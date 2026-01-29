@@ -8,9 +8,10 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.IntakeConstants;
 
 public class IntakeSubsystem extends SubsystemBase {
-  private final SparkFlex m_intakeMotor = new SparkFlex(40, MotorType.kBrushless);
+  private final SparkFlex m_intakeMotor = new SparkFlex(IntakeConstants.kIntakeMotorPort, MotorType.kBrushless);
 
   /** Creates a new IntakeSubsystem. */
   public IntakeSubsystem() {}

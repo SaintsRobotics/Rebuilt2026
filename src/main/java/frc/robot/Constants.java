@@ -43,9 +43,6 @@ public final class Constants {
     public static final double kControllerDeadband = 0.15;
     public static final double kSlowModeScalar = 0.8;
 
-    public static final double kElevatorAxisScalar = 0.05; //TODO: tune
-    public static final double kPivotAxisScalar = -0.25; //TODO: tune
-
     public static final int kDPadUp = 0;
     public static final int kDPadRight = 90;
     public static final int kDPadDown = 180;
@@ -170,5 +167,10 @@ public final class Constants {
     public static final Pose2d kTurretOffset = new Pose2d();
 
     public static final Pose2d kHubPose = new Pose2d(new Translation2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84)), new Rotation2d());
+  }
+
+  public static final class IntakeConstants {
+    public static final int kIntakeMotorPort = 40;
+    public static final double kIntakeSpeed = -0.75; 
   }
 }
