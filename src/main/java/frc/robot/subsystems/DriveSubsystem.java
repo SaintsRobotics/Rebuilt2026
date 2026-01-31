@@ -8,6 +8,7 @@ import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -185,30 +186,29 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     boolean LLreal = LimelightHelpers.getLatency_Pipeline(name) != 0.0;
-    boolean success = false;
-    int tagCount = 0;
     if (VisionConstants.kUseVision && Robot.isReal() && LLreal) {
       // Update LimeLight with current robot orientation
       LimelightHelpers.SetRobotOrientation(name, m_poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0.0, 0.0, 0.0, 0.0, 0.0);
       // LimelightHelpers.SetRobotOrientation(name, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 
-
       // Get the pose estimate
       LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(name);
 
-      tagCount = limelightMeasurement.tagCount;
       // Add it to your pose estimator if it is a valid measurement
       if (limelightMeasurement != null && limelightMeasurement.tagCount != 0 && m_gyro.getRate() < 720) {
+        
+        double stdDev = VisionConstants.kVisionPosStdDev 
+        * (VisionConstants.kTagCountScalar / limelightMeasurement.tagCount)
+        * (VisionConstants.kTagDistScalar * limelightMeasurement.avgTagDist);
+        
         m_poseEstimator.addVisionMeasurement(
             limelightMeasurement.pose,
-            limelightMeasurement.timestampSeconds);
-        success = true;
+            limelightMeasurement.timestampSeconds,
+            VecBuilder.fill(stdDev, stdDev, VisionConstants.kVisionAngleStdDev));
       }
-      SmartDashboard.putBoolean( name + "check", limelightMeasurement != null);
     }
 
-    SmartDashboard.putBoolean(name + " valid", success);
-    SmartDashboard.putNumber(name + " tagCount", tagCount);
+    SmartDashboard.putBoolean(name + " valid", LLreal);
   }
 
   /**

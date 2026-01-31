@@ -151,6 +151,11 @@ public final class Constants {
     public static final Vector<N3> kOdometrySTDDevs = VecBuilder.fill(0.1, 0.1, 0.1);
     public static final Vector<N3> kVisionSTDDevs = VecBuilder.fill(0.7, 0.7, 999999);
 
+    public static final double kVisionPosStdDev = 0.7;
+    public static final double kVisionAngleStdDev = 999999; // really high because we always trust gyro angle more
+    public static final double kTagCountScalar = 1.0;
+    public static final double kTagDistScalar = 0.2;
+
     public static final boolean kUseVision = true;
     public static final boolean kUseLeftLL = true;
     public static final boolean kUseRightLL = true;
