@@ -130,19 +130,19 @@ public final class Constants {
     // TODO: Update cam pose relative to center of bot
     public static final Pose3d kCamPosLeft = new Pose3d(
       // new Translation3d(0.3048,0.254,0),
-      new Translation3d(0.3429, -0.2413, 0.2413),
-      new Rotation3d(0,10,0)
+      new Translation3d(-0.17, 0.395, 0.25),
+      new Rotation3d(0,0,0)
     );
 
     public static final Pose3d kCamPosRight = new Pose3d(
-      new Translation3d(0.3429, 0.2413, 0.2413),
+      new Translation3d(0.152, 0.395, 0.25),
       new Rotation3d(0,0,0)
     );
 
     
 
-    public static final String kLimelightNameLeft = "limelight";
-    public static final String kLimelightNameRight = "limelight-sr";
+    public static final String kLimelightNameLeft = "limelight-sr";
+    public static final String kLimelightNameRight = "limelight";
 
     // https://docs.limelightvision.io/docs/docs-limelight/pipeline-apriltag/apriltag-robot-localization-megatag2
     public static final int kIMUMode = 0;
