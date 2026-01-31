@@ -73,8 +73,8 @@ public final class Constants {
     public static final int kRearRightTurningEncoderPort = 18;
 
     // TODO: Test motor orientations before driving on an actual robot
-    public static final boolean kFrontLeftDriveMotorReversed = false;
-    public static final boolean kRearLeftDriveMotorReversed = false;
+    public static final boolean kFrontLeftDriveMotorReversed = true;
+    public static final boolean kRearLeftDriveMotorReversed = true;
     public static final boolean kFrontRightDriveMotorReversed = true;
     public static final boolean kRearRightDriveMotorReversed = true;
 
@@ -130,13 +130,13 @@ public final class Constants {
     // TODO: Update cam pose relative to center of bot
     public static final Pose3d kCamPosLeft = new Pose3d(
       // new Translation3d(0.3048,0.254,0),
-      new Translation3d(-0.17, 0.395, 0.25),
-      new Rotation3d(0,0,0)
+      new Translation3d(-0.17, -0.395, 0.25),
+      new Rotation3d(0,0, Math.PI/2) // these angles are in degrees counterclockwise
     );
 
     public static final Pose3d kCamPosRight = new Pose3d(
-      new Translation3d(0.152, 0.395, 0.25),
-      new Rotation3d(0,0,0)
+      new Translation3d(0.152, -0.395, 0.25),
+      new Rotation3d(0,0, Math.PI/2)
     );
 
     
