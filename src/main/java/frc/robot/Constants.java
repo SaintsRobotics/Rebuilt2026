@@ -154,7 +154,7 @@ public final class Constants {
     public static final double kVisionPosStdDev = 0.7;
     public static final double kVisionAngleStdDev = 999999; // really high because we always trust gyro angle more
     public static final double kTagCountScalar = 0.7;
-    public static final double kTagDistScalar = 0.2;
+    public static final double kTagDistScalar = 0.3;
 
     public static final boolean kUseVision = true;
     public static final boolean kUseLeftLL = true;
