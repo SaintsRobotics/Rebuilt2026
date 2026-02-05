@@ -130,13 +130,13 @@ public final class Constants {
     // TODO: Update cam pose relative to center of bot
     public static final Pose3d kCamPosLeft = new Pose3d(
       // new Translation3d(0.3048,0.254,0),
-      new Translation3d(-0.17, -0.395, 0.25),
+      new Translation3d(Units.inchesToMeters(6.5), -0.395, 0.25),
       new Rotation3d(0,0, Math.PI/2) // these angles are in degrees counterclockwise
     );
 
     public static final Pose3d kCamPosRight = new Pose3d(
-      new Translation3d(0.152, -0.395, 0.25),
-      new Rotation3d(0,0, Math.PI/2)
+      new Translation3d(Units.inchesToMeters(15), Units.inchesToMeters(-5), Units.inchesToMeters(8.625)),
+      new Rotation3d(0,0, 0)
     );
 
     
