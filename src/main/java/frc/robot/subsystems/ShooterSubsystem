@@ -1,0 +1,65 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package frc.robot.subsystems;
+
+import com.studica.frc.AHRS;
+import com.studica.frc.AHRS.NavXComType;
+
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.VisionConstants;
+import frc.robot.Constants;
+import frc.robot.Robot;
+
+public class ShooterSubsystem extends SubsystemBase {
+
+    private final SparkFlex m_shooterMotorLeft = new SparkFlex(kShooterMotorLeftPort, MotorType.kBrushless);
+    private final SparkFlex m_shooterMotorRight = new SparkFlex(kShooterMotorRightPort, MotorType.kBrushless);
+    private final PIDController m_shooterPID = new PIDController(TurretConstants.kTurretP, 0, TurretConstants.kTurretD);
+    //private final SimpleMotorFeedforward m_turretFeedforward = new SimpleMotorFeedforward(TurretConstants.kTurretS, TurretConstants.kTurretV);
+
+    public ShooterSubsystem() {
+
+        m_shooterMotorLeft.setIdleMode(IdleMode.kCoast);
+        m_shooterMotorRight.setIdleMode(IdleMode.kCoast);
+
+        m_shooterMotorRight.setInverted(true);
+
+    }
+
+    public void reset() {
+        
+        shooterStop();
+
+    }
+
+    public void shooterStop() {
+
+        m_shooterMotorLeft.set(0);
+        m_shooterMotorRight.set(0);
+
+    }
+
+    public void setShooterSpeed(int speed) {
+
+        m_shooterMotorLeft.set(speed);
+        m_shooterMotorRight.set(speed);
+
+    }
+
+    public void getShooterSpeed() {
+
+    }
+
+    public void periodic() {
+        
+        setShooterSpeed(1);
+
+    }
+
+}
+
