@@ -157,18 +157,48 @@ public final class Constants {
   }
 
   public static final class TurretConstants {
+
+    // TODO: set constants
+
     public static final int kTurretMotorPort = 0;
 
-    public static final double kTurretMaxRotation = 270;
+    // CRT Encoders
+    public static final int kEncoder1CANId = 10;  
+    public static final int kEncoder2CANId = 11;  
 
-    public static final double kTurretP = 1;
-    public static final double kTurretD = 0.5;
-    public static final double kTurretS = 0.01;
-    public static final double kTurretV = 5;
-    public static final double kTurretMaxSpeed = 1;
+    public static final double kTurretTeeth = 90.0;
+    public static final double kEncoder1Teeth = 13.0;
+    public static final double kEncoder2Teeth = 14.0;
 
+    // Gear ratios 
+    public static final double kEncoder1Ratio = kTurretTeeth / kEncoder1Teeth; 
+    public static final double kEncoder2Ratio = kTurretTeeth / kEncoder2Teeth; 
+
+    // Encoder initial offsets
+    public static final double kEncoder1OffsetDegrees = 0.0;  
+    public static final double kEncoder2OffsetDegrees = 0.0;  
+
+    public static final double kTurretMaxRotation = 270; 
+
+    // PID gains
+    public static final double kTurretP = 0.10;  
+    public static final double kTurretI = 0.0;
+    public static final double kTurretD = 0.015; 
+
+    // Feedforward gains
+    public static final double kTurretS = 0.02;  
+    public static final double kTurretV = 0.10;  
+
+    public static final double kTurretMaxSpeed = 1.0;  
+    public static final double kTurretDeadband = 2.0;  
+    public static final double kTurretTolerance = 1.5;
     public static final Pose2d kTurretOffset = new Pose2d();
 
     public static final Pose2d kHubPose = new Pose2d(new Translation2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84)), new Rotation2d());
+
+    // Sim constants 
+    public static final double kTurretSimGearRatio = 100.0; 
+    public static final double kTurretSimMOI = 0.5;
+    public static final double kTurretSimLength = 0.5;   
   }
 }

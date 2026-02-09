@@ -14,8 +14,9 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.IOConstants;
-import frc.robot.Constants.TurretConstants;
+import frc.robot.commands.AutoAimTurret;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.TurretSubsystem;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -26,7 +27,7 @@ import frc.robot.subsystems.DriveSubsystem;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
-  // private final TurretSubsystem m_turret = new TurretSubsystem();
+  private final TurretSubsystem m_turret = new TurretSubsystem();
 
   private final XboxController m_driverController = new XboxController(IOConstants.kDriverControllerPort);
   private final XboxController m_operatorController = new XboxController(IOConstants.kOperatorControllerPort);
@@ -36,7 +37,6 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-
     // Configure the trigger bindings
     configureBindings();
 
@@ -68,12 +68,10 @@ public class RobotContainer {
                     * -1,
                 true),
                     m_robotDrive));
-    
-    // m_turret.setDefaultCommand(new RunCommand(() -> {
-    //     m_turret.calculateSetpoint(m_robotDrive.getPose(), TurretConstants.kHubPose, m_robotDrive.getRotationSpeed());
-    // },
-    // m_turret));
-}
+
+    // Set turret to continuously aim at the hub
+    m_turret.setDefaultCommand(new AutoAimTurret(m_turret, m_robotDrive));
+  }
 
 
   /**
