@@ -171,4 +171,28 @@ public final class Constants {
 
     public static final Pose2d kHubPose = new Pose2d(new Translation2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84)), new Rotation2d());
   }
+
+  public static final class ShooterConstants {
+
+    public static final int kShooterMotorLeftPort = 0;
+    public static final int kShooterMotorRightPort = 0;
+    public static final int kShooterEncoderChannel = 0;
+
+    public static final int kHoodMotorPort = 0;
+
+    public static final double kShooterP = 0;
+    public static final double kShooterI = 0;
+    public static final double kShooterD = 0;
+
+    public static final double kShooterS = 0;
+    public static final double kShooterV = 0;
+
+    public static final double kMaxSpeed = 1.0;
+    public static final double kMinSpeed = -kMaxSpeed;
+
+    public static final double kHoodAngleMin = 0;
+    public static final double kHoodAngleMax = 0;
+
+  }
+
 }
