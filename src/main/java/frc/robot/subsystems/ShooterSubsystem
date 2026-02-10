@@ -40,12 +40,14 @@ public class ShooterSubsystem extends SubsystemBase {
 
     }
 
+    //resets shooter
     public void reset() {
         
         shooterStop();
 
     }
 
+    //stops shooter
     public void shooterStop() {
 
         m_shooterMotorLeft.set(0);
@@ -53,6 +55,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     }
 
+    //sets shooter speed using PIDF, inputs current speed and speed setpoint
     public void setShooterSpeed(double measuredSpeed, double setSpeed) {
 
         m_shooterPID.setSetpoint(setSpeed);
@@ -64,6 +67,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     }
 
+    //sets the shooter motors at given speed
     public void setShooterMotors(double speed) {
 
         m_shooterMotorLeft.set(speed);
@@ -71,18 +75,22 @@ public class ShooterSubsystem extends SubsystemBase {
 
     }
 
+    //returns speed of the shooter as a average of the speeds of the two motors
     public double getAvgShooterSpeed() {
         return (m_shooterMotorLeft + m_shooterMotorRight)/2;
     }
 
+    //returns speed of the left shooter motor
     public double getLeftShooterSpeed() {
         return m_shooterMotorLeft;
     }
 
+    //returns speed of the right shooter motor
     public double getAvgShooterSpeed() {
         return m_shooterMotorRight;
     }
 
+    //periodic
     public void periodic() {
 
     }
