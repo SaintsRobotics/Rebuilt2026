@@ -4,6 +4,16 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Amp;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Meter;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Pounds;
+
+import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -14,7 +24,11 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Mass;
+import edu.wpi.first.units.measure.MomentOfInertia;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -154,6 +168,22 @@ public final class Constants {
     public static final boolean kUseVision = true;
     public static final boolean kUseLeftLL = true;
     public static final boolean kUseRightLL = true;
+  }
+
+  public static final class AutonConstants { // TODO: set constants when we get the real robot/when know what to set these to
+    private static final Mass kRobotMass = Pounds.of(138);
+    private static final MomentOfInertia kMomentOfInertia = KilogramSquareMeters.of(1);
+    private static final double kCoefficientOfStaticFriction = 0.5;
+    private static final DCMotor kDriveMotorType = DCMotor.getNeoVortex(1);
+    private static final Current kMaxDriveCurrent = Amp.of(60);
+
+    public static final PIDConstants kTranslationConstants = new PIDConstants(3, 0, 0); // TODO: tune
+    public static final PIDConstants kRotationConstants = new PIDConstants(8, 0, 0); // TODO: tune
+    public static final RobotConfig kBotConfig = new RobotConfig(kRobotMass, kMomentOfInertia,
+        new ModuleConfig(Meter.of(DriveConstants.kWheelDiameterMeters / 2),
+            MetersPerSecond.of(DriveConstants.kMaxSpeedMetersPerSecond), kCoefficientOfStaticFriction, kDriveMotorType,
+            DriveConstants.kDrivingGearRatio, kMaxDriveCurrent, 4),
+        DriveConstants.kModulePositions);
   }
 
   public static final class TurretConstants {
