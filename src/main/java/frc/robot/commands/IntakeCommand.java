@@ -22,7 +22,7 @@ public class IntakeCommand extends Command {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {m_intake.setSpeed(IntakeConstants.kIntakeSpeed);}
+  public void initialize() {m_intake.setIntakeMotor(IntakeConstants.kIntakeSpeed);}
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
@@ -30,7 +30,7 @@ public class IntakeCommand extends Command {
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {m_intake.setSpeed(0);}
+  public void end(boolean interrupted) {m_intake.setIntakeMotor(0);}
 
   // Returns true when the command should end.
   @Override

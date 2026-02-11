@@ -52,6 +52,25 @@ public final class Constants {
     public static final double kHapticStrength = 1;
   }
 
+  public static final class IntakeConstants{
+    // TODO: set motor and encoder constants    
+    public static final int kIntakeMotorID = -1;
+    public static final int kIntakeMotorPort = -1;
+    public static final int kArmMotorPort = -1;
+    public static final int kArmMotorID = -1;
+    public static final int kArmEncoderChannel = -1;
+    public static final double kArmP = 0.0;
+    public static final double kArmD = 0.0;
+
+    // In degrees
+    public static final double kIntakeLoweredAngle = -1;
+    public static final double kIntakeRaisedAngle = -1;
+
+    /** Encoder offset in rotations */
+    public static final double kArmEncoderOffset = -1;
+    public static final double kIntakeSpeed = -1;
+    public static final int kProximityThreshold = -1;
+  }
   public static final class DriveConstants {
     // TODO: set motor and encoder constants
     public static final int kFrontLeftDriveMotorPort = 36;
@@ -167,10 +186,5 @@ public final class Constants {
     public static final Pose2d kTurretOffset = new Pose2d();
 
     public static final Pose2d kHubPose = new Pose2d(new Translation2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84)), new Rotation2d());
-  }
-
-  public static final class IntakeConstants {
-    public static final int kIntakeMotorPort = 40;
-    public static final double kIntakeSpeed = -0.75; 
   }
 }
