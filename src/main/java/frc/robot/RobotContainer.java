@@ -5,13 +5,24 @@
 package frc.robot;
 
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.XboxController.Button;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.Constants.AutonConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.IOConstants;
 import frc.robot.Constants.TurretConstants;
@@ -32,6 +43,7 @@ public class RobotContainer {
   private final XboxController m_driverController = new XboxController(IOConstants.kDriverControllerPort);
   private final XboxController m_operatorController = new XboxController(IOConstants.kOperatorControllerPort);
 
+  private final SendableChooser<Command> m_autoChooser;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -40,6 +52,25 @@ public class RobotContainer {
 
     // Configure the trigger bindings
     configureBindings();
+
+    // Pathplanner auton initialization
+    AutoBuilder.configure(
+        m_robotDrive::getPose, 
+        (pose) -> m_robotDrive.resetOdometry(pose), 
+        () -> m_robotDrive.getRobotRelativeSpeeds(), 
+        (speeds) -> m_robotDrive.autonDrive(speeds),
+        new PPHolonomicDriveController(AutonConstants.kTranslationConstants, AutonConstants.kRotationConstants),
+        AutonConstants.kBotConfig, 
+        () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
+        m_robotDrive);
+    
+    NamedCommands.registerCommand("Score", Commands.none());
+    NamedCommands.registerCommand("Climb", Commands.none());
+    NamedCommands.registerCommand("Ferry", Commands.none());
+    NamedCommands.registerCommand("Intake", Commands.none());
+
+    m_autoChooser = AutoBuilder.buildAutoChooser();
+    SmartDashboard.putData(m_autoChooser);
 
     m_robotDrive.setDefaultCommand(
         new RunCommand(
@@ -97,6 +128,10 @@ public class RobotContainer {
     // driver reset odometry
     new JoystickButton(m_driverController, Button.kBack.value)
         .onTrue(new InstantCommand(() -> m_robotDrive.resetOdometry(new Pose2d()), m_robotDrive));
+  }
+
+  public Command getAutonomousCommand() {
+    return m_autoChooser.getSelected();
   }
 
   /**
