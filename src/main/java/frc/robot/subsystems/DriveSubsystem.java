@@ -8,6 +8,7 @@ import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -18,6 +19,8 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -81,6 +84,8 @@ public class DriveSubsystem extends SubsystemBase {
   private final SlewRateLimiter m_ySpeedLimiter = new SlewRateLimiter(DriveConstants.kMaxAccelerationUnitsPerSecond);
   private final SlewRateLimiter m_rotationSpeedLimiter = new SlewRateLimiter(DriveConstants.kMaxAngularAccelerationUnitsPerSecond);
 
+   private final StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault().getStructTopic("Vision Pose", Pose2d.struct).publish();
+
   /** Creates a new DriveSubsystem. */
   @SuppressWarnings("unused")
   public DriveSubsystem() {
@@ -104,10 +109,10 @@ public class DriveSubsystem extends SubsystemBase {
             VisionConstants.kCamPosLeft.getZ(),
             VisionConstants.kCamPosLeft.getRotation().getX(),
             VisionConstants.kCamPosLeft.getRotation().getY(),
-            VisionConstants.kCamPosLeft.getRotation().getZ());
+            Units.radiansToDegrees(VisionConstants.kCamPosLeft.getRotation().getZ()));
         LimelightHelpers.SetIMUMode(VisionConstants.kLimelightNameLeft, VisionConstants.kIMUMode);
 
-        LimelightHelpers.setCropWindow(VisionConstants.kLimelightNameLeft, -1, 1, -1, 0.4);
+        LimelightHelpers.setCropWindow(VisionConstants.kLimelightNameLeft, -1, 1, -0.4, 1);
       }
 
       if (VisionConstants.kUseRightLL) {
@@ -118,10 +123,10 @@ public class DriveSubsystem extends SubsystemBase {
           VisionConstants.kCamPosRight.getZ(),
           VisionConstants.kCamPosRight.getRotation().getX(),
           VisionConstants.kCamPosRight.getRotation().getY(),
-          VisionConstants.kCamPosRight.getRotation().getZ());
+          Units.radiansToDegrees(VisionConstants.kCamPosRight.getRotation().getZ()));
         LimelightHelpers.SetIMUMode(VisionConstants.kLimelightNameRight, VisionConstants.kIMUMode);
 
-        LimelightHelpers.setCropWindow(VisionConstants.kLimelightNameRight, -1, 1, -1, 0.4);
+        LimelightHelpers.setCropWindow(VisionConstants.kLimelightNameRight, -1, 1, -0.4, 1);
       }
     }
 
@@ -188,15 +193,24 @@ public class DriveSubsystem extends SubsystemBase {
     if (VisionConstants.kUseVision && Robot.isReal() && LLreal) {
       // Update LimeLight with current robot orientation
       LimelightHelpers.SetRobotOrientation(name, m_poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0.0, 0.0, 0.0, 0.0, 0.0);
+      // LimelightHelpers.SetRobotOrientation(name, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 
       // Get the pose estimate
       LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(name);
 
       // Add it to your pose estimator if it is a valid measurement
       if (limelightMeasurement != null && limelightMeasurement.tagCount != 0 && m_gyro.getRate() < 720) {
+        // scale vision standard deviation by tag count and distance
+        double stdDev = VisionConstants.kVisionPosStdDev
+        * (1 + VisionConstants.kTagDistScalar * limelightMeasurement.avgTagDist * limelightMeasurement.avgTagDist) // 1 + k * distance^2
+        * Math.pow(VisionConstants.kTagCountScalar, limelightMeasurement.tagCount-1); // k^(tagCount-1), 0 < k < 1
+        
         m_poseEstimator.addVisionMeasurement(
             limelightMeasurement.pose,
-            limelightMeasurement.timestampSeconds);
+            limelightMeasurement.timestampSeconds,
+            VecBuilder.fill(stdDev, stdDev, VisionConstants.kVisionAngleStdDev));
+        
+        publisher.set(limelightMeasurement.pose);
       }
     }
 

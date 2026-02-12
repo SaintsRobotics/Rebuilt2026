@@ -87,8 +87,8 @@ public final class Constants {
     public static final int kRearRightTurningEncoderPort = 18;
 
     // TODO: Test motor orientations before driving on an actual robot
-    public static final boolean kFrontLeftDriveMotorReversed = false;
-    public static final boolean kRearLeftDriveMotorReversed = false;
+    public static final boolean kFrontLeftDriveMotorReversed = true;
+    public static final boolean kRearLeftDriveMotorReversed = true;
     public static final boolean kFrontRightDriveMotorReversed = true;
     public static final boolean kRearRightDriveMotorReversed = true;
 
@@ -144,19 +144,19 @@ public final class Constants {
     // TODO: Update cam pose relative to center of bot
     public static final Pose3d kCamPosLeft = new Pose3d(
       // new Translation3d(0.3048,0.254,0),
-      new Translation3d(0.3429, -0.2413, 0.2413),
-      new Rotation3d(0,10,0)
+      new Translation3d(Units.inchesToMeters(6.5), -0.395, 0.25),
+      new Rotation3d(0,0, Math.PI/2) // these angles are in degrees counterclockwise
     );
 
     public static final Pose3d kCamPosRight = new Pose3d(
-      new Translation3d(0.3429, 0.2413, 0.2413),
-      new Rotation3d(0,0,0)
+      new Translation3d(Units.inchesToMeters(15), Units.inchesToMeters(-5), Units.inchesToMeters(8.625)),
+      new Rotation3d(0,0, 0)
     );
 
     
 
-    public static final String kLimelightNameLeft = "limelight";
-    public static final String kLimelightNameRight = "limelight-sr";
+    public static final String kLimelightNameLeft = "limelight-sr";
+    public static final String kLimelightNameRight = "limelight";
 
     // https://docs.limelightvision.io/docs/docs-limelight/pipeline-apriltag/apriltag-robot-localization-megatag2
     public static final int kIMUMode = 0;
@@ -164,6 +164,11 @@ public final class Constants {
     // TODO: Experiment with different std devs in the pose estimator
     public static final Vector<N3> kOdometrySTDDevs = VecBuilder.fill(0.1, 0.1, 0.1);
     public static final Vector<N3> kVisionSTDDevs = VecBuilder.fill(0.7, 0.7, 999999);
+
+    public static final double kVisionPosStdDev = 0.7;
+    public static final double kVisionAngleStdDev = 999999; // really high because we always trust gyro angle more
+    public static final double kTagCountScalar = 0.7;
+    public static final double kTagDistScalar = 0.3;
 
     public static final boolean kUseVision = true;
     public static final boolean kUseLeftLL = true;
