@@ -4,36 +4,35 @@
 
 package frc.robot.subsystems;
 
-import com.studica.frc.AHRS;
-import com.studica.frc.AHRS.NavXComType;
-
-import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.SparkFlex;
-
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkMax;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.DriveConstants;
-import frc.robot.Constants.VisionConstants;
-import frc.robot.Constants;
-import frc.robot.Robot;
 
-import frc.robot.utils.LaunchCalc;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
+
+import com.revrobotics.spark.config.SparkFlexConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+
+import frc.robot.Constants.ShooterConstants;
 
 
 
 public class ShooterSubsystem extends SubsystemBase {
 
     //shooter motors
-    SparkFlex m_shooterMotorLeft = new SparkFlex(kShooterMotorLeftPort, MotorType.kBrushless);
-    SparkFlex m_shooterMotorRight = new SparkFlex(kShooterMotorRightPort, MotorType.kBrushless);
+    SparkFlex m_shooterMotorLeft = new SparkFlex(ShooterConstants.kShooterMotorLeftPort, MotorType.kBrushless);
+    SparkFlex m_shooterMotorRight = new SparkFlex(ShooterConstants.kShooterMotorRightPort, MotorType.kBrushless);
 
     //hood motor
-    SparkMax m_hoodMotor = new SparkMax(kHoodMotorPort, MotorType.kBrushless);
-    private DutyCycleEncoder m_hoodEncoder = new DutyCycleEncoder(ShooterConstants.kHoodEncoderChannel, kHoodAngleMax, kHoodAngleMin);    
+    SparkMax m_hoodMotor = new SparkMax(ShooterConstants.kHoodMotorPort, MotorType.kBrushless);
+    private DutyCycleEncoder m_hoodEncoder = new DutyCycleEncoder(ShooterConstants.kHoodEncoderChannel, ShooterConstants.kHoodAngleMax, ShooterConstants.kHoodAngleMin);    
     
     //PID controllers and feedforward for shooter speed and hood angle
     private final PIDController m_shooterPID = new PIDController(ShooterConstants.kShooterP, ShooterConstants.kShooterI, ShooterConstants.kShooterD);
@@ -44,10 +43,11 @@ public class ShooterSubsystem extends SubsystemBase {
     //constructor
     public ShooterSubsystem() {
 
-        m_shooterMotorLeft.setIdleMode(IdleMode.kCoast);
-        m_shooterMotorRight.setIdleMode(IdleMode.kCoast);
-
-        m_shooterMotorRight.setInverted(true);
+        SparkFlexConfig motorConfig = new SparkFlexConfig();
+        motorConfig.idleMode(IdleMode.kCoast);
+        m_shooterMotorLeft.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+        motorConfig.inverted(true);
+        m_shooterMotorRight.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
 
     }
 
@@ -67,9 +67,10 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     //sets shooter parameters for PIDF control
-    public void setShooterParameters(double setSpeed, double ) {
+    public void setShooterParameters(double flywheelSpeed, double hoodAngle) {
 
-        m_shooterPID.setSetpoint(setSpeed);
+        m_shooterPID.setSetpoint(flywheelSpeed);
+        m_hoodAnglePID.setSetpoint(hoodAngle);
 
     }
 
@@ -83,17 +84,17 @@ public class ShooterSubsystem extends SubsystemBase {
 
     //returns speed of the shooter as a average of the speeds of the two motors
     public double getAvgShooterSpeed() {
-        return (m_shooterMotorLeft + m_shooterMotorRight)/2;
+        return (m_shooterMotorLeft.get() + m_shooterMotorRight.get())/2;
     }
 
     //returns speed of the left shooter motor
     public double getLeftShooterSpeed() {
-        return m_shooterMotorLeft;
+        return m_shooterMotorLeft.get();
     }
 
     //returns speed of the right shooter motor
-    public double getAvgShooterSpeed() {
-        return m_shooterMotorRight;
+    public double getRightShooterSpeed() {
+        return m_shooterMotorRight.get();
     }
 
     //sets hood angle by setting the setpoint of the hood angle PID controller
@@ -120,9 +121,9 @@ public class ShooterSubsystem extends SubsystemBase {
 
         //calculates PIDF output and sets shooter motors to that output
         double flywheelPIDValue = m_shooterPID.calculate(getLeftShooterSpeed());
-        double ffSpeed = m_shooterFeedforward.calculate(setSpeed);
+        double ffSpeed = m_shooterFeedforward.calculate(m_shooterPID.getSetpoint());
 
-        setShooterMotors(MathUtil.clamp(flywheelPIDValue + ffSpeed, kMinSpeed, kMaxSpeed));
+        setShooterMotors(MathUtil.clamp(flywheelPIDValue + ffSpeed, ShooterConstants.kMinSpeed, ShooterConstants.kMaxSpeed));
 
         //calculates PID output for hood angle and sets hood motor to that output
         double hoodPIDValue = m_hoodAnglePID.calculate(getHoodAngle());
