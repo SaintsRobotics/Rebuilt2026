@@ -21,16 +21,27 @@ import frc.robot.Constants.VisionConstants;
 import frc.robot.Constants;
 import frc.robot.Robot;
 
+import frc.robot.utils.LaunchCalc;
+
 
 
 public class ShooterSubsystem extends SubsystemBase {
 
+    //shooter motors
     SparkFlex m_shooterMotorLeft = new SparkFlex(kShooterMotorLeftPort, MotorType.kBrushless);
     SparkFlex m_shooterMotorRight = new SparkFlex(kShooterMotorRightPort, MotorType.kBrushless);
+
+    //hood motor
+    SparkMax m_hoodMotor = new SparkMax(kHoodMotorPort, MotorType.kBrushless);
+    private DutyCycleEncoder m_hoodEncoder = new DutyCycleEncoder(ShooterConstants.kHoodEncoderChannel, kHoodAngleMax, kHoodAngleMin);    
+    
+    //PID controllers and feedforward for shooter speed and hood angle
     private final PIDController m_shooterPID = new PIDController(ShooterConstants.kShooterP, ShooterConstants.kShooterI, ShooterConstants.kShooterD);
     private final SimpleMotorFeedforward m_shooterFeedforward = new SimpleMotorFeedforward(ShooterConstants.kShooterS, ShooterConstants.kShooterV);
 
+    private final PIDController m_hoodAnglePID = new PIDController(ShooterConstants.kHoodAngleP, ShooterConstants.kHoodAngleI, ShooterConstants.kHoodAngleD);
 
+    //constructor
     public ShooterSubsystem() {
 
         m_shooterMotorLeft.setIdleMode(IdleMode.kCoast);
@@ -55,15 +66,10 @@ public class ShooterSubsystem extends SubsystemBase {
 
     }
 
-    //sets shooter speed using PIDF, inputs current speed and speed setpoint
-    public void setShooterSpeed(double measuredSpeed, double setSpeed) {
+    //sets shooter parameters for PIDF control
+    public void setShooterParameters(double setSpeed, double ) {
 
         m_shooterPID.setSetpoint(setSpeed);
-
-        double pidValue = m_shooterPID.calculate(measuredSpeed);
-        double ffSpeed = m_shooterFeedforward.calculate(setSpeed);
-
-        setShooterMotors(MathUtil.clamp(pidValue + ffSpeed, kMinSpeed, kMaxSpeed));
 
     }
 
@@ -90,8 +96,37 @@ public class ShooterSubsystem extends SubsystemBase {
         return m_shooterMotorRight;
     }
 
+    //sets hood angle by setting the setpoint of the hood angle PID controller
+    public void setHoodAngle(double angle) {
+
+        m_hoodAnglePID.setSetpoint(angle);
+
+    }
+
+    //sets hood motor to given speed
+    public void setHoodMotor(double speed) {
+
+        m_hoodMotor.set(speed);
+
+    }
+
+    //returns hood angle from the hood encoder
+    public double getHoodAngle() {
+        return m_hoodEncoder.get();
+    }
+
     //periodic
     public void periodic() {
+
+        //calculates PIDF output and sets shooter motors to that output
+        double flywheelPIDValue = m_shooterPID.calculate(getLeftShooterSpeed());
+        double ffSpeed = m_shooterFeedforward.calculate(setSpeed);
+
+        setShooterMotors(MathUtil.clamp(flywheelPIDValue + ffSpeed, kMinSpeed, kMaxSpeed));
+
+        //calculates PID output for hood angle and sets hood motor to that output
+        double hoodPIDValue = m_hoodAnglePID.calculate(getHoodAngle());
+        setHoodMotor(hoodPIDValue);
 
     }
 
