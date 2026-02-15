@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
 import edu.wpi.first.wpilibj.simulation.RoboRioSim;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -145,8 +146,8 @@ public class ShooterSubsystem extends SubsystemBase {
         setShooterMotors(MathUtil.clamp(flywheelPIDValue + ffSpeed, ShooterConstants.kMinSpeed, ShooterConstants.kMaxSpeed));
 
         //calculates PID output for hood angle and sets hood motor to that output
-        double hoodPIDValue = m_hoodAnglePID.calculate(getHoodAngle());
-        setHoodMotor(hoodPIDValue);
+        double hoodOutput = m_hoodAnglePID.calculate(getHoodAngle());
+        setHoodMotor(MathUtil.clamp(hoodOutput, -ShooterConstants.kHoodSpeedMax, ShooterConstants.kHoodSpeedMax));
 
     }
 
@@ -162,6 +163,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
         // Update battery
         RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(m_flywheelSim.getCurrentDrawAmps()));
+
+        SmartDashboard.putNumber("flywheel speed", m_flywheelSim.getAngularVelocityRPM());
     }
 
 }

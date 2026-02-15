@@ -41,9 +41,14 @@ public class LaunchCalc{
         HoodAngleLUT.put(5.0, 50.0);
     }
 
-    public static double returnFlywheelSpeed(Pose2d currentPose, Pose2d targetPose) {
+    public static double findFlywheelSpeed(Pose2d currentPose, Pose2d targetPose) {
         double distance = currentPose.getTranslation().getDistance(targetPose.getTranslation());
         return FlywheelLUT.get(distance);
+    }
+
+    public static double findHoodAngle(Pose2d currentPose, Pose2d targetPose) {
+        double distance = currentPose.getTranslation().getDistance(targetPose.getTranslation());
+        return HoodAngleLUT.get(distance);
     }
    
 }
