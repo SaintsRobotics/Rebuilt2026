@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
+import com.revrobotics.sim.SparkFlexSim;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 
@@ -15,7 +16,14 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.system.LinearSystem;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.simulation.BatterySim;
+import edu.wpi.first.wpilibj.simulation.FlywheelSim;
+import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -39,6 +47,17 @@ public class ShooterSubsystem extends SubsystemBase {
     private final SimpleMotorFeedforward m_shooterFeedforward = new SimpleMotorFeedforward(ShooterConstants.kShooterS, ShooterConstants.kShooterV);
 
     private final PIDController m_hoodAnglePID = new PIDController(ShooterConstants.kHoodAngleP, ShooterConstants.kHoodAngleI, ShooterConstants.kHoodAngleD);
+
+    // Simulation classes
+    private final DCMotor m_flywheelDCMotor = DCMotor.getNeoVortex(2);
+    private final FlywheelSim m_flywheelSim = new FlywheelSim(
+        LinearSystemId.createFlywheelSystem(
+            m_flywheelDCMotor, 
+            ShooterConstants.kFlywheelMOI, 
+            ShooterConstants.kFlywheelGearing), 
+        m_flywheelDCMotor);
+    private final SparkFlexSim m_leftMotorSim = new SparkFlexSim(m_shooterMotorLeft, DCMotor.getNeoVortex(1));
+    private final SparkFlexSim m_rightMotorSim = new SparkFlexSim(m_shooterMotorRight, DCMotor.getNeoVortex(1));
 
     //constructor
     public ShooterSubsystem() {
@@ -129,6 +148,20 @@ public class ShooterSubsystem extends SubsystemBase {
         double hoodPIDValue = m_hoodAnglePID.calculate(getHoodAngle());
         setHoodMotor(hoodPIDValue);
 
+    }
+
+    @Override
+    public void simulationPeriodic() {
+        // set inputs and update by one timestep
+        m_flywheelSim.setInput(m_leftMotorSim.getAppliedOutput() * RobotController.getBatteryVoltage());
+        m_flywheelSim.update(0.02);
+
+        // update SparkFlexSim
+        m_leftMotorSim.iterate(m_flywheelSim.getAngularVelocityRPM(), RobotController.getBatteryVoltage(), 0.02);
+        m_rightMotorSim.iterate(m_flywheelSim.getAngularVelocityRPM(), RobotController.getBatteryVoltage(), 0.02);
+
+        // Update battery
+        RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(m_flywheelSim.getCurrentDrawAmps()));
     }
 
 }

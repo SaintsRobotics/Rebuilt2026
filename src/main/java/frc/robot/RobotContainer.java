@@ -15,7 +15,9 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.IOConstants;
 import frc.robot.Constants.TurretConstants;
+import frc.robot.commands.ShooterCommand;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -27,6 +29,7 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
   // private final TurretSubsystem m_turret = new TurretSubsystem();
+  private final ShooterSubsystem m_shooter = new ShooterSubsystem();
 
   private final XboxController m_driverController = new XboxController(IOConstants.kDriverControllerPort);
   private final XboxController m_operatorController = new XboxController(IOConstants.kOperatorControllerPort);
@@ -73,6 +76,8 @@ public class RobotContainer {
     //     m_turret.calculateSetpoint(m_robotDrive.getPose(), TurretConstants.kHubPose, m_robotDrive.getRotationSpeed());
     // },
     // m_turret));
+    
+    m_shooter.setDefaultCommand(new ShooterCommand(m_shooter));
 }
 
 
