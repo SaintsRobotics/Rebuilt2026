@@ -69,6 +69,9 @@ public class ShooterSubsystem extends SubsystemBase {
         motorConfig.inverted(true);
         m_shooterMotorRight.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
 
+        SparkFlexConfig hoodMotorConfig = new SparkFlexConfig();
+        hoodMotorConfig.absoluteEncoder.positionConversionFactor(360);
+        m_hoodMotor.configure(hoodMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     //resets shooter

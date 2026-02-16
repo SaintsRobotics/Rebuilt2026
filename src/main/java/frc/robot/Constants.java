@@ -178,17 +178,17 @@ public final class Constants {
     public static final int kShooterMotorRightPort = 2;
     //public static final int kShooterEncoderChannel = 0;
 
-    public static final int kHoodMotorPort = 0;
+    public static final int kHoodMotorPort = 3;
     public static final int kHoodEncoderChannel = 0;
 
-    public static final double kShooterP = 0;
+    public static final double kShooterP = 0.1;
     public static final double kShooterI = 0;
     public static final double kShooterD = 0;
 
-    public static final double kShooterS = 0;
-    public static final double kShooterV = 0;
+    public static final double kShooterS = 0.1;
+    public static final double kShooterV = 1;
 
-    public static final double kHoodAngleP = 0;
+    public static final double kHoodAngleP = 0.1;
     public static final double kHoodAngleI = 0;
     public static final double kHoodAngleD = 0;
     
@@ -196,7 +196,8 @@ public final class Constants {
     public static final double kMinSpeed = -kMaxSpeed;
 
     public static final double kHoodAngleMin = 0;
-    public static final double kHoodAngleMax = 0;
+    public static final double kHoodAngleMax = 180;
+    public static final double kHoodSpeedMax = 1;
 
     public static final double kFlywheelMOI = 1.0;
     public static final double kFlywheelGearing = 1.0;
