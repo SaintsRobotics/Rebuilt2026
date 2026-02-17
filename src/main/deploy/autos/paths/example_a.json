@@ -1,0 +1,39 @@
+{
+  "path_elements": [
+    {
+      "type": "translation",
+      "x_meters": 3.0996622270015015,
+      "y_meters": 3.626859627488911,
+      "intermediate_handoff_radius_meters": 0.2
+    },
+    {
+      "type": "rotation",
+      "rotation_radians": 0.0,
+      "t_ratio": 0.0,
+      "profiled_rotation": true
+    },
+    {
+      "type": "translation",
+      "x_meters": 4.573297021197018,
+      "y_meters": 0.5477847220192906,
+      "intermediate_handoff_radius_meters": 0.2
+    },
+    {
+      "type": "event_trigger",
+      "t_ratio": 0.17916326677164554,
+      "lib_key": ""
+    },
+    {
+      "type": "rotation",
+      "rotation_radians": 1.5707963267948966,
+      "t_ratio": 1.0,
+      "profiled_rotation": true
+    },
+    {
+      "type": "translation",
+      "x_meters": 7.7929874641310555,
+      "y_meters": 2.581960808607379,
+      "intermediate_handoff_radius_meters": 0.2
+    }
+  ]
+}

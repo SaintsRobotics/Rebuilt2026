@@ -171,4 +171,19 @@ public final class Constants {
 
     public static final Pose2d kHubPose = new Pose2d(new Translation2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84)), new Rotation2d());
   }
+
+  public static final class AutonConstants {
+    // TODO: Tune when real robot is available
+    public static final double kTranslationP = 5.0;
+    public static final double kTranslationI = 0.0;
+    public static final double kTranslationD = 0.0;
+
+    public static final double kRotationP = 3.0;
+    public static final double kRotationI = 0.0;
+    public static final double kRotationD = 0.0;
+
+    public static final double kCrossTrackP = 2.0;
+    public static final double kCrossTrackI = 0.0;
+    public static final double kCrossTrackD = 0.0;
+  }
 }

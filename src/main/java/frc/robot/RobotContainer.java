@@ -6,15 +6,19 @@ package frc.robot;
 
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.IOConstants;
 import frc.robot.Constants.TurretConstants;
+import frc.robot.lib.BLine.FollowPath;
 import frc.robot.subsystems.DriveSubsystem;
 
 /*
@@ -31,6 +35,7 @@ public class RobotContainer {
   private final XboxController m_driverController = new XboxController(IOConstants.kDriverControllerPort);
   private final XboxController m_operatorController = new XboxController(IOConstants.kOperatorControllerPort);
 
+  private final FollowPath.Builder m_pathBuilder;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -39,6 +44,18 @@ public class RobotContainer {
 
     // Configure the trigger bindings
     configureBindings();
+
+    // BLine Auton
+    m_pathBuilder = new FollowPath.Builder(
+        m_robotDrive,
+        m_robotDrive::getPose,
+        m_robotDrive::getRobotRelativeSpeeds,
+        m_robotDrive::autonDrive,
+        new PIDController(5.0, 0, 0),
+        new PIDController(3.0, 0, 0),
+        new PIDController(2.0, 0, 0)
+    ).withDefaultShouldFlip()
+     .withPoseReset(m_robotDrive::resetOdometry);
 
     m_robotDrive.setDefaultCommand(
         new RunCommand(
@@ -96,6 +113,10 @@ public class RobotContainer {
     // driver reset odometry
     new JoystickButton(m_driverController, Button.kBack.value)
         .onTrue(new InstantCommand(() -> m_robotDrive.resetOdometry(new Pose2d()), m_robotDrive));
+  }
+
+  public Command getAutonomousCommand() {
+    return Commands.none();
   }
 
   /**
