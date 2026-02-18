@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import frc.robot.Robot;
 import frc.robot.Constants.ShooterConstants;
 
 
@@ -107,7 +108,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     //returns speed of the shooter as a average of the speeds of the two motors
     public double getAvgShooterSpeed() {
-        return (m_shooterMotorLeft.get() + m_shooterMotorRight.get())/2;
+        return Robot.isReal() ? (m_shooterMotorLeft.get() + m_shooterMotorRight.get())/2 : m_flywheelSim.getAngularVelocityRPM();
     }
 
     //returns speed of the left shooter motor

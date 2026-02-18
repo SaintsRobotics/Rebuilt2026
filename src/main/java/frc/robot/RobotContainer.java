@@ -5,10 +5,21 @@
 package frc.robot;
 
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Seconds;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.DistanceUnit;
+import edu.wpi.first.units.LinearVelocityUnit;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -18,6 +29,7 @@ import frc.robot.Constants.TurretConstants;
 import frc.robot.commands.ShooterCommand;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.utils.FuelSim;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -34,6 +46,8 @@ public class RobotContainer {
   private final XboxController m_driverController = new XboxController(IOConstants.kDriverControllerPort);
   private final XboxController m_operatorController = new XboxController(IOConstants.kOperatorControllerPort);
 
+  public final FuelSim fuelSim;
+
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -42,6 +56,9 @@ public class RobotContainer {
 
     // Configure the trigger bindings
     configureBindings();
+
+    fuelSim = new FuelSim();
+    configureFuelSim();
 
     m_robotDrive.setDefaultCommand(
         new RunCommand(
@@ -101,6 +118,37 @@ public class RobotContainer {
     // driver reset odometry
     new JoystickButton(m_driverController, Button.kBack.value)
         .onTrue(new InstantCommand(() -> m_robotDrive.resetOdometry(new Pose2d()), m_robotDrive));
+    
+    // Simulation launch fuel
+    SmartDashboard.putData(new InstantCommand(() -> {
+        fuelSim.launchFuel(
+            LinearVelocity.ofBaseUnits(
+                m_shooter.getAvgShooterSpeed() * Units.inchesToMeters(4), 
+                LinearVelocityUnit.combine(Meters, Seconds)), 
+            //Angle.ofBaseUnits(m_shooter.getHoodAngle(), Degrees),
+            Angle.ofBaseUnits(45, Degrees), 
+            Angle.ofBaseUnits(m_robotDrive.getPose().getRotation().getDegrees(), Degrees), 
+            Distance.ofBaseUnits(2, Meters));
+    })
+    .withName("Launch Fuel"));
+  }
+
+  private void configureFuelSim() {
+    //fuelSim.spawnStartingFuel();
+    fuelSim.start();
+    SmartDashboard.putData(new InstantCommand(() -> {
+        fuelSim.clearFuel();
+        //fuelSim.spawnStartingFuel();
+    })
+    .withName("Reset Fuel")
+    .ignoringDisable(true));
+
+    fuelSim.registerRobot(
+        Units.inchesToMeters(32), 
+        Units.inchesToMeters(32), 
+        Units.inchesToMeters(5), 
+        m_robotDrive::getPose, 
+        m_robotDrive::getRobotRelativeSpeeds);
   }
 
   /**
