@@ -41,13 +41,13 @@ public class IntakeSubsystem extends SubsystemBase {
     m_armEncoder.setInverted(true);
     //m_armPID.enableContinuousInput(0, 360);
 
-    m_intakeMotor = new SparkFlex(IntakeConstants.kIntakeMotorID, MotorType.kBrushless);
+    m_intakeMotor = new SparkFlex(IntakeConstants.kIntakeMotorPort, MotorType.kBrushless);
     m_intakeMotor.configure(intakeConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
 
     SparkFlexConfig armConfig = new SparkFlexConfig();
     armConfig.inverted(true);
     armConfig.idleMode(IdleMode.kBrake);
-    m_armMotor = new SparkFlex(IntakeConstants.kArmMotorID  , MotorType.kBrushless);
+    m_armMotor = new SparkFlex(IntakeConstants.kArmMotorPort, MotorType.kBrushless);
     m_armMotor.configure(armConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);    
 
     m_armPID.setTolerance(10);
