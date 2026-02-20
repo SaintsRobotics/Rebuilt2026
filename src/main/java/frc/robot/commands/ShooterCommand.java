@@ -25,7 +25,7 @@ public class ShooterCommand extends Command {
 
     public void execute() {
         
-        m_shooterSubsystem.setShooterParameters(1, 45);
+        m_shooterSubsystem.setShooterParameters(5500, 45);
         
     }
 

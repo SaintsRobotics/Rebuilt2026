@@ -58,21 +58,26 @@ public class ShooterSubsystem extends SubsystemBase {
             ShooterConstants.kFlywheelMOI, 
             ShooterConstants.kFlywheelGearing), 
         m_flywheelDCMotor);
-    private final SparkFlexSim m_leftMotorSim = new SparkFlexSim(m_shooterMotorLeft, DCMotor.getNeoVortex(1));
-    private final SparkFlexSim m_rightMotorSim = new SparkFlexSim(m_shooterMotorRight, DCMotor.getNeoVortex(1));
+    private final SparkFlexSim m_sparkFlexSim = new SparkFlexSim(m_shooterMotorLeft, m_flywheelDCMotor);
 
     //constructor
     public ShooterSubsystem() {
 
         SparkFlexConfig motorConfig = new SparkFlexConfig();
         motorConfig.idleMode(IdleMode.kCoast);
-        m_shooterMotorLeft.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-        motorConfig.inverted(true);
-        m_shooterMotorRight.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+        m_shooterMotorLeft.configure(motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+        SparkFlexConfig followerConfig = new SparkFlexConfig();
+        followerConfig
+            .follow(m_shooterMotorLeft, true)
+            .idleMode(IdleMode.kCoast);
+        m_shooterMotorRight.configure(followerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         SparkFlexConfig hoodMotorConfig = new SparkFlexConfig();
-        hoodMotorConfig.absoluteEncoder.positionConversionFactor(360);
-        m_hoodMotor.configure(hoodMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+        hoodMotorConfig
+            .idleMode(IdleMode.kCoast)
+            .absoluteEncoder.positionConversionFactor(360);
+        m_hoodMotor.configure(hoodMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     //resets shooter
@@ -86,7 +91,6 @@ public class ShooterSubsystem extends SubsystemBase {
     public void shooterStop() {
 
         m_shooterMotorLeft.set(0);
-        m_shooterMotorRight.set(0);
 
     }
 
@@ -102,23 +106,22 @@ public class ShooterSubsystem extends SubsystemBase {
     public void setShooterMotors(double speed) {
 
         m_shooterMotorLeft.set(speed);
-        m_shooterMotorRight.set(speed);
 
     }
 
     //returns speed of the shooter as a average of the speeds of the two motors
     public double getAvgShooterSpeed() {
-        return Robot.isReal() ? (m_shooterMotorLeft.get() + m_shooterMotorRight.get())/2 : m_flywheelSim.getAngularVelocityRPM();
+        return Robot.isReal() ? (getLeftShooterSpeed() + getRightShooterSpeed())/2 : m_flywheelSim.getAngularVelocityRPM();
     }
 
     //returns speed of the left shooter motor
     public double getLeftShooterSpeed() {
-        return m_shooterMotorLeft.get();
+        return m_shooterMotorLeft.getEncoder().getVelocity();
     }
 
     //returns speed of the right shooter motor
     public double getRightShooterSpeed() {
-        return m_shooterMotorRight.get();
+        return m_shooterMotorRight.getEncoder().getVelocity();
     }
 
     //sets hood angle by setting the setpoint of the hood angle PID controller
@@ -158,12 +161,11 @@ public class ShooterSubsystem extends SubsystemBase {
     @Override
     public void simulationPeriodic() {
         // set inputs and update by one timestep
-        m_flywheelSim.setInput(m_leftMotorSim.getAppliedOutput() * RobotController.getBatteryVoltage());
+        m_flywheelSim.setInput(m_sparkFlexSim.getAppliedOutput() * RobotController.getBatteryVoltage());
         m_flywheelSim.update(0.02);
 
         // update SparkFlexSim
-        m_leftMotorSim.iterate(m_flywheelSim.getAngularVelocityRPM(), RobotController.getBatteryVoltage(), 0.02);
-        m_rightMotorSim.iterate(m_flywheelSim.getAngularVelocityRPM(), RobotController.getBatteryVoltage(), 0.02);
+        m_sparkFlexSim.iterate(m_flywheelSim.getAngularVelocityRPM(), RobotController.getBatteryVoltage(), 0.02);
 
         // Update battery
         RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(m_flywheelSim.getCurrentDrawAmps()));

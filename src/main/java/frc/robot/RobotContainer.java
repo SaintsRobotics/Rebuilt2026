@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.IOConstants;
+import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.commands.ShooterCommand;
 import frc.robot.subsystems.DriveSubsystem;
@@ -123,12 +124,12 @@ public class RobotContainer {
     SmartDashboard.putData(new InstantCommand(() -> {
         fuelSim.launchFuel(
             LinearVelocity.ofBaseUnits(
-                m_shooter.getAvgShooterSpeed() * Units.inchesToMeters(4), 
+                Units.rotationsPerMinuteToRadiansPerSecond(m_shooter.getAvgShooterSpeed()) * ShooterConstants.kFlywheelRadius, 
                 LinearVelocityUnit.combine(Meters, Seconds)), 
             //Angle.ofBaseUnits(m_shooter.getHoodAngle(), Degrees),
             Angle.ofBaseUnits(45, Degrees), 
             Angle.ofBaseUnits(m_robotDrive.getPose().getRotation().getDegrees(), Degrees), 
-            Distance.ofBaseUnits(2, Meters));
+            Distance.ofBaseUnits(0.5, Meters));
     })
     .withName("Launch Fuel"));
   }
