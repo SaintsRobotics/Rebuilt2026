@@ -104,7 +104,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
 
     m_armPID.setSetpoint(m_armSetpoint);
-    double armMotorSpeed = m_armPID.atSetpoint() ? 0 : MathUtil.clamp(m_armPID.calculate(m_armEncoder.get()), -0.3, 0.3);
+    double armMotorSpeed = m_armPID.atSetpoint() ? 0 : MathUtil.clamp(m_armPID.calculate(m_armEncoder.get()), -IntakeConstants.kArmMaxSpeed, IntakeConstants.kArmMaxSpeed);
 
     SmartDashboard.putNumber("Motor Speed", armMotorSpeed);
     SmartDashboard.putNumber("Arm Angle", m_armEncoder.get());
