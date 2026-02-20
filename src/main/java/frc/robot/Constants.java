@@ -57,8 +57,10 @@ public final class Constants {
     public static final int kIntakeMotorPort = 0;
     public static final int kArmMotorPort = 1;
     public static final int kArmEncoderChannel = 0;
+    
     public static final double kArmP = 0.5;
     public static final double kArmD = 0.0;
+    public static final double kArmMaxSpeed = 0.3;
 
     // In degrees
     public static final double kIntakeLoweredAngle = 160;
