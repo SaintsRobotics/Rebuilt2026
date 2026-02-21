@@ -10,6 +10,8 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -20,6 +22,7 @@ import frc.robot.Constants.IOConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.lib.BLine.FollowPath;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.utils.AutoBuilder;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -35,7 +38,8 @@ public class RobotContainer {
   private final XboxController m_driverController = new XboxController(IOConstants.kDriverControllerPort);
   private final XboxController m_operatorController = new XboxController(IOConstants.kOperatorControllerPort);
 
-  private final FollowPath.Builder m_pathBuilder;
+//   private final FollowPath.Builder m_pathBuilder;
+  private final SendableChooser<Command> m_autoChooser;
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -46,16 +50,9 @@ public class RobotContainer {
     configureBindings();
 
     // BLine Auton
-    m_pathBuilder = new FollowPath.Builder(
-        m_robotDrive,
-        m_robotDrive::getPose,
-        m_robotDrive::getRobotRelativeSpeeds,
-        m_robotDrive::autonDrive,
-        new PIDController(5.0, 0, 0),
-        new PIDController(3.0, 0, 0),
-        new PIDController(2.0, 0, 0)
-    ).withDefaultShouldFlip()
-     .withPoseReset(m_robotDrive::resetOdometry);
+    AutoBuilder autoBuilder = new AutoBuilder(m_robotDrive);
+    m_autoChooser = autoBuilder.buildAutoChooser();
+    SmartDashboard.putData("Auto Chooser", m_autoChooser);
 
     m_robotDrive.setDefaultCommand(
         new RunCommand(
@@ -116,7 +113,7 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return Commands.none();
+    return m_autoChooser.getSelected();
   }
 
   /**

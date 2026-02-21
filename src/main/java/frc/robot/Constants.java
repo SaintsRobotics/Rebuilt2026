@@ -174,7 +174,7 @@ public final class Constants {
 
   public static final class AutonConstants {
     // TODO: Tune when real robot is available
-    public static final double kTranslationP = 5.0;
+    public static final double kTranslationP = 2.0;
     public static final double kTranslationI = 0.0;
     public static final double kTranslationD = 0.0;
 
