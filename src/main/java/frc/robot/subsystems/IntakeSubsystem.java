@@ -13,7 +13,12 @@ import com.revrobotics.PersistMode;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.CANcoder;
+
+import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.MagnetSensorConfigs;
+
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
@@ -26,7 +31,8 @@ public class IntakeSubsystem extends SubsystemBase {
 
   private PIDController m_armPID = new PIDController(0.002, 0, 0);
 
-  private CANcoder m_armEncoder = new CANcoder(IntakeConstants.kArmEncoderChannel, 360, IntakeConstants.kArmEncoderOffset);
+  private CANcoder m_armEncoder = new CANcoder(IntakeConstants.kArmEncoderChannel);
+
 
   private ArmPosition m_armPosition = ArmPosition.Retracted;
 
@@ -38,7 +44,7 @@ public class IntakeSubsystem extends SubsystemBase {
     SparkFlexConfig intakeConfig = new SparkFlexConfig();
     intakeConfig.idleMode(IdleMode.kCoast);
 
-    m_armEncoder.setInverted(true);
+    m_armEncoder.getConfigurator().apply(new MagnetSensorConfigs().withSensorDirection(SensorDirectionValue.Clockwise_Positive));
     //m_armPID.enableContinuousInput(0, 360);
 
     m_intakeMotor = new SparkFlex(IntakeConstants.kIntakeMotorPort, MotorType.kBrushless);
@@ -53,6 +59,10 @@ public class IntakeSubsystem extends SubsystemBase {
     m_armPID.setTolerance(10);
 
     m_armSetpoint = 10;
+
+    CANcoderConfiguration config = new CANcoderConfiguration();
+    config.MagnetSensor.MagnetOffset = IntakeConstants.kArmEncoderOffset;
+    m_armEncoder.getConfigurator().apply(config);
   }
 
   public void reset() {
@@ -104,10 +114,10 @@ public class IntakeSubsystem extends SubsystemBase {
 
 
     m_armPID.setSetpoint(m_armSetpoint);
-    double armMotorSpeed = m_armPID.atSetpoint() ? 0 : MathUtil.clamp(m_armPID.calculate(m_armEncoder.get()), -IntakeConstants.kArmMaxSpeed, IntakeConstants.kArmMaxSpeed);
+    double armMotorSpeed = m_armPID.atSetpoint() ? 0 : MathUtil.clamp(m_armPID.calculate(m_armEncoder.getAbsolutePosition().getValueAsDouble() * 360.0), -IntakeConstants.kArmMaxSpeed, IntakeConstants.kArmMaxSpeed);
 
     SmartDashboard.putNumber("Motor Speed", armMotorSpeed);
-    SmartDashboard.putNumber("Arm Angle", m_armEncoder.get());
+    SmartDashboard.putNumber("Arm Angle", m_armEncoder.getAbsolutePosition().getValueAsDouble() * 360.0);
     // SmartDashboard.putNumber("pid output", armMotorSpeed);
 
     m_armMotor.set(armMotorSpeed);
