@@ -7,6 +7,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.MathUtil;
@@ -23,6 +24,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.IOConstants;
 import frc.robot.Constants.ShooterConstants;
@@ -119,6 +121,16 @@ public class RobotContainer {
     // driver reset odometry
     new JoystickButton(m_driverController, Button.kBack.value)
         .onTrue(new InstantCommand(() -> m_robotDrive.resetOdometry(new Pose2d()), m_robotDrive));
+
+
+    new JoystickButton(m_driverController, Button.kRightBumper.value)
+        .onTrue(new InstantCommand(() -> {fuelSim.launchFuel(
+            LinearVelocity.ofBaseUnits(
+                Units.rotationsPerMinuteToRadiansPerSecond(m_shooter.getAvgShooterSpeed()) * ShooterConstants.kFlywheelRadius, 
+                LinearVelocityUnit.combine(Meters, Seconds)),
+                Angle.ofBaseUnits(45, Degrees),
+                Angle.ofBaseUnits(-m_robotDrive.getPose().getRotation().getRadians(), Radians),
+                Distance.ofBaseUnits(0.5, Meters));}));
     
     // Simulation launch fuel
     SmartDashboard.putData(new InstantCommand(() -> {
@@ -128,7 +140,7 @@ public class RobotContainer {
                 LinearVelocityUnit.combine(Meters, Seconds)), 
             //Angle.ofBaseUnits(m_shooter.getHoodAngle(), Degrees),
             Angle.ofBaseUnits(45, Degrees), 
-            Angle.ofBaseUnits(m_robotDrive.getPose().getRotation().getDegrees(), Degrees), 
+            Angle.ofBaseUnits(-m_robotDrive.getPose().getRotation().getDegrees(), Degrees), 
             Distance.ofBaseUnits(0.5, Meters));
     })
     .withName("Launch Fuel"));
