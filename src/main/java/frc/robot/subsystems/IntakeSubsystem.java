@@ -13,7 +13,7 @@ import com.revrobotics.PersistMode;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.wpilibj.CANcoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
@@ -26,7 +26,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
   private PIDController m_armPID = new PIDController(0.002, 0, 0);
 
-  private DutyCycleEncoder m_armEncoder = new DutyCycleEncoder(IntakeConstants.kArmEncoderChannel, 360, IntakeConstants.kArmEncoderOffset);
+  private CANcoder m_armEncoder = new CANcoder(IntakeConstants.kArmEncoderChannel, 360, IntakeConstants.kArmEncoderOffset);
 
   private ArmPosition m_armPosition = ArmPosition.Retracted;
 
