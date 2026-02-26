@@ -163,12 +163,14 @@ public final class Constants {
     public static final int kTurretMotorPort = 0;
 
     // CRT Encoders
-    public static final int kEncoder1CANId = 10;  
-    public static final int kEncoder2CANId = 11;  
+    public static final int kEncoder1CANId = 2;  
+    public static final int kEncoder2CANId = 1;  
 
     public static final double kTurretTeeth = 90.0;
     public static final double kEncoder1Teeth = 13.0;
     public static final double kEncoder2Teeth = 14.0;
+
+    public static final double kEncoderMaxDelta = 40.0;
 
     // Gear ratios 
     public static final double kEncoder1Ratio = kTurretTeeth / kEncoder1Teeth; 

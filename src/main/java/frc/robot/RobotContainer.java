@@ -26,7 +26,7 @@ import frc.robot.subsystems.TurretSubsystem;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here
-  private final DriveSubsystem m_robotDrive = new DriveSubsystem();
+  //private final DriveSubsystem m_robotDrive = new DriveSubsystem();
   private final TurretSubsystem m_turret = new TurretSubsystem();
 
   private final XboxController m_driverController = new XboxController(IOConstants.kDriverControllerPort);
@@ -40,37 +40,37 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureBindings();
 
-    m_robotDrive.setDefaultCommand(
-        new RunCommand(
-            () -> m_robotDrive.drive(
-                MathUtil.applyDeadband(
-                    -m_driverController.getLeftY(),
-                    IOConstants.kControllerDeadband)
-                    * DriveConstants.kMaxSpeedMetersPerSecond
-                    * (1 - (m_driverController
-                        .getRightBumperButton() ? IOConstants.kSlowModeScalar : 0))
-                    * 0.8,
-                MathUtil.applyDeadband(
-                    -m_driverController.getLeftX(),
-                    IOConstants.kControllerDeadband)
-                    * DriveConstants.kMaxSpeedMetersPerSecond
-                    * (1 - (m_driverController
-                        .getRightBumperButton() ? 1 : 0)
-                        * IOConstants.kSlowModeScalar)
-                    * 0.8,
-                MathUtil.applyDeadband(
-                    m_driverController.getRightX(),
-                    IOConstants.kControllerDeadband)
-                    * DriveConstants.kMaxAngularSpeedRadiansPerSecond
-                    * (1 - (m_driverController
-                        .getRightBumperButton() ? 1 : 0)
-                        * IOConstants.kSlowModeScalar)
-                    * -1,
-                true),
-                    m_robotDrive));
+    // m_robotDrive.setDefaultCommand(
+    //     new RunCommand(
+    //         () -> m_robotDrive.drive(
+    //             MathUtil.applyDeadband(
+    //                 -m_driverController.getLeftY(),
+    //                 IOConstants.kControllerDeadband)
+    //                 * DriveConstants.kMaxSpeedMetersPerSecond
+    //                 * (1 - (m_driverController
+    //                     .getRightBumperButton() ? IOConstants.kSlowModeScalar : 0))
+    //                 * 0.8,
+    //             MathUtil.applyDeadband(
+    //                 -m_driverController.getLeftX(),
+    //                 IOConstants.kControllerDeadband)
+    //                 * DriveConstants.kMaxSpeedMetersPerSecond
+    //                 * (1 - (m_driverController
+    //                     .getRightBumperButton() ? 1 : 0)
+    //                     * IOConstants.kSlowModeScalar)
+    //                 * 0.8,
+    //             MathUtil.applyDeadband(
+    //                 m_driverController.getRightX(),
+    //                 IOConstants.kControllerDeadband)
+    //                 * DriveConstants.kMaxAngularSpeedRadiansPerSecond
+    //                 * (1 - (m_driverController
+    //                     .getRightBumperButton() ? 1 : 0)
+    //                     * IOConstants.kSlowModeScalar)
+    //                 * -1,
+    //             true),
+    //                 m_robotDrive));
 
     // Set turret to continuously aim at the hub
-    m_turret.setDefaultCommand(new AutoAimTurret(m_turret, m_robotDrive));
+    //m_turret.setDefaultCommand(new AutoAimTurret(m_turret, m_robotDrive));
   }
 
 
@@ -88,12 +88,12 @@ public class RobotContainer {
       // -------- driving bindings -------- //
 
     // driver reset heading
-    new JoystickButton(m_driverController, Button.kStart.value)
-        .onTrue(new InstantCommand(m_robotDrive::zeroHeading, m_robotDrive));
+    // new JoystickButton(m_driverController, Button.kStart.value)
+    //     .onTrue(new InstantCommand(m_robotDrive::zeroHeading, m_robotDrive));
 
-    // driver reset odometry
-    new JoystickButton(m_driverController, Button.kBack.value)
-        .onTrue(new InstantCommand(() -> m_robotDrive.resetOdometry(new Pose2d()), m_robotDrive));
+    // // driver reset odometry
+    // new JoystickButton(m_driverController, Button.kBack.value)
+    //     .onTrue(new InstantCommand(() -> m_robotDrive.resetOdometry(new Pose2d()), m_robotDrive));
   }
 
   /**
@@ -105,6 +105,6 @@ public class RobotContainer {
    * </p>
    */
   public void fastPeriodic() {
-    m_robotDrive.fastPeriodic();
+    // m_robotDrive.fastPeriodic();
   }
 }

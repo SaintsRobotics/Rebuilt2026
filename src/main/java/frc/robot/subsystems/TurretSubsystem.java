@@ -35,7 +35,7 @@ import frc.robot.Constants.TurretConstants;
 
 public class TurretSubsystem extends SubsystemBase {
 
-  private final SparkFlex m_turretMotor = new SparkFlex(TurretConstants.kTurretMotorPort, MotorType.kBrushless);
+  //private final SparkFlex m_turretMotor = new SparkFlex(TurretConstants.kTurretMotorPort, MotorType.kBrushless);
   private final PIDController m_turretPID = new PIDController(TurretConstants.kTurretP, TurretConstants.kTurretI, TurretConstants.kTurretD);
   private final SimpleMotorFeedforward m_turretFeedforward = new SimpleMotorFeedforward(TurretConstants.kTurretS, TurretConstants.kTurretV);
 
@@ -45,6 +45,7 @@ public class TurretSubsystem extends SubsystemBase {
 
   private double relativeAngularVelocity;
   private double previousTargetAngle;  
+  private double lastCalculatedPosition;
 
   // simulation classes
   private final DCMotor m_motorSim = DCMotor.getNeoVortex(1);
@@ -57,7 +58,7 @@ public class TurretSubsystem extends SubsystemBase {
     Units.degreesToRadians(TurretConstants.kTurretMaxRotation / 2),  
     false,  
     Units.degreesToRadians(0));  
-  private final SparkFlexSim m_turretMotorSim = new SparkFlexSim(m_turretMotor, m_motorSim);
+  // private final SparkFlexSim m_turretMotorSim = new SparkFlexSim(m_turretMotor, m_motorSim);
 
   private final StructPublisher<Pose3d> m_turretCurrentPublisher =
     NetworkTableInstance.getDefault().getStructTopic("Turret/Current", Pose3d.struct).publish();
@@ -76,9 +77,9 @@ public class TurretSubsystem extends SubsystemBase {
       SparkFlexConfig motorConfig = new SparkFlexConfig();
       motorConfig.encoder.positionConversionFactor(360);
       motorConfig.idleMode(IdleMode.kBrake);
-      m_turretMotor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+      //m_turretMotor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
 
-      m_turretMotor.getEncoder().setPosition(crtPosition);
+      // m_turretMotor.getEncoder().setPosition(crtPosition);
     } 
     else {
       m_encoder1 = null;
@@ -87,8 +88,8 @@ public class TurretSubsystem extends SubsystemBase {
       SparkFlexConfig motorConfig = new SparkFlexConfig();
       motorConfig.encoder.positionConversionFactor(360);
       motorConfig.idleMode(IdleMode.kBrake);
-      m_turretMotor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-      m_turretMotor.getEncoder().setPosition(0);
+      // m_turretMotor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+      // m_turretMotor.getEncoder().setPosition(0);
     }
   }
 
@@ -107,26 +108,51 @@ public class TurretSubsystem extends SubsystemBase {
     }
 
     output = MathUtil.clamp(output, -TurretConstants.kTurretMaxSpeed, TurretConstants.kTurretMaxSpeed);
-    m_turretMotor.set(output);
+    // m_turretMotor.set(output);
 
-    SmartDashboard.putNumber("Turret Angle", getTurretPosition());
-    SmartDashboard.putNumber("Turret Setpoint", m_turretPID.getSetpoint());
-    SmartDashboard.putNumber("Turret Error", getError());
-    SmartDashboard.putNumber("Turret Output", output);
+    double pos = calculateCRTPosition();
+    // if (Math.abs(lastCalculatedPosition - pos) > TurretConstants.kEncoderMaxDelta) {
+    //   pos = lastCalculatedPosition;
+    // }
+    // lastCalculatedPosition = pos;
+
+    SmartDashboard.putNumber("Turret Angle", pos);
+    SmartDashboard.putNumber("Turret Error", calculateCRTError());
+    SmartDashboard.putNumber("Encoder 1 Angle", m_encoder1.getAbsolutePosition().getValueAsDouble()*360);
+    SmartDashboard.putNumber("Encoder 2 Angle", m_encoder2.getAbsolutePosition().getValueAsDouble()*360);
+
+    // SmartDashboard.putNumber("Turret Setpoint", m_turretPID.getSetpoint());
+    // SmartDashboard.putNumber("Turret Error", getError());
+    // SmartDashboard.putNumber("Turret Output", output);
+
+    //double period1 = 360.0 / TurretConstants.kEncoder1Ratio; // 360 / (90/13) = 52
+    //double period2 = 360.0 / TurretConstants.kEncoder2Ratio; // 360 / (90/14) = 56
+    // // Search for solution
+    // double bestSolution = 0.0;
+    // double minError = Double.MAX_VALUE;
+    // for (double candidate = -364; candidate <= 364; candidate += period1) {
+    //   double testAngle = turretFromEnc1 + candidate;
+    //   double error2 = Math.abs(((testAngle - turretFromEnc2) % period2 + period2) % period2);
+    //   error2 = Math.min(error2, period2 - error2);
+    //   if (error2 < minError) {
+    //     minError = error2;
+    //     bestSolution = testAngle;
+    //   }
+    // }
   }
 
   @Override
   public void simulationPeriodic() {
     // set inputs and update simulation
-    m_turretSim.setInput(m_turretMotorSim.getAppliedOutput() * RobotController.getBatteryVoltage());
+    // m_turretSim.setInput(m_turretMotorSim.getAppliedOutput() * RobotController.getBatteryVoltage());
     m_turretSim.update(0.02);
 
     // update turret the SparkFlexSim
-    m_turretMotorSim.iterate(
-      Units.radiansPerSecondToRotationsPerMinute(m_turretSim.getVelocityRadPerSec()), 
-      RobotController.getBatteryVoltage(), 
-      0.02);
-    m_turretMotorSim.getRelativeEncoderSim().setPosition(Units.radiansToDegrees(m_turretSim.getAngleRads()));
+    // m_turretMotorSim.iterate(
+    //   Units.radiansPerSecondToRotationsPerMinute(m_turretSim.getVelocityRadPerSec()), 
+    //   RobotController.getBatteryVoltage(), 
+    //   0.02);
+    // m_turretMotorSim.getRelativeEncoderSim().setPosition(Units.radiansToDegrees(m_turretSim.getAngleRads()));
 
     // update battery
     RoboRioSim.setVInVoltage(
@@ -212,7 +238,8 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   public double getTurretPosition() {
-    return m_turretMotor.getEncoder().getPosition();
+    // return m_turretMotor.getEncoder().getPosition();
+    return 0;
   }
 
   // Returns the current error between setpoint and position
@@ -228,7 +255,7 @@ public class TurretSubsystem extends SubsystemBase {
 
   // Reset turret encoder
   public void resetEncoder() {
-    m_turretMotor.getEncoder().setPosition(0);
+    // m_turretMotor.getEncoder().setPosition(0);
   }
 
   public boolean atSetpoint() {
@@ -252,8 +279,54 @@ public class TurretSubsystem extends SubsystemBase {
     // Calculate periods
     double turretFromEnc1 = enc1 / TurretConstants.kEncoder1Ratio;
     double turretFromEnc2 = enc2 / TurretConstants.kEncoder2Ratio;
-    double period1 = 360.0 / TurretConstants.kEncoder1Ratio; 
-    double period2 = 360.0 / TurretConstants.kEncoder2Ratio; 
+    double period1 = 360.0 / TurretConstants.kEncoder1Ratio; // 360 / (90/13) = 52
+    double period2 = 360.0 / TurretConstants.kEncoder2Ratio; // 360 / (90/14) = 56
+
+    // Search for solution
+    double bestSolution = 0.0;
+    double minError = Double.MAX_VALUE;
+
+    // for (double rotations = -10; rotations <= 10; rotations++){
+    //   double enc1Rot = enc1/360 + rotations;
+    //   double turretRot = enc1Rot / TurretConstants.kEncoder1Ratio;
+    //   double enc2Rot = turretRot * TurretConstants.kEncoder2Ratio;
+    //   double error = Math.abs((enc2Rot - Math.floor(enc2Rot)) - enc2/360);
+    //   if (error < minError) {
+    //     minError = error;
+    //     bestSolution = turretRot * 360;
+    //   }
+    // }
+    for (double candidate = -364; candidate <= 364; candidate += period1) {
+      double testAngle = turretFromEnc1 + candidate;
+      double error2 = Math.abs(((testAngle - turretFromEnc2) % period2 + period2) % period2);
+      error2 = Math.min(error2, period2 - error2);
+      if (error2 < minError) {
+        minError = error2;
+        bestSolution = testAngle;
+      }
+    }
+    return bestSolution;
+  }
+
+    // Calculates turret position with CRT
+  private double calculateCRTError() {
+    if (m_encoder1 == null || m_encoder2 == null) {
+      return 0.0;
+    }
+
+    // Read encoder positions
+    double enc1 = m_encoder1.getAbsolutePosition().getValueAsDouble() * 360.0 - TurretConstants.kEncoder1OffsetDegrees;
+    double enc2 = m_encoder2.getAbsolutePosition().getValueAsDouble() * 360.0 - TurretConstants.kEncoder2OffsetDegrees;
+
+    // Normalize range
+    enc1 = ((enc1 % 360.0) + 360.0) % 360.0;
+    enc2 = ((enc2 % 360.0) + 360.0) % 360.0;
+
+    // Calculate periods
+    double turretFromEnc1 = enc1 / TurretConstants.kEncoder1Ratio;
+    double turretFromEnc2 = enc2 / TurretConstants.kEncoder2Ratio;
+    double period1 = 360.0 / TurretConstants.kEncoder1Ratio; // 360 / (90/13) = 52
+    double period2 = 360.0 / TurretConstants.kEncoder2Ratio; // 360 / (90/14) = 56
 
     // Search for solution
     double bestSolution = 0.0;
@@ -267,6 +340,7 @@ public class TurretSubsystem extends SubsystemBase {
         bestSolution = testAngle;
       }
     }
-    return bestSolution;
+    return minError;
   }
+
 }
