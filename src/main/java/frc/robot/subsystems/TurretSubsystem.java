@@ -269,43 +269,54 @@ public class TurretSubsystem extends SubsystemBase {
     }
 
     // Read encoder positions
-    double enc1 = m_encoder1.getAbsolutePosition().getValueAsDouble() * 360.0 - TurretConstants.kEncoder1OffsetDegrees;
-    double enc2 = m_encoder2.getAbsolutePosition().getValueAsDouble() * 360.0 - TurretConstants.kEncoder2OffsetDegrees;
+    double enc1 = m_encoder1.getAbsolutePosition().getValueAsDouble(); //* 360.0 - TurretConstants.kEncoder1OffsetDegrees;
+    double enc2 = m_encoder2.getAbsolutePosition().getValueAsDouble(); //* 360.0 - TurretConstants.kEncoder2OffsetDegrees;
 
-    // Normalize range
-    enc1 = ((enc1 % 360.0) + 360.0) % 360.0;
-    enc2 = ((enc2 % 360.0) + 360.0) % 360.0;
+    double diff = enc1 - enc2;
 
-    // Calculate periods
-    double turretFromEnc1 = enc1 / TurretConstants.kEncoder1Ratio;
-    double turretFromEnc2 = enc2 / TurretConstants.kEncoder2Ratio;
-    double period1 = 360.0 / TurretConstants.kEncoder1Ratio; // 360 / (90/13) = 52
-    double period2 = 360.0 / TurretConstants.kEncoder2Ratio; // 360 / (90/14) = 56
+    // handle wraparound
+    if (diff < 0) {
+      diff += 1.0;
+    }
 
-    // Search for solution
-    double bestSolution = 0.0;
-    double minError = Double.MAX_VALUE;
+    return diff * (1/(TurretConstants.kEncoder1Ratio - TurretConstants.kEncoder2Ratio)) * 360.0;
 
-    // for (double rotations = -10; rotations <= 10; rotations++){
-    //   double enc1Rot = enc1/360 + rotations;
-    //   double turretRot = enc1Rot / TurretConstants.kEncoder1Ratio;
-    //   double enc2Rot = turretRot * TurretConstants.kEncoder2Ratio;
-    //   double error = Math.abs((enc2Rot - Math.floor(enc2Rot)) - enc2/360);
-    //   if (error < minError) {
-    //     minError = error;
-    //     bestSolution = turretRot * 360;
+    // // Normalize range
+    // enc1 = ((enc1 % 360.0) + 360.0) % 360.0;
+    // enc2 = ((enc2 % 360.0) + 360.0) % 360.0;
+
+    // // Calculate periods
+    // double turretFromEnc1 = enc1 / TurretConstants.kEncoder1Ratio;
+    // double turretFromEnc2 = enc2 / TurretConstants.kEncoder2Ratio;
+    // double period1 = 360.0 / TurretConstants.kEncoder1Ratio; // 360 / (90/13) = 52
+    // double period2 = 360.0 / TurretConstants.kEncoder2Ratio; // 360 / (90/14) = 56
+
+    // // Search for solution
+    // double bestSolution = 0.0;
+    // double minError = Double.MAX_VALUE;
+
+    // // for (double rotations = -10; rotations <= 10; rotations++){
+    // //   double enc1Rot = enc1/360 + rotations;
+    // //   double turretRot = enc1Rot / TurretConstants.kEncoder1Ratio;
+    // //   double enc2Rot = turretRot * TurretConstants.kEncoder2Ratio;
+    // //   double error = Math.abs((enc2Rot - Math.floor(enc2Rot)) - enc2/360);
+    // //   if (error < minError) {
+    // //     minError = error;
+    // //     bestSolution = turretRot * 360;
+    // //   }
+    // // }
+    // for (double candidate = -364; candidate <= 364; candidate += period1) {
+    //   double testAngle = turretFromEnc1 + candidate;
+    //   double error2 = Math.abs(((testAngle - turretFromEnc2) % period2 + period2) % period2);
+    //   error2 = Math.min(error2, period2 - error2);
+    //   if (error2 < minError) {
+    //     minError = error2;
+    //     bestSolution = testAngle;
     //   }
     // }
-    for (double candidate = -364; candidate <= 364; candidate += period1) {
-      double testAngle = turretFromEnc1 + candidate;
-      double error2 = Math.abs(((testAngle - turretFromEnc2) % period2 + period2) % period2);
-      error2 = Math.min(error2, period2 - error2);
-      if (error2 < minError) {
-        minError = error2;
-        bestSolution = testAngle;
-      }
-    }
-    return bestSolution;
+    // return bestSolution;
+
+
   }
 
     // Calculates turret position with CRT
