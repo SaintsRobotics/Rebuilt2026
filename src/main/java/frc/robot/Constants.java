@@ -21,10 +21,8 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.AngularMomentumUnit;
-import edu.wpi.first.units.AngularVelocityUnit;
 import edu.wpi.first.units.LinearMomentumUnit;
 import edu.wpi.first.units.MomentOfInertiaUnit;
-import edu.wpi.first.units.Unit;
 import edu.wpi.first.units.measure.MomentOfInertia;
 
 /**
@@ -210,7 +208,9 @@ public final class Constants {
     public static final double kHoodAngleMax = 180;
     public static final double kHoodSpeedMax = 1;
 
-    public static final double kFlywheelMOI = 0.000190215774729;
+    public static final int kShootOnTheMoveIterations = 5;
+
+    public static final double kFlywheelMOI = 0.000190215774729; // why is converting an in^2 lbs MOI to kg m^2 MOI so difficult
     public static final double kFlywheelGearing = 1.0;
     public static final double kFlywheelRadius = Units.inchesToMeters(1.5);
 

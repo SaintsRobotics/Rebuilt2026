@@ -5,13 +5,18 @@
 package frc.robot.utils;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants.ShooterConstants;
 
 public class LaunchCalc{
 
     private static final InterpolatingDoubleTreeMap FlywheelLUT = new InterpolatingDoubleTreeMap();
     private static final InterpolatingDoubleTreeMap HoodAngleLUT = new InterpolatingDoubleTreeMap();
+    private static final InterpolatingDoubleTreeMap TimeLUT = new InterpolatingDoubleTreeMap();
 
     static {
         // Populate the LUTs with empirical data
@@ -38,6 +43,19 @@ public class LaunchCalc{
     public static double findHoodAngle(Pose2d currentPose, Pose2d targetPose) {
         double distance = currentPose.getTranslation().getDistance(targetPose.getTranslation());
         return HoodAngleLUT.get(distance);
+    }
+
+    /** Calculates the target to aim for when shooting on the move. */
+    public static Pose2d findTargetOnTheMove(Pose2d currentPose, Pose2d targetPose, Translation2d velocity) {
+        double distance = 0;
+        double timeOfFlight = 0;
+        Pose2d newTarget = targetPose;
+        for (int i = 0; i < ShooterConstants.kShootOnTheMoveIterations; i++) {
+            distance = currentPose.getTranslation().getDistance(newTarget.getTranslation());
+            timeOfFlight = TimeLUT.get(distance);
+            newTarget = targetPose.plus(new Transform2d(velocity.times(-timeOfFlight), Rotation2d.kZero));
+        }
+        return newTarget;
     }
    
 }
