@@ -6,6 +6,7 @@ package frc.robot.utils;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class LaunchCalc{
 
@@ -15,21 +16,22 @@ public class LaunchCalc{
     static {
         // Populate the LUTs with empirical data
         // Example entries (distance in meters, flywheel speed in RPM, hood angle in degrees)
-        FlywheelLUT.put(1.0, 3000.0);
-        FlywheelLUT.put(2.0, 4000.0);
-        FlywheelLUT.put(3.0, 5000.0);
-        FlywheelLUT.put(4.0, 6000.0);
-        FlywheelLUT.put(5.0, 7000.0);
+        FlywheelLUT.put(1.0, 1450.0);
+        FlywheelLUT.put(2.0, 1550.0);
+        FlywheelLUT.put(3.0, 1720.0);
+        FlywheelLUT.put(4.0, 1860.0);
+        FlywheelLUT.put(5.0, 2050.0);
 
-        HoodAngleLUT.put(1.0, 10.0);
-        HoodAngleLUT.put(2.0, 20.0);
-        HoodAngleLUT.put(3.0, 30.0);
-        HoodAngleLUT.put(4.0, 40.0);
-        HoodAngleLUT.put(5.0, 50.0);
+        HoodAngleLUT.put(1.0, 82.5);
+        HoodAngleLUT.put(2.0, 60.0);
+        HoodAngleLUT.put(3.0, 50.0);
+        HoodAngleLUT.put(4.0, 48.0);
+        HoodAngleLUT.put(5.0, 45.0);
     }
 
     public static double findFlywheelSpeed(Pose2d currentPose, Pose2d targetPose) {
         double distance = currentPose.getTranslation().getDistance(targetPose.getTranslation());
+        SmartDashboard.putNumber("distance to target", distance);
         return FlywheelLUT.get(distance);
     }
 

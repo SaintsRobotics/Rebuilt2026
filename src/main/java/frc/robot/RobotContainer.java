@@ -32,6 +32,7 @@ import frc.robot.Constants.TurretConstants;
 import frc.robot.commands.ShooterCommand;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.utils.FuelSim;
 
 /*
@@ -43,7 +44,7 @@ import frc.robot.utils.FuelSim;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
-  // private final TurretSubsystem m_turret = new TurretSubsystem();
+  private final TurretSubsystem m_turret = new TurretSubsystem();
   private final ShooterSubsystem m_shooter = new ShooterSubsystem();
 
   private final XboxController m_driverController = new XboxController(IOConstants.kDriverControllerPort);
@@ -92,12 +93,12 @@ public class RobotContainer {
                 true),
                     m_robotDrive));
     
-    // m_turret.setDefaultCommand(new RunCommand(() -> {
-    //     m_turret.calculateSetpoint(m_robotDrive.getPose(), TurretConstants.kHubPose, m_robotDrive.getRotationSpeed());
-    // },
-    // m_turret));
+    m_turret.setDefaultCommand(new RunCommand(() -> {
+        m_turret.calculateSetpoint(m_robotDrive.getPose(), TurretConstants.kHubPose, m_robotDrive.getRotationSpeed());
+    },
+    m_turret));
     
-    m_shooter.setDefaultCommand(new ShooterCommand(m_shooter));
+    m_shooter.setDefaultCommand(new ShooterCommand(m_shooter, m_robotDrive::getPose, () -> {return TurretConstants.kHubPose;}));
 }
 
 
@@ -128,8 +129,8 @@ public class RobotContainer {
             LinearVelocity.ofBaseUnits(
                 Units.rotationsPerMinuteToRadiansPerSecond(m_shooter.getAvgShooterSpeed()) * ShooterConstants.kFlywheelRadius, 
                 LinearVelocityUnit.combine(Meters, Seconds)),
-                Angle.ofBaseUnits(45, Degrees),
-                Angle.ofBaseUnits(-m_robotDrive.getPose().getRotation().getRadians(), Radians),
+                Angle.ofBaseUnits(Units.degreesToRadians(m_shooter.getHoodAngle()), Radians),
+                Angle.ofBaseUnits(Units.degreesToRadians(m_turret.getTurretPosition()) + m_robotDrive.getPose().getRotation().getRadians(), Radians),
                 Distance.ofBaseUnits(0.5, Meters));}));
     
     // Simulation launch fuel
@@ -137,11 +138,10 @@ public class RobotContainer {
         fuelSim.launchFuel(
             LinearVelocity.ofBaseUnits(
                 Units.rotationsPerMinuteToRadiansPerSecond(m_shooter.getAvgShooterSpeed()) * ShooterConstants.kFlywheelRadius, 
-                LinearVelocityUnit.combine(Meters, Seconds)), 
-            //Angle.ofBaseUnits(m_shooter.getHoodAngle(), Degrees),
-            Angle.ofBaseUnits(45, Degrees), 
-            Angle.ofBaseUnits(-m_robotDrive.getPose().getRotation().getDegrees(), Degrees), 
-            Distance.ofBaseUnits(0.5, Meters));
+                LinearVelocityUnit.combine(Meters, Seconds)),
+                Angle.ofBaseUnits(Units.degreesToRadians(m_shooter.getHoodAngle()), Radians),
+                Angle.ofBaseUnits(Units.degreesToRadians(m_turret.getTurretPosition()) - m_robotDrive.getPose().getRotation().getRadians(), Radians),
+                Distance.ofBaseUnits(0.5, Meters));
     })
     .withName("Launch Fuel"));
   }

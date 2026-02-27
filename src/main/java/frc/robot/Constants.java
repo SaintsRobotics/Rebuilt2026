@@ -192,12 +192,12 @@ public final class Constants {
     public static final int kHoodMotorPort = 3;
     public static final int kHoodEncoderChannel = 0;
 
-    public static final double kShooterP = 1;
+    public static final double kShooterP = 0.00001;
     public static final double kShooterI = 0;
     public static final double kShooterD = 0;
 
-    public static final double kShooterS = 0.05;
-    public static final double kShooterV = 1;
+    public static final double kShooterS = 0.0;
+    public static final double kShooterV = 0.000145;
 
     public static final double kHoodAngleP = 0.1;
     public static final double kHoodAngleI = 0;
@@ -210,15 +210,7 @@ public final class Constants {
     public static final double kHoodAngleMax = 180;
     public static final double kHoodSpeedMax = 1;
 
-    public static final double kFlywheelMOI = MomentOfInertia.ofBaseUnits( 
-      0.65, 
-      MomentOfInertiaUnit.combine(
-        AngularMomentumUnit.combine(
-          LinearMomentumUnit.combine(Pounds, InchesPerSecond), 
-          Inches),
-        RadiansPerSecond
-      ))
-      .in(edu.wpi.first.units.Units.KilogramSquareMeters); // why is converting an in^2 lbs MOI to kg m^2 MOI so difficult
+    public static final double kFlywheelMOI = 0.000190215774729;
     public static final double kFlywheelGearing = 1.0;
     public static final double kFlywheelRadius = Units.inchesToMeters(1.5);
 

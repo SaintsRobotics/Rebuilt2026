@@ -139,7 +139,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
     //returns hood angle from the hood encoder
     public double getHoodAngle() {
-        return m_hoodEncoder.get();
+        // return m_hoodEncoder.get();
+        return m_hoodAnglePID.getSetpoint();
     }
 
     //periodic
@@ -155,6 +156,7 @@ public class ShooterSubsystem extends SubsystemBase {
         double hoodOutput = m_hoodAnglePID.calculate(getHoodAngle());
         setHoodMotor(MathUtil.clamp(hoodOutput, -ShooterConstants.kHoodSpeedMax, ShooterConstants.kHoodSpeedMax));
 
+        // SmartDashboard.putNumber("Shooter Hood Angle", getHoodAngle());
     }
 
     @Override
