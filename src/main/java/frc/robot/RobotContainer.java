@@ -12,7 +12,11 @@ import static edu.wpi.first.units.Units.Seconds;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.LinearVelocityUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
@@ -33,6 +37,7 @@ import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.utils.FuelSim;
+import frc.robot.utils.LaunchCalc;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -50,6 +55,7 @@ public class RobotContainer {
   private final XboxController m_operatorController = new XboxController(IOConstants.kOperatorControllerPort);
 
   public final FuelSim fuelSim;
+  private final StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault().getStructTopic("SotM Target", Pose2d.struct).publish();
 
 
   /**
@@ -173,5 +179,11 @@ public class RobotContainer {
    */
   public void fastPeriodic() {
     m_robotDrive.fastPeriodic();
+
+    ChassisSpeeds speeds = ChassisSpeeds.fromRobotRelativeSpeeds(m_robotDrive.getRobotRelativeSpeeds(), m_robotDrive.getPose().getRotation());
+    publisher.set(LaunchCalc.findTargetOnTheMove(
+        m_robotDrive.getPose(), 
+        TurretConstants.kHubPose, 
+        new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond)));
   }
 }

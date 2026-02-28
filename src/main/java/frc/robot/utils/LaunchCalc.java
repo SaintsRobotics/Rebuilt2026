@@ -32,6 +32,12 @@ public class LaunchCalc{
         HoodAngleLUT.put(3.0, 50.0);
         HoodAngleLUT.put(4.0, 48.0);
         HoodAngleLUT.put(5.0, 45.0);
+
+        TimeLUT.put(1.0, 0.81);
+        TimeLUT.put(2.0, 0.72);
+        TimeLUT.put(3.0, 0.68);
+        TimeLUT.put(4.0, 0.77);
+        TimeLUT.put(5.0, 0.86);
     }
 
     public static double findFlywheelSpeed(Pose2d currentPose, Pose2d targetPose) {
