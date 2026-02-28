@@ -12,9 +12,12 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+
+import frc.robot.utils.Region;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -169,6 +172,60 @@ public final class Constants {
 
     public static final Pose2d kTurretOffset = new Pose2d();
 
-    public static final Pose2d kHubPose = new Pose2d(new Translation2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84)), new Rotation2d());
+  }
+
+  public static final class FieldConstants {
+
+    public static final Translation2d kOrigin = new Translation2d(0, 0);
+
+    public static final double kFieldLength = Units.inchesToMeters(651.22);
+    public static final double kFieldWidth = Units.inchesToMeters(317.69);
+
+    public static final double kAllianceZoneLength = Units.inchesToMeters(156.61);
+
+    public static final double kTrenchWidth = Units.inchesToMeters(47.00);
+    public static final double kTrenchLength = Units.inchesToMeters(49.84);
+
+    public static final Region kBlueAllianceRegion = new Region(
+      new Rectangle2d(
+        kOrigin,
+        new Translation2d(kAllianceZoneLength, kFieldWidth))
+    );
+
+    public static final Region kRedAllianceRegion = new Region(
+      new Rectangle2d(
+        new Translation2d(kFieldLength - kAllianceZoneLength, 0),
+        new Translation2d(kFieldLength, kFieldWidth))
+    );
+
+    public static final Region kTrenchesRegion = new Region(
+      new Rectangle2d( //Blue bottom trench
+        new Translation2d(kAllianceZoneLength, 0),
+        new Translation2d(kAllianceZoneLength + kTrenchLength, kTrenchWidth)
+      ),
+
+      new Rectangle2d( //Blue top trench
+        new Translation2d(kAllianceZoneLength, kFieldWidth - kTrenchWidth),
+        new Translation2d(kAllianceZoneLength + kTrenchLength, kFieldWidth)
+      ),
+
+      new Rectangle2d( //Red bottom trench
+        new Translation2d(kFieldLength - kAllianceZoneLength - kTrenchLength, 0),
+        new Translation2d(kFieldLength - kAllianceZoneLength, kTrenchWidth)
+      ),
+
+      new Rectangle2d( //Red top trench
+        new Translation2d(kFieldLength - kAllianceZoneLength - kTrenchLength, kFieldWidth - kTrenchWidth),
+        new Translation2d(kFieldLength - kAllianceZoneLength, kFieldWidth)
+      )
+    );
+
+    public static final Pose2d kHubPose = new Pose2d(
+      new Translation2d(
+        Units.inchesToMeters(182.11),
+        Units.inchesToMeters(158.84)),
+      new Rotation2d()
+    );
+
   }
 }
