@@ -21,17 +21,17 @@ public class LaunchCalc{
     static {
         // Populate the LUTs with empirical data
         // Example entries (distance in meters, flywheel speed in RPM, hood angle in degrees)
-        FlywheelLUT.put(1.0, 1450.0);
-        FlywheelLUT.put(2.0, 1550.0);
-        FlywheelLUT.put(3.0, 1720.0);
-        FlywheelLUT.put(4.0, 1860.0);
-        FlywheelLUT.put(5.0, 2050.0);
+        FlywheelLUT.put(1.0, 1550.0);
+        FlywheelLUT.put(2.0, 1150.0);
+        FlywheelLUT.put(3.0, 1820.0);
+        FlywheelLUT.put(4.0, 1850.0);
+        FlywheelLUT.put(5.0, 2000.0);
 
-        HoodAngleLUT.put(1.0, 82.5);
-        HoodAngleLUT.put(2.0, 60.0);
-        HoodAngleLUT.put(3.0, 50.0);
-        HoodAngleLUT.put(4.0, 48.0);
-        HoodAngleLUT.put(5.0, 45.0);
+        HoodAngleLUT.put(1.0, 83.0);
+        HoodAngleLUT.put(2.0, 63.0);
+        HoodAngleLUT.put(3.0, 55.0);
+        HoodAngleLUT.put(4.0, 58.0);
+        HoodAngleLUT.put(5.0, 60.0);
 
         TimeLUT.put(1.0, 0.81);
         TimeLUT.put(2.0, 0.72);
@@ -59,7 +59,7 @@ public class LaunchCalc{
         for (int i = 0; i < ShooterConstants.kShootOnTheMoveIterations; i++) {
             distance = currentPose.getTranslation().getDistance(newTarget.getTranslation());
             timeOfFlight = TimeLUT.get(distance);
-            newTarget = targetPose.plus(new Transform2d(velocity.times(-timeOfFlight), Rotation2d.kZero));
+            newTarget = targetPose.plus(new Transform2d(velocity.times(-timeOfFlight*ShooterConstants.kShootOnTheMoveMultiplier), Rotation2d.kZero));
         }
         return newTarget;
     }

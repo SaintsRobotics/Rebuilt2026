@@ -56,6 +56,7 @@ public class RobotContainer {
 
   public final FuelSim fuelSim;
   private final StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault().getStructTopic("SotM Target", Pose2d.struct).publish();
+  private Pose2d currentTarget = TurretConstants.kHubPose;
 
 
   /**
@@ -99,11 +100,11 @@ public class RobotContainer {
                     m_robotDrive));
     
     m_turret.setDefaultCommand(new RunCommand(() -> {
-        m_turret.calculateSetpoint(m_robotDrive.getPose(), TurretConstants.kHubPose, m_robotDrive.getRotationSpeed());
+        m_turret.calculateSetpoint(m_robotDrive.getPose(), currentTarget, m_robotDrive.getRotationSpeed());
     },
     m_turret));
     
-    m_shooter.setDefaultCommand(new ShooterCommand(m_shooter, m_robotDrive::getPose, () -> {return TurretConstants.kHubPose;}));
+    m_shooter.setDefaultCommand(new ShooterCommand(m_shooter, m_robotDrive::getPose, () -> {return currentTarget;}));
 }
 
 
@@ -129,7 +130,7 @@ public class RobotContainer {
         .onTrue(new InstantCommand(() -> m_robotDrive.resetOdometry(new Pose2d()), m_robotDrive));
 
 
-    new JoystickButton(m_driverController, Button.kRightBumper.value)
+    new JoystickButton(m_driverController, Button.kLeftBumper.value)
         .onTrue(new InstantCommand(() -> {fuelSim.launchFuel(
             LinearVelocity.ofBaseUnits(
                 Units.rotationsPerMinuteToRadiansPerSecond(m_shooter.getAvgShooterSpeed()) * ShooterConstants.kFlywheelRadius, 
@@ -181,9 +182,10 @@ public class RobotContainer {
     m_robotDrive.fastPeriodic();
 
     ChassisSpeeds speeds = ChassisSpeeds.fromRobotRelativeSpeeds(m_robotDrive.getRobotRelativeSpeeds(), m_robotDrive.getPose().getRotation());
-    publisher.set(LaunchCalc.findTargetOnTheMove(
+    currentTarget = LaunchCalc.findTargetOnTheMove(
         m_robotDrive.getPose(), 
         TurretConstants.kHubPose, 
-        new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond)));
+        new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond));
+    publisher.set(currentTarget);
   }
 }
