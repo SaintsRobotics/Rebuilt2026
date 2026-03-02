@@ -54,17 +54,25 @@ public final class Constants {
 
   public static final class IntakeConstants{
     // TODO: set motor and encoder constants    
-    public static final int kIntakeMotorID = -1;
-    public static final int kIntakeMotorPort = -1;
-    public static final int kArmMotorPort = -1;
-    public static final int kArmMotorID = -1;
-    public static final int kArmEncoderChannel = -1;
+    public static final int kIntakeMotorID = 1;
+    public static final int kIntakeMotorPort = 1;
+    public static final int kArmMotorPort = 2;
+    public static final int kArmMotorID = 2;
+    public static final int kArmEncoderChannel = 3;
+    public static final int kIntakeEncoderID = 3;
     public static final double kArmP = 0.0;
     public static final double kArmD = 0.0;
 
+    //TODO: set constants
+    public static final double kIntakeMass = 8.75;
+    public static final double kIntakeLength = 11;
+    public static final double kArmMOI = 0.210028942;
+    public static final double kRollerMOI = 0.0;
+    public static final double kArmReduction = 240/7;
+
     // In degrees
-    public static final double kIntakeLoweredAngle = -1;
-    public static final double kIntakeRaisedAngle = -1;
+    public static final double kIntakeExtendedAngle = 0; //check these idk
+    public static final double kIntakeRetractedAngle = 120;
 
     /** Encoder offset in rotations */
     public static final double kArmEncoderOffset = -1;
