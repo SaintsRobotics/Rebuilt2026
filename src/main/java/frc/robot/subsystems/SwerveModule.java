@@ -62,6 +62,8 @@ public class SwerveModule {
 
     m_turningMotorConfig.idleMode(IdleMode.kBrake);
 
+    m_turningMotorConfig.inverted(true);
+
     m_driveMotor.configure(m_driveMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     m_turningMotor.configure(m_turningMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
