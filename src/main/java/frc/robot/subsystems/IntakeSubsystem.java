@@ -20,7 +20,12 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
+
+import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.MagnetSensorConfigs;
+
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
@@ -45,19 +50,19 @@ public class IntakeSubsystem extends SubsystemBase {
 
   private final PIDController m_armPID = new PIDController(0.02, 0, 0);
 
-  private final CANcoder m_armEncoder = new CANcoder(IntakeConstants.kIntakeEncoderID);
-  private final CANcoderConfiguration m_armEncoderConfig = new CANcoderConfiguration();
+  private CANcoder m_armEncoder = new CANcoder(IntakeConstants.kArmEncoderChannel);
+
 
   private ArmPosition m_armPosition = ArmPosition.Retracted;
 
   private final DCMotor m_motorsim = DCMotor.getNeoVortex(1);
   //fix params if needed
   private final SingleJointedArmSim m_intakeSim = new SingleJointedArmSim(m_motorsim,
-  IntakeConstants.kArmReduction,       //CHANGE LATER
+  IntakeConstants.kArmReduction,       
   IntakeConstants.kArmMOI,
   IntakeConstants.kIntakeLength,
-  Units.degreesToRadians(IntakeConstants.kIntakeRetractedAngle), 
-  Units.degreesToRadians(IntakeConstants.kIntakeExtendedAngle), 
+  Units.degreesToRadians(IntakeConstants.kIntakeRaisedAngle), 
+  Units.degreesToRadians(IntakeConstants.kIntakeLoweredAngle), 
   true, 
   getArmPosition());
   private final SparkFlexSim m_armMotorSim = new SparkFlexSim(m_armMotor, m_motorsim);
@@ -67,17 +72,14 @@ public class IntakeSubsystem extends SubsystemBase {
   //private final MechanismLigament2d m_rollerMech;
 
   private double m_intakeSpeed = 0;
-  private double m_armSetpoint = IntakeConstants.kIntakeRetractedAngle;
+  private double m_armSetpoint = IntakeConstants.kIntakeRaisedAngle;
 
   /** Creates a new IntakeSubsystem */
   public IntakeSubsystem() {
     SparkFlexConfig intakeConfig = new SparkFlexConfig();
     intakeConfig.idleMode(IdleMode.kCoast);
 
-    //invert encoder
-    m_armEncoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.Clockwise_Positive;
-    m_armEncoder.getConfigurator().apply(m_armEncoderConfig);
-
+    m_armEncoder.getConfigurator().apply(new MagnetSensorConfigs().withSensorDirection(SensorDirectionValue.Clockwise_Positive));
     //m_armPID.enableContinuousInput(0, 360);
 
     m_intakeMotor.configure(intakeConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
@@ -90,6 +92,10 @@ public class IntakeSubsystem extends SubsystemBase {
     m_armPID.setTolerance(10);
 
     m_armSetpoint = 10;
+
+    CANcoderConfiguration config = new CANcoderConfiguration();
+    config.MagnetSensor.MagnetOffset = IntakeConstants.kArmEncoderOffset;
+    m_armEncoder.getConfigurator().apply(config);
 
     //sim
     Mechanism2d intakeMech = new Mechanism2d(1, 1);
@@ -167,10 +173,10 @@ public class IntakeSubsystem extends SubsystemBase {
     m_armPosition = position;
     switch (position) {
       case Extended:
-        m_armSetpoint = IntakeConstants.kIntakeExtendedAngle;
+        m_armSetpoint = IntakeConstants.kIntakeLoweredAngle;
         break;
       case Retracted:
-        m_armSetpoint = IntakeConstants.kIntakeRetractedAngle;
+        m_armSetpoint = IntakeConstants.kIntakeRaisedAngle;
       default:
         break;
     }
@@ -197,6 +203,8 @@ public class IntakeSubsystem extends SubsystemBase {
   public void setIntakeMotor(double speed) {
     m_intakeMotor.set(speed);
   }
+
+
 
   public static enum ArmPosition {
     Extended,

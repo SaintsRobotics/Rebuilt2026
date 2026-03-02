@@ -54,13 +54,13 @@ public final class Constants {
 
   public static final class IntakeConstants{
     // TODO: set motor and encoder constants    
-    public static final int kIntakeMotorID = 1;
-    public static final int kIntakeMotorPort = 1;
-    public static final int kArmMotorPort = 2;
-    public static final int kArmMotorID = 2;
-    public static final int kArmEncoderChannel = 3;
+    public static final int kIntakeMotorID = -1;
+    public static final int kIntakeMotorPort = 0;
+    public static final int kArmMotorPort = 1;
+    public static final int kArmMotorID = -2;
+    public static final int kArmEncoderChannel = 0;
     public static final int kIntakeEncoderID = 3;
-    public static final double kArmP = 0.0;
+    public static final double kArmP = 0.5;
     public static final double kArmD = 0.0;
 
     //TODO: set constants
@@ -69,16 +69,18 @@ public final class Constants {
     public static final double kArmMOI = 0.210028942;
     public static final double kRollerMOI = 0.0;
     public static final double kArmReduction = 240/7;
+    public static final double kArmMaxSpeed = 0.3;
 
     // In degrees
-    public static final double kIntakeExtendedAngle = 0; //check these idk
-    public static final double kIntakeRetractedAngle = 120;
+    public static final double kIntakeLoweredAngle = 160;
+    public static final double kIntakeRaisedAngle = 20;
+    public static final double kIntakeFullyRaisedAngle = 0;
 
     /** Encoder offset in rotations */
-    public static final double kArmEncoderOffset = -1;
-    public static final double kIntakeSpeed = -1;
-    public static final int kProximityThreshold = -1;
+    public static final double kArmEncoderOffset = 0;
+    public static final double kIntakeSpeed = 0.5;
   }
+
   public static final class DriveConstants {
     // TODO: set motor and encoder constants
     public static final int kFrontLeftDriveMotorPort = 36;
