@@ -43,6 +43,7 @@ public class TurretSubsystem extends SubsystemBase {
   private final CANcoder m_encoder1;
   private final CANcoder m_encoder2;
 
+
   private double relativeAngularVelocity;
   private double previousTargetAngle;  
   private double lastCalculatedPosition;
@@ -72,7 +73,7 @@ public class TurretSubsystem extends SubsystemBase {
       m_encoder1 = new CANcoder(TurretConstants.kEncoder1CANId);
       m_encoder2 = new CANcoder(TurretConstants.kEncoder2CANId);
 
-      double crtPosition = calculateCRTPosition();
+      double crtPosition = calculateTurretPosition();
 
       SparkFlexConfig motorConfig = new SparkFlexConfig();
       motorConfig.encoder.positionConversionFactor(360);
@@ -110,35 +111,15 @@ public class TurretSubsystem extends SubsystemBase {
     output = MathUtil.clamp(output, -TurretConstants.kTurretMaxSpeed, TurretConstants.kTurretMaxSpeed);
     // m_turretMotor.set(output);
 
-    double pos = calculateCRTPosition();
-    // if (Math.abs(lastCalculatedPosition - pos) > TurretConstants.kEncoderMaxDelta) {
-    //   pos = lastCalculatedPosition;
-    // }
-    // lastCalculatedPosition = pos;
+    double pos = calculateTurretPosition();
 
     SmartDashboard.putNumber("Turret Angle", pos);
-    SmartDashboard.putNumber("Turret Error", calculateCRTError());
     SmartDashboard.putNumber("Encoder 1 Angle", m_encoder1.getAbsolutePosition().getValueAsDouble()*360);
     SmartDashboard.putNumber("Encoder 2 Angle", m_encoder2.getAbsolutePosition().getValueAsDouble()*360);
 
     // SmartDashboard.putNumber("Turret Setpoint", m_turretPID.getSetpoint());
     // SmartDashboard.putNumber("Turret Error", getError());
     // SmartDashboard.putNumber("Turret Output", output);
-
-    //double period1 = 360.0 / TurretConstants.kEncoder1Ratio; // 360 / (90/13) = 52
-    //double period2 = 360.0 / TurretConstants.kEncoder2Ratio; // 360 / (90/14) = 56
-    // // Search for solution
-    // double bestSolution = 0.0;
-    // double minError = Double.MAX_VALUE;
-    // for (double candidate = -364; candidate <= 364; candidate += period1) {
-    //   double testAngle = turretFromEnc1 + candidate;
-    //   double error2 = Math.abs(((testAngle - turretFromEnc2) % period2 + period2) % period2);
-    //   error2 = Math.min(error2, period2 - error2);
-    //   if (error2 < minError) {
-    //     minError = error2;
-    //     bestSolution = testAngle;
-    //   }
-    // }
   }
 
   @Override
@@ -263,95 +244,19 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   // Calculates turret position with CRT
-  private double calculateCRTPosition() {
+  private double calculateTurretPosition() {
     if (m_encoder1 == null || m_encoder2 == null) {
       return 0.0;
     }
-
     // Read encoder positions
     double enc1 = m_encoder1.getAbsolutePosition().getValueAsDouble(); //* 360.0 - TurretConstants.kEncoder1OffsetDegrees;
     double enc2 = m_encoder2.getAbsolutePosition().getValueAsDouble(); //* 360.0 - TurretConstants.kEncoder2OffsetDegrees;
-
     double diff = enc1 - enc2;
-
     // handle wraparound
     if (diff < 0) {
       diff += 1.0;
     }
-
     return diff * (1/(TurretConstants.kEncoder1Ratio - TurretConstants.kEncoder2Ratio)) * 360.0;
-
-    // // Normalize range
-    // enc1 = ((enc1 % 360.0) + 360.0) % 360.0;
-    // enc2 = ((enc2 % 360.0) + 360.0) % 360.0;
-
-    // // Calculate periods
-    // double turretFromEnc1 = enc1 / TurretConstants.kEncoder1Ratio;
-    // double turretFromEnc2 = enc2 / TurretConstants.kEncoder2Ratio;
-    // double period1 = 360.0 / TurretConstants.kEncoder1Ratio; // 360 / (90/13) = 52
-    // double period2 = 360.0 / TurretConstants.kEncoder2Ratio; // 360 / (90/14) = 56
-
-    // // Search for solution
-    // double bestSolution = 0.0;
-    // double minError = Double.MAX_VALUE;
-
-    // // for (double rotations = -10; rotations <= 10; rotations++){
-    // //   double enc1Rot = enc1/360 + rotations;
-    // //   double turretRot = enc1Rot / TurretConstants.kEncoder1Ratio;
-    // //   double enc2Rot = turretRot * TurretConstants.kEncoder2Ratio;
-    // //   double error = Math.abs((enc2Rot - Math.floor(enc2Rot)) - enc2/360);
-    // //   if (error < minError) {
-    // //     minError = error;
-    // //     bestSolution = turretRot * 360;
-    // //   }
-    // // }
-    // for (double candidate = -364; candidate <= 364; candidate += period1) {
-    //   double testAngle = turretFromEnc1 + candidate;
-    //   double error2 = Math.abs(((testAngle - turretFromEnc2) % period2 + period2) % period2);
-    //   error2 = Math.min(error2, period2 - error2);
-    //   if (error2 < minError) {
-    //     minError = error2;
-    //     bestSolution = testAngle;
-    //   }
-    // }
-    // return bestSolution;
-
-
-  }
-
-    // Calculates turret position with CRT
-  private double calculateCRTError() {
-    if (m_encoder1 == null || m_encoder2 == null) {
-      return 0.0;
-    }
-
-    // Read encoder positions
-    double enc1 = m_encoder1.getAbsolutePosition().getValueAsDouble() * 360.0 - TurretConstants.kEncoder1OffsetDegrees;
-    double enc2 = m_encoder2.getAbsolutePosition().getValueAsDouble() * 360.0 - TurretConstants.kEncoder2OffsetDegrees;
-
-    // Normalize range
-    enc1 = ((enc1 % 360.0) + 360.0) % 360.0;
-    enc2 = ((enc2 % 360.0) + 360.0) % 360.0;
-
-    // Calculate periods
-    double turretFromEnc1 = enc1 / TurretConstants.kEncoder1Ratio;
-    double turretFromEnc2 = enc2 / TurretConstants.kEncoder2Ratio;
-    double period1 = 360.0 / TurretConstants.kEncoder1Ratio; // 360 / (90/13) = 52
-    double period2 = 360.0 / TurretConstants.kEncoder2Ratio; // 360 / (90/14) = 56
-
-    // Search for solution
-    double bestSolution = 0.0;
-    double minError = Double.MAX_VALUE;
-    for (double candidate = -364; candidate <= 364; candidate += period1) {
-      double testAngle = turretFromEnc1 + candidate;
-      double error2 = Math.abs(((testAngle - turretFromEnc2) % period2 + period2) % period2);
-      error2 = Math.min(error2, period2 - error2);
-      if (error2 < minError) {
-        minError = error2;
-        bestSolution = testAngle;
-      }
-    }
-    return minError;
   }
 
 }
