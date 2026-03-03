@@ -59,6 +59,7 @@ public class SwerveModule {
     m_driveMotorConfig.encoder.positionConversionFactor(
         DriveConstants.kWheelDiameterMeters * Math.PI / DriveConstants.kDrivingGearRatio);
     m_driveMotorConfig.inverted(driveMotorReversed);
+    m_driveMotorConfig.idleMode(IdleMode.kBrake);
 
     m_turningMotorConfig.idleMode(IdleMode.kBrake);
 

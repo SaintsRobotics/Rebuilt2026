@@ -114,7 +114,7 @@ public final class Constants {
     /** Heading Correction */
     public static final double kHeadingCorrectionTurningStopTime = 0.2;
     // TODO: Tune this PID before running on a robot on the ground
-    public static final double kPHeadingCorrectionController = 5;
+    public static final double kPHeadingCorrectionController = 0.1;
 
     public static final boolean kAutoDriving = true;
     
