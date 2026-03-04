@@ -28,7 +28,7 @@ import frc.robot.subsystems.IntakeSubsystem;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
-  private final IntakeSubsystem m_intake = new IntakeSubsystem();
+  // private final IntakeSubsystem m_intake = new IntakeSubsystem();
   // private final TurretSubsystem m_turret = new TurretSubsystem();
 
   private final XboxController m_driverController = new XboxController(IOConstants.kDriverControllerPort);
@@ -100,8 +100,8 @@ public class RobotContainer {
     new JoystickButton(m_driverController, Button.kBack.value)
         .onTrue(new InstantCommand(() -> m_robotDrive.resetOdometry(new Pose2d()), m_robotDrive));
     
-    new JoystickButton(m_driverController, Button.kLeftBumper.value)
-        .whileTrue(new IntakeCommand(m_intake));
+    // new JoystickButton(m_driverController, Button.kLeftBumper.value)
+    //     .whileTrue(new IntakeCommand(m_intake));
   }
 
   /**
