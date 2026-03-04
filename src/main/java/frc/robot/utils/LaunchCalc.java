@@ -22,22 +22,22 @@ public class LaunchCalc{
         // Populate the LUTs with empirical data
         // Example entries (distance in meters, flywheel speed in RPM, hood angle in degrees)
         FlywheelLUT.put(1.0, 1550.0);
-        FlywheelLUT.put(2.0, 1550.0);
+        FlywheelLUT.put(2.0, 1600.0);
         FlywheelLUT.put(3.0, 1750.0);
         FlywheelLUT.put(4.0, 1850.0);
-        FlywheelLUT.put(5.0, 2000.0);
+        FlywheelLUT.put(5.0, 2050.0);
 
-        HoodAngleLUT.put(1.0, 83.0);
-        HoodAngleLUT.put(2.0, 65.0);
-        HoodAngleLUT.put(3.0, 56.0);
-        HoodAngleLUT.put(4.0, 58.0);
+        HoodAngleLUT.put(1.0, 82.5);
+        HoodAngleLUT.put(2.0, 70.0);
+        HoodAngleLUT.put(3.0, 65.0);
+        HoodAngleLUT.put(4.0, 60.0);
         HoodAngleLUT.put(5.0, 60.0);
 
-        TimeLUT.put(1.0, 0.81);
-        TimeLUT.put(2.0, 0.72);
-        TimeLUT.put(3.0, 0.68);
-        TimeLUT.put(4.0, 0.77);
-        TimeLUT.put(5.0, 0.86);
+        TimeLUT.put(1.0, 0.97);
+        TimeLUT.put(2.0, 0.95);
+        TimeLUT.put(3.0, 1.09);
+        TimeLUT.put(4.0, 1.0);
+        TimeLUT.put(5.0, 1.17);
     }
 
     public static double findFlywheelSpeed(Pose2d currentPose, Pose2d targetPose) {
@@ -52,16 +52,20 @@ public class LaunchCalc{
     }
 
     /** Calculates the target to aim for when shooting on the move. */
-    public static Pose2d findTargetOnTheMove(Pose2d currentPose, Pose2d targetPose, Translation2d velocity) {
+    public static Pose2d findTargetOnTheMove(Pose2d currentPose, Pose2d targetPose, Translation2d velocity, int iterations) {
         double distance = 0;
         double timeOfFlight = 0;
         Pose2d newTarget = targetPose;
-        for (int i = 0; i < ShooterConstants.kShootOnTheMoveIterations; i++) {
+        for (int i = 0; i < iterations; i++) {
             distance = currentPose.getTranslation().getDistance(newTarget.getTranslation());
             timeOfFlight = TimeLUT.get(distance);
             newTarget = targetPose.plus(new Transform2d(velocity.times(-timeOfFlight*ShooterConstants.kShootOnTheMoveMultiplier), Rotation2d.kZero));
         }
         return newTarget;
+    }
+
+    public static Pose2d findTargetOnTheMove(Pose2d currentPose, Pose2d targetPose, Translation2d velocity) {
+        return findTargetOnTheMove(currentPose, targetPose, velocity, ShooterConstants.kShootOnTheMoveIterations);
     }
    
 }

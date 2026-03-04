@@ -55,7 +55,8 @@ public class RobotContainer {
   private final XboxController m_operatorController = new XboxController(IOConstants.kOperatorControllerPort);
 
   public final FuelSim fuelSim;
-  private final StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault().getStructTopic("SotM Target", Pose2d.struct).publish();
+  private final StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault().getStructTopic("SotM Target/5 iterations", Pose2d.struct).publish();
+  private final StructPublisher<Pose2d> publisher2 = NetworkTableInstance.getDefault().getStructTopic("SotM Target/10 iterations", Pose2d.struct).publish();
   private Pose2d currentTarget = TurretConstants.kHubPose;
 
 
@@ -187,5 +188,6 @@ public class RobotContainer {
         TurretConstants.kHubPose, 
         new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond));
     publisher.set(currentTarget);
+    // publisher2.set(LaunchCalc.findTargetOnTheMove(m_robotDrive.getPose(), TurretConstants.kHubPose, new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond), 10));
   }
 }

@@ -209,7 +209,7 @@ public final class Constants {
     public static final double kHoodSpeedMax = 1;
 
     public static final int kShootOnTheMoveIterations = 5;
-    public static final double kShootOnTheMoveMultiplier = 1.2;
+    public static final double kShootOnTheMoveMultiplier = 1.0;
 
     public static final double kFlywheelMOI = 0.000190215774729; // why is converting an in^2 lbs MOI to kg m^2 MOI so difficult
     public static final double kFlywheelGearing = 1.0;
