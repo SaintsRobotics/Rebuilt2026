@@ -4,11 +4,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.InchesPerSecond;
-import static edu.wpi.first.units.Units.Pounds;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -20,10 +15,6 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.AngularMomentumUnit;
-import edu.wpi.first.units.LinearMomentumUnit;
-import edu.wpi.first.units.MomentOfInertiaUnit;
-import edu.wpi.first.units.measure.MomentOfInertia;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -66,10 +57,10 @@ public final class Constants {
 
   public static final class DriveConstants {
     // TODO: set motor and encoder constants
-    public static final int kFrontLeftDriveMotorPort = 36;
-    public static final int kRearLeftDriveMotorPort = 32;
-    public static final int kFrontRightDriveMotorPort = 29;
-    public static final int kRearRightDriveMotorPort = 34;
+    public static final int kFrontLeftDriveMotorPort = 5;
+    public static final int kRearLeftDriveMotorPort = 11;
+    public static final int kFrontRightDriveMotorPort = 7;
+    public static final int kRearRightDriveMotorPort = 9;
 
     public static final int kFrontLeftTurningMotorPort = 37;
     public static final int kRearLeftTurningMotorPort = 28;
@@ -183,12 +174,15 @@ public final class Constants {
 
   public static final class ShooterConstants {
 
-    public static final int kShooterMotorLeftPort = 1;
-    public static final int kShooterMotorRightPort = 2;
+    public static final int kShooterMotorLeftPort = 30;
+    public static final int kShooterMotorRightPort = 31;
     //public static final int kShooterEncoderChannel = 0;
 
-    public static final int kHoodMotorPort = 3;
+    public static final int kHoodMotorPort = 32;
     public static final int kHoodEncoderChannel = 0;
+
+    public static final int kSpindexerPort = 33;
+    public static final int kTransferPort = 34;
 
     public static final double kShooterP = 0.00001;
     public static final double kShooterI = 0;
@@ -214,6 +208,9 @@ public final class Constants {
     public static final double kFlywheelMOI = 0.000190215774729; // why is converting an in^2 lbs MOI to kg m^2 MOI so difficult
     public static final double kFlywheelGearing = 1.0;
     public static final double kFlywheelRadius = Units.inchesToMeters(1.5);
+
+    public static final double kSpindexerMaxSpd = 0.5;
+    public static final double kTransferMaxSpd = 0.5;
 
   }
 
