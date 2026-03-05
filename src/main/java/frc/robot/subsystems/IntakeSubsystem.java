@@ -125,7 +125,7 @@ public class IntakeSubsystem extends SubsystemBase {
     // SmartDashboard.putNumber("pid output", armMotorSpeed);
 
     m_armMotor.set(armMotorSpeed);
-    m_intakeMotor.set(m_intakeSpeed);
+    m_intakeMotor.set(m_intakeSpeed); 
   }
 
   @Override

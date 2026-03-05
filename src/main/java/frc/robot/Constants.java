@@ -54,12 +54,12 @@ public final class Constants {
 
   public static final class IntakeConstants{
     // TODO: set motor and encoder constants    
-    public static final int kIntakeMotorID = -1;
-    public static final int kIntakeMotorPort = 0;
-    public static final int kArmMotorPort = 1;
-    public static final int kArmMotorID = -2;
-    public static final int kArmEncoderChannel = 0;
-    public static final int kIntakeEncoderID = 3;
+    public static final int kIntakeMotorID = 21;
+    public static final int kArmMotorID = 22;
+
+    public static final int kArmEncoderChannel = 0; //change later
+    public static final int kIntakeEncoderID = 3; //change later
+
     public static final double kArmP = 0.5;
     public static final double kArmD = 0.0;
 
