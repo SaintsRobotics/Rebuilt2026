@@ -36,6 +36,7 @@ import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.utils.FuelSim;
 import frc.robot.utils.LaunchCalc;
+import frc.robot.Constants.FieldConstants;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -55,7 +56,7 @@ public class RobotContainer {
   public final FuelSim fuelSim;
   private final StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault().getStructTopic("SotM Target/5 iterations", Pose2d.struct).publish();
   private final StructPublisher<Pose2d> publisher2 = NetworkTableInstance.getDefault().getStructTopic("SotM Target/10 iterations", Pose2d.struct).publish();
-  private Pose2d currentTarget = TurretConstants.kHubPose;
+  private Pose2d currentTarget = FieldConstants.kHubPose;
 
 
   /**
@@ -184,9 +185,18 @@ public class RobotContainer {
     ChassisSpeeds speeds = ChassisSpeeds.fromRobotRelativeSpeeds(m_robotDrive.getRobotRelativeSpeeds(), m_robotDrive.getPose().getRotation());
     currentTarget = LaunchCalc.findTargetOnTheMove(
         m_robotDrive.getPose(), 
-        TurretConstants.kHubPose, 
+        FieldConstants.kHubPose, 
         new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond));
     publisher.set(currentTarget);
     // publisher2.set(LaunchCalc.findTargetOnTheMove(m_robotDrive.getPose(), TurretConstants.kHubPose, new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond), 10));
   }
+
+  public void periodic() {
+    
+    SmartDashboard.putBoolean("In Blue", FieldConstants.kBlueAllianceRegion.isInRegion(m_robotDrive.getPose()));
+    SmartDashboard.putBoolean("In Red", FieldConstants.kRedAllianceRegion.isInRegion(m_robotDrive.getPose()));
+    SmartDashboard.putBoolean("In Trench", FieldConstants.kTrenchesRegion.isInRegion(m_robotDrive.getPose()));
+
+  }
+
 }
