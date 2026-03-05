@@ -34,6 +34,8 @@ import frc.robot.commands.ShooterCommand;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
+import frc.robot.utils.AllianceFlipUtil;
+import frc.robot.utils.FindTarget;
 import frc.robot.utils.FuelSim;
 import frc.robot.utils.LaunchCalc;
 import frc.robot.Constants.FieldConstants;
@@ -185,7 +187,7 @@ public class RobotContainer {
     ChassisSpeeds speeds = ChassisSpeeds.fromRobotRelativeSpeeds(m_robotDrive.getRobotRelativeSpeeds(), m_robotDrive.getPose().getRotation());
     currentTarget = LaunchCalc.findTargetOnTheMove(
         m_robotDrive.getPose(), 
-        FieldConstants.kHubPose, 
+        FindTarget.getTarget(m_robotDrive.getPose()), 
         new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond));
     publisher.set(currentTarget);
     // publisher2.set(LaunchCalc.findTargetOnTheMove(m_robotDrive.getPose(), TurretConstants.kHubPose, new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond), 10));
