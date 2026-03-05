@@ -60,26 +60,26 @@ public final class Constants {
 
   public static final class DriveConstants {
     // TODO: set motor and encoder constants
-    public static final int kFrontLeftDriveMotorPort = 36;
-    public static final int kRearLeftDriveMotorPort = 32;
-    public static final int kFrontRightDriveMotorPort = 29;
-    public static final int kRearRightDriveMotorPort = 34;
+    public static final int kFrontLeftDriveMotorPort = 5;
+    public static final int kRearLeftDriveMotorPort = 11;
+    public static final int kFrontRightDriveMotorPort = 7;
+    public static final int kRearRightDriveMotorPort = 9;
 
-    public static final int kFrontLeftTurningMotorPort = 37;
-    public static final int kRearLeftTurningMotorPort = 28;
-    public static final int kFrontRightTurningMotorPort = 22;
-    public static final int kRearRightTurningMotorPort = 26;
+    public static final int kFrontLeftTurningMotorPort = 6;
+    public static final int kRearLeftTurningMotorPort = 12;
+    public static final int kFrontRightTurningMotorPort = 8;
+    public static final int kRearRightTurningMotorPort = 10;
 
-    public static final int kFrontLeftTurningEncoderPort = 19;
-    public static final int kRearLeftTurningEncoderPort = 17;
-    public static final int kFrontRightTurningEncoderPort = 20;
-    public static final int kRearRightTurningEncoderPort = 18;
+    public static final int kFrontLeftTurningEncoderPort = 1;
+    public static final int kRearLeftTurningEncoderPort = 4;
+    public static final int kFrontRightTurningEncoderPort = 2;
+    public static final int kRearRightTurningEncoderPort = 3;
 
     // TODO: Test motor orientations before driving on an actual robot
-    public static final boolean kFrontLeftDriveMotorReversed = false;
-    public static final boolean kRearLeftDriveMotorReversed = false;
-    public static final boolean kFrontRightDriveMotorReversed = true;
-    public static final boolean kRearRightDriveMotorReversed = true;
+    public static final boolean kFrontLeftDriveMotorReversed = true;
+    public static final boolean kRearLeftDriveMotorReversed = true;
+    public static final boolean kFrontRightDriveMotorReversed = false;
+    public static final boolean kRearRightDriveMotorReversed = false;
 
     /** Distance between centers of right and left wheels on robot (in meters). */
     public static final double kTrackWidth = 0.57785;
@@ -117,7 +117,7 @@ public final class Constants {
     /** Heading Correction */
     public static final double kHeadingCorrectionTurningStopTime = 0.2;
     // TODO: Tune this PID before running on a robot on the ground
-    public static final double kPHeadingCorrectionController = 5;
+    public static final double kPHeadingCorrectionController = 0.1;
 
     public static final boolean kAutoDriving = true;
     
@@ -154,7 +154,7 @@ public final class Constants {
     public static final Vector<N3> kOdometrySTDDevs = VecBuilder.fill(0.1, 0.1, 0.1);
     public static final Vector<N3> kVisionSTDDevs = VecBuilder.fill(0.7, 0.7, 999999);
 
-    public static final boolean kUseVision = true;
+    public static final boolean kUseVision = false;
     public static final boolean kUseLeftLL = true;
     public static final boolean kUseRightLL = true;
   }

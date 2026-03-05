@@ -258,6 +258,7 @@ public class DriveSubsystem extends SubsystemBase {
       // If we are translating or if we have not rotated for a long enough time
       // then maintain our desired angle
       calculatedRotation = m_headingCorrectionPID.calculate(currentAngle);
+      //SmartDashboard.putNumber("Heading correction", m_headingCorrectionPID.calculate(currentAngle));
     }
 
     // TODO: set speed limiter rate based on elevator height using interlocks/constraints
