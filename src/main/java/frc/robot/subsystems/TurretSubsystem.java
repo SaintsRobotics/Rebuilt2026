@@ -5,7 +5,10 @@
 package frc.robot.subsystems;
 
 
+import static edu.wpi.first.units.Units.Radians;
+
 import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.sim.CANcoderSimState;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.sim.SparkFlexSim;
@@ -35,7 +38,7 @@ import frc.robot.Constants.TurretConstants;
 
 public class TurretSubsystem extends SubsystemBase {
 
-  //private final SparkFlex m_turretMotor = new SparkFlex(TurretConstants.kTurretMotorPort, MotorType.kBrushless);
+  private final SparkFlex m_turretMotor = new SparkFlex(TurretConstants.kTurretMotorPort, MotorType.kBrushless);
   private final PIDController m_turretPID = new PIDController(TurretConstants.kTurretP, TurretConstants.kTurretI, TurretConstants.kTurretD);
   private final SimpleMotorFeedforward m_turretFeedforward = new SimpleMotorFeedforward(TurretConstants.kTurretS, TurretConstants.kTurretV);
 
@@ -59,7 +62,7 @@ public class TurretSubsystem extends SubsystemBase {
     Units.degreesToRadians(TurretConstants.kTurretMaxRotation / 2),  
     false,  
     Units.degreesToRadians(0));  
-  // private final SparkFlexSim m_turretMotorSim = new SparkFlexSim(m_turretMotor, m_motorSim);
+  private final SparkFlexSim m_turretMotorSim = new SparkFlexSim(m_turretMotor, m_motorSim);
 
   private final StructPublisher<Pose3d> m_turretCurrentPublisher =
     NetworkTableInstance.getDefault().getStructTopic("Turret/Current", Pose3d.struct).publish();
@@ -69,28 +72,26 @@ public class TurretSubsystem extends SubsystemBase {
 
   /** Creates a new TurretSubsystem. */
   public TurretSubsystem() {
+    m_encoder1 = new CANcoder(TurretConstants.kEncoder1CANId);
+    m_encoder2 = new CANcoder(TurretConstants.kEncoder2CANId);
     if (RobotBase.isReal()) {
-      m_encoder1 = new CANcoder(TurretConstants.kEncoder1CANId);
-      m_encoder2 = new CANcoder(TurretConstants.kEncoder2CANId);
+      
 
       double crtPosition = calculateTurretPosition();
 
       SparkFlexConfig motorConfig = new SparkFlexConfig();
       motorConfig.encoder.positionConversionFactor(360);
       motorConfig.idleMode(IdleMode.kBrake);
-      //m_turretMotor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+      m_turretMotor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
 
-      // m_turretMotor.getEncoder().setPosition(crtPosition);
+      m_turretMotor.getEncoder().setPosition(crtPosition);
     } 
     else {
-      m_encoder1 = null;
-      m_encoder2 = null;
-
       SparkFlexConfig motorConfig = new SparkFlexConfig();
       motorConfig.encoder.positionConversionFactor(360);
       motorConfig.idleMode(IdleMode.kBrake);
-      // m_turretMotor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-      // m_turretMotor.getEncoder().setPosition(0);
+      m_turretMotor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+      m_turretMotor.getEncoder().setPosition(0);
     }
   }
 
@@ -99,8 +100,9 @@ public class TurretSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
 
     double setpoint = m_turretPID.getSetpoint();
-    double output = m_turretPID.calculate(getTurretPosition(), setpoint) +
-                    m_turretFeedforward.calculate(relativeAngularVelocity);
+    double output = m_turretPID.calculate(getTurretPosition(), setpoint) 
+                    + Math.signum(m_turretPID.getError())
+                    * Math.abs(m_turretFeedforward.calculate(relativeAngularVelocity));
 
     // Apply deadband
     double error = setpoint - getTurretPosition();
@@ -109,7 +111,7 @@ public class TurretSubsystem extends SubsystemBase {
     }
 
     output = MathUtil.clamp(output, -TurretConstants.kTurretMaxSpeed, TurretConstants.kTurretMaxSpeed);
-    // m_turretMotor.set(output);
+    m_turretMotor.set(output);
 
     double pos = calculateTurretPosition();
 
@@ -125,15 +127,24 @@ public class TurretSubsystem extends SubsystemBase {
   @Override
   public void simulationPeriodic() {
     // set inputs and update simulation
-    // m_turretSim.setInput(m_turretMotorSim.getAppliedOutput() * RobotController.getBatteryVoltage());
+    m_turretSim.setInput(m_turretMotorSim.getAppliedOutput() * RobotController.getBatteryVoltage());
     m_turretSim.update(0.02);
 
-    // update turret the SparkFlexSim
-    // m_turretMotorSim.iterate(
-    //   Units.radiansPerSecondToRotationsPerMinute(m_turretSim.getVelocityRadPerSec()), 
-    //   RobotController.getBatteryVoltage(), 
-    //   0.02);
-    // m_turretMotorSim.getRelativeEncoderSim().setPosition(Units.radiansToDegrees(m_turretSim.getAngleRads()));
+    // update the SparkFlexSim
+    m_turretMotorSim.iterate(
+      Units.radiansPerSecondToRotationsPerMinute(m_turretSim.getVelocityRadPerSec()), 
+      RobotController.getBatteryVoltage(), 
+      0.02);
+    m_turretMotorSim.getRelativeEncoderSim().setPosition(Units.radiansToDegrees(m_turretSim.getAngleRads()));
+
+    m_encoder1.getSimState().addPosition(
+      Radians.of(
+        m_turretSim.getVelocityRadPerSec() 
+        * TurretConstants.kEncoder1Ratio));
+    m_encoder2.getSimState().addPosition(
+      Radians.of(
+        m_turretSim.getVelocityRadPerSec() 
+        * TurretConstants.kEncoder2Ratio));
 
     // update battery
     RoboRioSim.setVInVoltage(
@@ -219,8 +230,8 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   public double getTurretPosition() {
-    // return m_turretMotor.getEncoder().getPosition();
-    return 0;
+    return m_turretMotor.getEncoder().getPosition();
+    // return 0;
   }
 
   // Returns the current error between setpoint and position
@@ -236,14 +247,14 @@ public class TurretSubsystem extends SubsystemBase {
 
   // Reset turret encoder
   public void resetEncoder() {
-    // m_turretMotor.getEncoder().setPosition(0);
+    m_turretMotor.getEncoder().setPosition(0);
   }
 
   public boolean atSetpoint() {
     return Math.abs(getError()) < TurretConstants.kTurretTolerance;
   }
 
-  // Calculates turret position with CRT
+  // Calculates turret position with whatever this method is called
   private double calculateTurretPosition() {
     if (m_encoder1 == null || m_encoder2 == null) {
       return 0.0;

@@ -180,7 +180,7 @@ public final class Constants {
     public static final double kEncoder1OffsetDegrees = 0.0;  
     public static final double kEncoder2OffsetDegrees = 0.0;  
 
-    public static final double kTurretMaxRotation = 270; 
+    public static final double kTurretMaxRotation = 360; 
 
     // PID gains
     public static final double kTurretP = 0.10;  
