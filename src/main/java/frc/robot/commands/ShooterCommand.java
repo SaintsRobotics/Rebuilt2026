@@ -37,6 +37,10 @@ public class ShooterCommand extends Command {
             LaunchCalc.findFlywheelSpeed(m_robotPoseSupplier.get(), m_targetSupplier.get()), 
             LaunchCalc.findHoodAngle(m_robotPoseSupplier.get(), m_targetSupplier.get()));
         
+        if (m_shooterSubsystem.isShooterReady()) {
+            m_shooterSubsystem.setSpindexer(200);
+            m_shooterSubsystem.setTransfer(200);
+        }
     }
 
     public void end(boolean interrupted) {

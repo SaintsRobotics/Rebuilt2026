@@ -21,17 +21,21 @@ public class LaunchCalc{
     static {
         // Populate the LUTs with empirical data
         // Example entries (distance in meters, flywheel speed in RPM, hood angle in degrees)
-        FlywheelLUT.put(1.0, 1550.0);
-        FlywheelLUT.put(2.0, 1600.0);
-        FlywheelLUT.put(3.0, 1750.0);
-        FlywheelLUT.put(4.0, 1850.0);
-        FlywheelLUT.put(5.0, 2050.0);
+        FlywheelLUT.put(1.0, 1700.0);
+        FlywheelLUT.put(2.0, 1800.0);
+        FlywheelLUT.put(3.0, 1950.0);
+        FlywheelLUT.put(4.0, 2050.0);
+        FlywheelLUT.put(5.0, 2250.0);
+        FlywheelLUT.put(6.0, 2350.0);
+        FlywheelLUT.put(8.0, 2650.0);
 
         HoodAngleLUT.put(1.0, 82.5);
-        HoodAngleLUT.put(2.0, 70.0);
-        HoodAngleLUT.put(3.0, 65.0);
-        HoodAngleLUT.put(4.0, 60.0);
-        HoodAngleLUT.put(5.0, 60.0);
+        HoodAngleLUT.put(2.0, 77.5);
+        HoodAngleLUT.put(3.0, 72.5);
+        HoodAngleLUT.put(4.0, 67.5);
+        HoodAngleLUT.put(5.0, 67.5);
+        HoodAngleLUT.put(6.0, 65.0);
+        HoodAngleLUT.put(8.0, 65.0);
 
         TimeLUT.put(1.0, 0.97);
         TimeLUT.put(2.0, 0.95);
@@ -60,6 +64,12 @@ public class LaunchCalc{
             distance = currentPose.getTranslation().getDistance(newTarget.getTranslation());
             timeOfFlight = TimeLUT.get(distance);
             newTarget = targetPose.plus(new Transform2d(velocity.times(-timeOfFlight*ShooterConstants.kShootOnTheMoveMultiplier), Rotation2d.kZero));
+            // move newTarget slightly away from currentPose
+            if (velocity.getDistance(new Translation2d()) > 0.05) {
+                Transform2d offset = currentPose.minus(newTarget).times(-ShooterConstants.kSOTMOffsetMultiplier);
+                // offset = offset.div(offset.getTranslation().getDistance(new Translation2d())); // unit vector
+                newTarget = newTarget.plus(offset);
+            }
         }
         return newTarget;
     }

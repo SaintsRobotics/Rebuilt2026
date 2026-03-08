@@ -18,17 +18,34 @@ public class FindTarget {
 
   public static Pose2d getTarget(Pose2d robotPose) {
 
+    // if (DriverStation.getAlliance().isEmpty()) {
+    //   return AllianceFlipUtil.apply(FieldConstants.kHubPose);
+    // }
+
+    // switch (DriverStation.getAlliance().get()) {
+    //   case Blue:
+    //     return FieldConstants.kBlueAllianceRegion.isInRegion(robotPose) ? FieldConstants.kHubPose : targetAllianceWall(robotPose);
+    //   case Red:
+    //     return FieldConstants.kRedAllianceRegion.isInRegion(robotPose) ? AllianceFlipUtil.apply(FieldConstants.kHubPose) : targetAllianceWall(robotPose);
+    //   default:
+    //     return AllianceFlipUtil.apply(FieldConstants.kHubPose);
+    // }
+
+    return shouldScoreHub(robotPose) ? AllianceFlipUtil.apply(FieldConstants.kHubPose) : targetAllianceWall(robotPose);
+  }
+
+  public static boolean shouldScoreHub(Pose2d robotPose) {
     if (DriverStation.getAlliance().isEmpty()) {
-      return AllianceFlipUtil.apply(FieldConstants.kHubPose);
+      return false;
     }
 
     switch (DriverStation.getAlliance().get()) {
       case Blue:
-        return FieldConstants.kBlueAllianceRegion.isInRegion(robotPose) ? FieldConstants.kHubPose : targetAllianceWall(robotPose);
+        return FieldConstants.kBlueAllianceRegion.isInRegion(robotPose);
       case Red:
-        return FieldConstants.kRedAllianceRegion.isInRegion(robotPose) ? AllianceFlipUtil.apply(FieldConstants.kHubPose) : targetAllianceWall(robotPose);
+        return FieldConstants.kRedAllianceRegion.isInRegion(robotPose);
       default:
-        return AllianceFlipUtil.apply(FieldConstants.kHubPose);
+        return AllianceFlipUtil.shouldFlip();
     }
   }
 
