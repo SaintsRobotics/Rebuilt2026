@@ -94,6 +94,10 @@ public class RobotContainer {
     // // driver reset odometry
     new JoystickButton(m_driverController, Button.kBack.value)
         .onTrue(new InstantCommand(() -> m_robotDrive.resetOdometry(new Pose2d()), m_robotDrive));
+    
+    // operator manual turret
+    new JoystickButton(m_operatorController, Button.kLeftBumper.value)
+        .whileTrue(new RunCommand(() -> m_turret.setSetpoint(90), m_turret));
   }
 
   /**
@@ -106,5 +110,6 @@ public class RobotContainer {
    */
   public void fastPeriodic() {
     m_robotDrive.fastPeriodic();
+    m_turret.fastPeriodic();
   }
 }

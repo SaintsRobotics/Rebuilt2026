@@ -99,6 +99,17 @@ public class TurretSubsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
 
+    double pos = calculateTurretPosition();
+    SmartDashboard.putNumber("Turret Angle", pos);
+    SmartDashboard.putNumber("Encoder 1 Angle", m_encoder1.getAbsolutePosition().getValueAsDouble()*360);
+    SmartDashboard.putNumber("Encoder 2 Angle", m_encoder2.getAbsolutePosition().getValueAsDouble()*360);
+
+    // SmartDashboard.putNumber("Turret Setpoint", m_turretPID.getSetpoint());
+    // SmartDashboard.putNumber("Turret Error", getError());
+    // SmartDashboard.putNumber("Turret Output", output);
+  }
+
+  public void fastPeriodic() {
     double setpoint = m_turretPID.getSetpoint();
     double output = m_turretPID.calculate(getTurretPosition(), setpoint) 
                     + Math.signum(m_turretPID.getError())
@@ -112,16 +123,6 @@ public class TurretSubsystem extends SubsystemBase {
 
     output = MathUtil.clamp(output, -TurretConstants.kTurretMaxSpeed, TurretConstants.kTurretMaxSpeed);
     m_turretMotor.set(output);
-
-    double pos = calculateTurretPosition();
-
-    SmartDashboard.putNumber("Turret Angle", pos);
-    SmartDashboard.putNumber("Encoder 1 Angle", m_encoder1.getAbsolutePosition().getValueAsDouble()*360);
-    SmartDashboard.putNumber("Encoder 2 Angle", m_encoder2.getAbsolutePosition().getValueAsDouble()*360);
-
-    // SmartDashboard.putNumber("Turret Setpoint", m_turretPID.getSetpoint());
-    // SmartDashboard.putNumber("Turret Error", getError());
-    // SmartDashboard.putNumber("Turret Output", output);
   }
 
   @Override
