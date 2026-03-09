@@ -160,7 +160,7 @@ public final class Constants {
 
     // TODO: set constants
 
-    public static final int kTurretMotorPort = 0;
+    public static final int kTurretMotorPort = 40;
 
     // CRT Encoders
     public static final int kEncoder1CANId = 2;  
