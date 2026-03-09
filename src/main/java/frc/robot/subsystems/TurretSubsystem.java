@@ -8,13 +8,12 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Radians;
 
 import com.ctre.phoenix6.hardware.CANcoder;
-import com.ctre.phoenix6.sim.CANcoderSimState;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
-import com.revrobotics.sim.SparkFlexSim;
-import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.sim.SparkMaxSim;
+import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkFlexConfig;
+import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.math.MathUtil;
@@ -38,7 +37,7 @@ import frc.robot.Constants.TurretConstants;
 
 public class TurretSubsystem extends SubsystemBase {
 
-  private final SparkFlex m_turretMotor = new SparkFlex(TurretConstants.kTurretMotorPort, MotorType.kBrushless);
+  private final SparkMax m_turretMotor = new SparkMax(TurretConstants.kTurretMotorPort, MotorType.kBrushless);
   private final PIDController m_turretPID = new PIDController(TurretConstants.kTurretP, TurretConstants.kTurretI, TurretConstants.kTurretD);
   private final SimpleMotorFeedforward m_turretFeedforward = new SimpleMotorFeedforward(TurretConstants.kTurretS, TurretConstants.kTurretV);
 
@@ -52,7 +51,7 @@ public class TurretSubsystem extends SubsystemBase {
   private double lastCalculatedPosition;
 
   // simulation classes
-  private final DCMotor m_motorSim = DCMotor.getNeoVortex(1);
+  private final DCMotor m_motorSim = DCMotor.getNeo550(1);
   private final SingleJointedArmSim m_turretSim = new SingleJointedArmSim(
     m_motorSim,
     TurretConstants.kTurretSimGearRatio, 
@@ -62,7 +61,7 @@ public class TurretSubsystem extends SubsystemBase {
     Units.degreesToRadians(TurretConstants.kTurretMaxRotation / 2),  
     false,  
     Units.degreesToRadians(0));  
-  private final SparkFlexSim m_turretMotorSim = new SparkFlexSim(m_turretMotor, m_motorSim);
+  private final SparkMaxSim m_turretMotorSim = new SparkMaxSim(m_turretMotor, m_motorSim);
 
   private final StructPublisher<Pose3d> m_turretCurrentPublisher =
     NetworkTableInstance.getDefault().getStructTopic("Turret/Current", Pose3d.struct).publish();
@@ -79,7 +78,7 @@ public class TurretSubsystem extends SubsystemBase {
 
       double crtPosition = calculateTurretPosition();
 
-      SparkFlexConfig motorConfig = new SparkFlexConfig();
+      SparkMaxConfig motorConfig = new SparkMaxConfig();
       motorConfig.encoder.positionConversionFactor(360);
       motorConfig.idleMode(IdleMode.kBrake);
       m_turretMotor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
@@ -87,7 +86,7 @@ public class TurretSubsystem extends SubsystemBase {
       m_turretMotor.getEncoder().setPosition(crtPosition);
     } 
     else {
-      SparkFlexConfig motorConfig = new SparkFlexConfig();
+      SparkMaxConfig motorConfig = new SparkMaxConfig();
       motorConfig.encoder.positionConversionFactor(360);
       motorConfig.idleMode(IdleMode.kBrake);
       m_turretMotor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
@@ -131,7 +130,7 @@ public class TurretSubsystem extends SubsystemBase {
     m_turretSim.setInput(m_turretMotorSim.getAppliedOutput() * RobotController.getBatteryVoltage());
     m_turretSim.update(0.02);
 
-    // update the SparkFlexSim
+    // update the SparkMaxSim
     m_turretMotorSim.iterate(
       Units.radiansPerSecondToRotationsPerMinute(m_turretSim.getVelocityRadPerSec()), 
       RobotController.getBatteryVoltage(), 
