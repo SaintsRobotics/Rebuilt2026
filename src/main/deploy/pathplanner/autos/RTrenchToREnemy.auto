@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "LCenterToLTrench"
+            "pathName": "RTrenchToRSideline"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "LTrenchToTower"
+            "pathName": "RSidelineToREnemy"
           }
         }
       ]

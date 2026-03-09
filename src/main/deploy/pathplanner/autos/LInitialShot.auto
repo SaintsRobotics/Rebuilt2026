@@ -5,6 +5,18 @@
     "data": {
       "commands": [
         {
+          "type": "path",
+          "data": {
+            "pathName": "UnDock"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "TowerToRidgeToLCenter"
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "Intake"
@@ -13,31 +25,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "TowerToRTrench"
+            "pathName": "LCenterToBalls"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "RTrenchToCenter"
+            "pathName": "RCenterToShotspot"
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "RCenterToBalls"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "LCenterToLTrench"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "LTrenchToTower"
+            "name": "Shoot"
           }
         }
       ]
