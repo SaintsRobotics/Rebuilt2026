@@ -9,6 +9,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.XboxController.Button;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -16,6 +17,7 @@ import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.IOConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.Constants.FieldConstants;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.commands.IntakeCommand;
 
@@ -28,6 +30,7 @@ import frc.robot.commands.IntakeCommand;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
+  // private final IntakeSubsystem m_intake = new IntakeSubsystem();
   // private final TurretSubsystem m_turret = new TurretSubsystem();
   private final IntakeSubsystem m_intake = new IntakeSubsystem();
 
@@ -116,4 +119,13 @@ public class RobotContainer {
   public void fastPeriodic() {
     m_robotDrive.fastPeriodic();
   }
+
+  public void periodic() {
+    
+    SmartDashboard.putBoolean("In Blue", FieldConstants.kBlueAllianceRegion.isInRegion(m_robotDrive.getPose()));
+    SmartDashboard.putBoolean("In Red", FieldConstants.kRedAllianceRegion.isInRegion(m_robotDrive.getPose()));
+    SmartDashboard.putBoolean("In Trench", FieldConstants.kTrenchesRegion.isInRegion(m_robotDrive.getPose()));
+
+  }
+
 }
