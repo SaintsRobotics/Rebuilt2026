@@ -107,7 +107,9 @@ public class ShooterSubsystem extends SubsystemBase {
     //stops shooter
     public void shooterStop() {
 
-        m_shooterMotorLeft.set(0);
+        m_shooterPID.setSetpoint(0);
+        m_spindexerPID.setSetpoint(0);
+        m_transferPID.setSetpoint(0);
 
     }
 

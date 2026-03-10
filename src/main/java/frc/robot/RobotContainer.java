@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.IOConstants;
 import frc.robot.Constants.ShooterConstants;
@@ -106,7 +107,7 @@ public class RobotContainer {
     },
     m_turret));
     
-    m_shooter.setDefaultCommand(new ShooterCommand(m_shooter, m_robotDrive::getPose, () -> {return currentTarget;}));
+    //m_shooter.setDefaultCommand(new ShooterCommand(m_shooter, m_robotDrive::getPose, () -> {return currentTarget;}));
 }
 
 
@@ -152,6 +153,9 @@ public class RobotContainer {
                 Distance.ofBaseUnits(0.5, Meters));
     })
     .withName("Launch Fuel"));
+
+    new Trigger(() -> {return m_driverController.getLeftTriggerAxis() > 0.5;})
+        .whileTrue(new ShooterCommand(m_shooter, m_robotDrive::getPose, () -> {return currentTarget;}));
   }
 
   private void configureFuelSim() {
