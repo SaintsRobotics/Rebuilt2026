@@ -108,16 +108,16 @@ public final class Constants {
     public static final boolean kRearRightDriveMotorReversed = false;
 
     /** Distance between centers of right and left wheels on robot (in meters). */
-    public static final double kTrackWidth = 0.57785;
+    public static final double kTrackWidth = Units.inchesToMeters(21.75);
 
     /** Distance between front and back wheels on robot (in meters). */
-    public static final double kWheelBase = 0.57785;
+    public static final double kWheelBase = Units.inchesToMeters(21.75);
 
-    /** Diameter of each wheel in the SDS MK4i swerve module (in meters) */
-    public static final double kWheelDiameterMeters = 0.1;
+    /** Diameter of each wheel in the SDS MK5i swerve module (in meters) */
+    public static final double kWheelDiameterMeters = Units.inchesToMeters(4);
 
     /** Gear ratio between the motor and the wheel. */
-    public static final double kDrivingGearRatio = 6.12; // SDS MK4i's in L2 configuration
+    public static final double kDrivingGearRatio = 6.03; // SDS MK5i's in L2 configuration
 
     // TODO: Tune this PID before running on a robot on the ground
     public static final double kPModuleTurningController = 0.3;
@@ -131,13 +131,13 @@ public final class Constants {
 
     public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(kModulePositions);
 
-    /** For a a SDS Mk4i L1 swerve base with Neos */
-    public static final double kMaxSpeedMetersPerSecond = 4.4196;
+    /** For a a SDS Mk5i L2 swerve base with Neos */
+    public static final double kMaxSpeedMetersPerSecond = 5.31876;
 
     // TODO: Set max acceleration constants
     public static final double kMaxAccelerationMetersPerSecondSquared = 1;
     
-    /** For a a SDS Mk4i L1 swerve base with Neos */
+    /** For a a SDS Mk5i L2 swerve base with Neos */
     public static final double kMaxAngularSpeedRadiansPerSecond = 10.8164;
 
     /** Heading Correction */
