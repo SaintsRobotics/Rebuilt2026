@@ -179,7 +179,9 @@ public class ShooterSubsystem extends SubsystemBase {
     public void periodic() {
 
         // SmartDashboard.putNumber("Shooter Hood Angle", getHoodAngle());
-        SmartDashboard.putBoolean("Shooter Ready", isShooterReady());
+        SmartDashboard.putBoolean("Shooter/Shooter Ready?", isShooterReady());
+        SmartDashboard.putNumber("Shooter/Flywheel Setpoint", m_shooterPID.getSetpoint());
+        SmartDashboard.putNumber("Shooter/Flywheel Speed", Robot.isReal() ? m_shooterMotorLeft.getEncoder().getVelocity() : m_flywheelSim.getAngularVelocityRPM());
     }
 
     @Override
@@ -194,7 +196,7 @@ public class ShooterSubsystem extends SubsystemBase {
         // Update battery
         RoboRioSim.setVInVoltage(BatterySim.calculateDefaultBatteryLoadedVoltage(m_flywheelSim.getCurrentDrawAmps()));
 
-        SmartDashboard.putNumber("flywheel speed", m_flywheelSim.getAngularVelocityRPM());
+        // SmartDashboard.putNumber("flywheel speed", m_flywheelSim.getAngularVelocityRPM());
     }
 
     /** Runs every 10ms (100Hz), faster than the regular periodic loop */
