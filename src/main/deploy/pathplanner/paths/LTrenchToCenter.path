@@ -25,7 +25,7 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "LeftCenter"
     }
   ],
   "rotationTargets": [],
@@ -53,8 +53,8 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 3.0,
-    "rotation": -90.0
+    "velocity": 0,
+    "rotation": -91.88143630704766
   },
   "reversed": false,
   "folder": null,
