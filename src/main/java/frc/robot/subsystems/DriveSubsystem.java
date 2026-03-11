@@ -109,26 +109,40 @@ public class DriveSubsystem extends SubsystemBase {
             VisionConstants.kCamPosLeft.getX(),
             VisionConstants.kCamPosLeft.getY(),
             VisionConstants.kCamPosLeft.getZ(),
-            VisionConstants.kCamPosLeft.getRotation().getX(),
-            VisionConstants.kCamPosLeft.getRotation().getY(),
+            Units.radiansToDegrees(VisionConstants.kCamPosLeft.getRotation().getX()),
+            Units.radiansToDegrees(VisionConstants.kCamPosLeft.getRotation().getY()),
             Units.radiansToDegrees(VisionConstants.kCamPosLeft.getRotation().getZ()));
         LimelightHelpers.SetIMUMode(VisionConstants.kLimelightNameLeft, VisionConstants.kIMUMode);
 
         LimelightHelpers.setCropWindow(VisionConstants.kLimelightNameLeft, -1, 1, -0.4, 1);
       }
 
-      if (VisionConstants.kUseRightLL) {
+      if (VisionConstants.kUseBackLL) {
         LimelightHelpers.setCameraPose_RobotSpace(
-          VisionConstants.kLimelightNameRight,
-          VisionConstants.kCamPosRight.getX(),
-          VisionConstants.kCamPosRight.getY(),
-          VisionConstants.kCamPosRight.getZ(),
-          VisionConstants.kCamPosRight.getRotation().getX(),
-          VisionConstants.kCamPosRight.getRotation().getY(),
-          Units.radiansToDegrees(VisionConstants.kCamPosRight.getRotation().getZ()));
-        LimelightHelpers.SetIMUMode(VisionConstants.kLimelightNameRight, VisionConstants.kIMUMode);
+          VisionConstants.kLimelightNameBack,
+          VisionConstants.kCamPosBack.getX(),
+          VisionConstants.kCamPosBack.getY(),
+          VisionConstants.kCamPosBack.getZ(),
+          Units.radiansToDegrees(VisionConstants.kCamPosBack.getRotation().getX()),
+          Units.radiansToDegrees(VisionConstants.kCamPosBack.getRotation().getY()),
+          Units.radiansToDegrees(VisionConstants.kCamPosBack.getRotation().getZ()));
+        LimelightHelpers.SetIMUMode(VisionConstants.kLimelightNameBack, VisionConstants.kIMUMode);
 
-        LimelightHelpers.setCropWindow(VisionConstants.kLimelightNameRight, -1, 1, -0.4, 1);
+        LimelightHelpers.setCropWindow(VisionConstants.kLimelightNameBack, -1, 1, -0.4, 1);
+      }
+
+      if (VisionConstants.kUseFrontLL) {
+        LimelightHelpers.setCameraPose_RobotSpace(
+          VisionConstants.kLimelightNameFront,
+          VisionConstants.kCamPosFront.getX(),
+          VisionConstants.kCamPosFront.getY(),
+          VisionConstants.kCamPosFront.getZ(),
+          Units.radiansToDegrees(VisionConstants.kCamPosFront.getRotation().getX()),
+          Units.radiansToDegrees(VisionConstants.kCamPosFront.getRotation().getY()),
+          Units.radiansToDegrees(VisionConstants.kCamPosFront.getRotation().getZ()));
+        LimelightHelpers.SetIMUMode(VisionConstants.kLimelightNameFront, VisionConstants.kIMUMode);
+
+        LimelightHelpers.setCropWindow(VisionConstants.kLimelightNameFront, -1, 1, -0.4, 1);
       }
     }
 
@@ -150,8 +164,9 @@ public class DriveSubsystem extends SubsystemBase {
     m_poseEstimator.update(getGyroAngle(),
         m_swerveModulePositions);
 
+    measureLimelight(VisionConstants.kLimelightNameBack, VisionConstants.kUseBackLL);
     measureLimelight(VisionConstants.kLimelightNameLeft, VisionConstants.kUseLeftLL);
-    measureLimelight(VisionConstants.kLimelightNameRight, VisionConstants.kUseRightLL);
+    measureLimelight(VisionConstants.kLimelightNameFront, VisionConstants.kUseFrontLL);
 
     m_field.setRobotPose(m_poseEstimator.getEstimatedPosition());
 
