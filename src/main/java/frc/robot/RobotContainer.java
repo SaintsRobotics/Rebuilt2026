@@ -160,6 +160,9 @@ public class RobotContainer {
 
     new Trigger(() -> {return m_driverController.getRightTriggerAxis() > 0.5;})
         .whileTrue(new ShooterCommand(m_shooter, m_robotDrive::getPose, () -> {return currentTarget;}));
+
+    new Trigger(() -> {return FieldConstants.kTrenchesRegion.isInRegion(m_robotDrive.getPose());})
+        .whileTrue(new InstantCommand(() -> m_shooter.setHoodAngle(0), m_shooter));
   }
 
   private void configureFuelSim() {
