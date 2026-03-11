@@ -34,18 +34,23 @@ public class ShooterCommand extends Command {
     public void execute() {
         
         m_shooterSubsystem.setShooterParameters(
-            LaunchCalc.findFlywheelSpeed(m_robotPoseSupplier.get(), m_targetSupplier.get()), 
-            LaunchCalc.findHoodAngle(m_robotPoseSupplier.get(), m_targetSupplier.get()));
+            // LaunchCalc.findFlywheelSpeed(m_robotPoseSupplier.get(), m_targetSupplier.get()), 
+            // 90 - LaunchCalc.findHoodAngle(m_robotPoseSupplier.get(), m_targetSupplier.get())
+            3000,
+            0.36
+        );
         
         if (m_shooterSubsystem.isShooterReady()) {
-            m_shooterSubsystem.setSpindexer(200);
-            m_shooterSubsystem.setTransfer(200);
+            m_shooterSubsystem.setSpindexer(true);
+            m_shooterSubsystem.setTransfer(true);
         }
     }
 
     public void end(boolean interrupted) {
         
         m_shooterSubsystem.shooterStop();
+        m_shooterSubsystem.setSpindexer(false);
+        m_shooterSubsystem.setTransfer(false);
 
     }
 

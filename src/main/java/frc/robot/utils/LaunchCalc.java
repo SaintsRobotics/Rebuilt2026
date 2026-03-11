@@ -15,7 +15,7 @@ import frc.robot.Constants.ShooterConstants;
 public class LaunchCalc{
 
     private static final InterpolatingDoubleTreeMap FlywheelLUT = new InterpolatingDoubleTreeMap();
-    private static final InterpolatingDoubleTreeMap HoodAngleLUT = new InterpolatingDoubleTreeMap();
+    private static final InterpolatingDoubleTreeMap LaunchAngleLUT = new InterpolatingDoubleTreeMap();
     private static final InterpolatingDoubleTreeMap TimeLUT = new InterpolatingDoubleTreeMap();
 
     static {
@@ -29,13 +29,13 @@ public class LaunchCalc{
         FlywheelLUT.put(6.0, 2350.0);
         FlywheelLUT.put(8.0, 2650.0);
 
-        HoodAngleLUT.put(1.0, 82.5);
-        HoodAngleLUT.put(2.0, 77.5);
-        HoodAngleLUT.put(3.0, 72.5);
-        HoodAngleLUT.put(4.0, 67.5);
-        HoodAngleLUT.put(5.0, 67.5);
-        HoodAngleLUT.put(6.0, 65.0);
-        HoodAngleLUT.put(8.0, 65.0);
+        LaunchAngleLUT.put(1.0, 82.5);
+        LaunchAngleLUT.put(2.0, 77.5);
+        LaunchAngleLUT.put(3.0, 72.5);
+        LaunchAngleLUT.put(4.0, 67.5);
+        LaunchAngleLUT.put(5.0, 67.5);
+        LaunchAngleLUT.put(6.0, 65.0);
+        LaunchAngleLUT.put(8.0, 65.0);
 
         TimeLUT.put(1.0, 0.97);
         TimeLUT.put(2.0, 0.95);
@@ -52,7 +52,7 @@ public class LaunchCalc{
 
     public static double findHoodAngle(Pose2d currentPose, Pose2d targetPose) {
         double distance = currentPose.getTranslation().getDistance(targetPose.getTranslation());
-        return HoodAngleLUT.get(distance);
+        return LaunchAngleLUT.get(distance);
     }
 
     /** Calculates the target to aim for when shooting on the move. */

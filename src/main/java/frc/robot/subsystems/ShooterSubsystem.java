@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.sim.SparkFlexSim;
@@ -18,7 +19,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.BatterySim;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
@@ -36,29 +36,32 @@ import frc.robot.Constants.ShooterConstants;
 public class ShooterSubsystem extends SubsystemBase {
 
     //shooter motors
-    SparkFlex m_shooterMotorLeft = new SparkFlex(ShooterConstants.kShooterMotorLeftPort, MotorType.kBrushless);
-    SparkFlex m_shooterMotorRight = new SparkFlex(ShooterConstants.kShooterMotorRightPort, MotorType.kBrushless);
+    private final SparkFlex m_shooterMotorLeft = new SparkFlex(ShooterConstants.kShooterMotorLeftPort, MotorType.kBrushless);
+    private final SparkFlex m_shooterMotorRight = new SparkFlex(ShooterConstants.kShooterMotorRightPort, MotorType.kBrushless);
 
     //hood motor
-    SparkMax m_hoodMotor = new SparkMax(ShooterConstants.kHoodMotorPort, MotorType.kBrushless);
-    private DutyCycleEncoder m_hoodEncoder = new DutyCycleEncoder(ShooterConstants.kHoodEncoderChannel, ShooterConstants.kHoodAngleMax, ShooterConstants.kHoodAngleMin);    
+    private final SparkMax m_hoodMotor = new SparkMax(ShooterConstants.kHoodMotorPort, MotorType.kBrushless);
+    private final CANcoder m_hoodEncoder = new CANcoder(ShooterConstants.kHoodEncoderChannel);    
     
     // spindexer and transfer
-    SparkFlex m_spindexerMotor = new SparkFlex(ShooterConstants.kSpindexerPort, MotorType.kBrushless);
-    SparkFlex m_transferMotor = new SparkFlex(ShooterConstants.kTransferPort, MotorType.kBrushless);
+    private final SparkFlex m_spindexerMotor = new SparkFlex(ShooterConstants.kSpindexerPort, MotorType.kBrushless);
+    private final SparkFlex m_transferMotor = new SparkFlex(ShooterConstants.kTransferPort, MotorType.kBrushless);
 
     //PID controllers and feedforward for shooter speed and hood angle
     private final PIDController m_shooterPID = new PIDController(ShooterConstants.kShooterP, ShooterConstants.kShooterI, ShooterConstants.kShooterD);
     private final SimpleMotorFeedforward m_shooterFeedforward = new SimpleMotorFeedforward(ShooterConstants.kShooterS, ShooterConstants.kShooterV);
 
     // TODO: tune these lol
-    private final PIDController m_spindexerPID = new PIDController(0, 0, 0);
-    private final SimpleMotorFeedforward m_spindexerFF = new SimpleMotorFeedforward(0, 0);
+    private final PIDController m_spindexerPID = new PIDController(0.01, 0, 0);
+    private final SimpleMotorFeedforward m_spindexerFF = new SimpleMotorFeedforward(0, 0.01);
 
-    private final PIDController m_transferPID = new PIDController(0, 0, 0);
-    private final SimpleMotorFeedforward m_transferFF = new SimpleMotorFeedforward(0, 0);
+    private final PIDController m_transferPID = new PIDController(0.01, 0, 0);
+    private final SimpleMotorFeedforward m_transferFF = new SimpleMotorFeedforward(0, 0.01);
 
     private final PIDController m_hoodAnglePID = new PIDController(ShooterConstants.kHoodAngleP, ShooterConstants.kHoodAngleI, ShooterConstants.kHoodAngleD);
+
+    private boolean spindexerOn = false;
+    private boolean transferOn = false;
 
     // Simulation classes
     private final DCMotor m_flywheelDCMotor = DCMotor.getNeoVortex(2);
@@ -86,15 +89,17 @@ public class ShooterSubsystem extends SubsystemBase {
         SparkFlexConfig hoodMotorConfig = new SparkFlexConfig();
         hoodMotorConfig
             .idleMode(IdleMode.kBrake)
-            .absoluteEncoder.positionConversionFactor(360);
+            .absoluteEncoder.positionConversionFactor(360)
+            .inverted(true);
         m_hoodMotor.configure(hoodMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         SparkFlexConfig spindexerConfig = new SparkFlexConfig();
-        spindexerConfig.idleMode(IdleMode.kBrake);
+        spindexerConfig.idleMode(IdleMode.kCoast);
         m_spindexerMotor.configure(spindexerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         m_transferMotor.configure(spindexerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         m_shooterPID.setTolerance(200);
+        
     }
 
     //resets shooter
@@ -163,16 +168,24 @@ public class ShooterSubsystem extends SubsystemBase {
 
     //returns hood angle from the hood encoder
     public double getHoodAngle() {
-        // return m_hoodEncoder.get();
-        return m_hoodAnglePID.getSetpoint();
+        return m_hoodEncoder.getAbsolutePosition().getValueAsDouble();
+        // return m_hoodAnglePID.getSetpoint();
     }
 
     public void setSpindexer(double setpoint) {
         m_spindexerPID.setSetpoint(setpoint);
     }
 
+    public void setSpindexer(boolean on) {
+        spindexerOn = on;
+    }
+
     public void setTransfer(double setpoint) {
         m_transferPID.setSetpoint(setpoint);
+    }
+
+    public void setTransfer(boolean on) {
+        transferOn = on;
     }
 
     //periodic
@@ -182,6 +195,8 @@ public class ShooterSubsystem extends SubsystemBase {
         SmartDashboard.putBoolean("Shooter/Shooter Ready?", isShooterReady());
         SmartDashboard.putNumber("Shooter/Flywheel Setpoint", m_shooterPID.getSetpoint());
         SmartDashboard.putNumber("Shooter/Flywheel Speed", Robot.isReal() ? m_shooterMotorLeft.getEncoder().getVelocity() : m_flywheelSim.getAngularVelocityRPM());
+        SmartDashboard.putNumber("Shooter/Hood Angle", getHoodAngle());
+        SmartDashboard.putNumber("Shooter/Motor speed", m_shooterMotorLeft.get());
     }
 
     @Override
@@ -210,17 +225,19 @@ public class ShooterSubsystem extends SubsystemBase {
 
         //calculates PID output for hood angle and sets hood motor to that output
         double hoodOutput = m_hoodAnglePID.calculate(getHoodAngle());
-        setHoodMotor(MathUtil.clamp(hoodOutput, -ShooterConstants.kHoodSpeedMax, ShooterConstants.kHoodSpeedMax));
+        // setHoodMotor(MathUtil.clamp(hoodOutput, -ShooterConstants.kHoodSpeedMax, ShooterConstants.kHoodSpeedMax));
 
-        double spindexerOutput = m_spindexerPID.calculate(
-            m_spindexerMotor.getEncoder().getVelocity()) 
-            + m_spindexerFF.calculate(m_spindexerPID.getSetpoint());
-        m_spindexerMotor.set(MathUtil.clamp(spindexerOutput, -ShooterConstants.kSpindexerMaxSpd, ShooterConstants.kSpindexerMaxSpd));
+        // double spindexerOutput = m_spindexerPID.calculate(
+        //     m_spindexerMotor.getEncoder().getVelocity()) 
+        //     + m_spindexerFF.calculate(m_spindexerPID.getSetpoint());
+        // m_spindexerMotor.set(MathUtil.clamp(spindexerOutput, -ShooterConstants.kSpindexerMaxSpd, ShooterConstants.kSpindexerMaxSpd));
+        m_spindexerMotor.set(spindexerOn ? 1.0 : 0);
 
-        double transferOutput = m_transferPID.calculate(
-            m_transferMotor.getEncoder().getVelocity()) 
-            + m_transferFF.calculate(m_transferPID.getSetpoint());
-        m_transferMotor.set(MathUtil.clamp(transferOutput, -ShooterConstants.kTransferMaxSpd, ShooterConstants.kTransferMaxSpd));
+        // double transferOutput = m_transferPID.calculate(
+        //     m_transferMotor.getEncoder().getVelocity()) 
+        //     + m_transferFF.calculate(m_transferPID.getSetpoint());
+        // m_transferMotor.set(MathUtil.clamp(transferOutput, -ShooterConstants.kTransferMaxSpd, ShooterConstants.kTransferMaxSpd));
+        m_transferMotor.set(transferOn ? 0.5 : 0);
     }
 
 }

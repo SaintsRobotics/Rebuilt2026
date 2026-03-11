@@ -160,7 +160,7 @@ public final class Constants {
   }
 
   public static final class TurretConstants {
-    public static final int kTurretMotorPort = 0;
+    public static final int kTurretMotorPort = 40;
 
     public static final double kTurretMaxRotation = 270;
 
@@ -236,7 +236,7 @@ public final class Constants {
     //public static final int kShooterEncoderChannel = 0;
 
     public static final int kHoodMotorPort = 32;
-    public static final int kHoodEncoderChannel = 0;
+    public static final int kHoodEncoderChannel = 35;
 
     public static final int kSpindexerPort = 33;
     public static final int kTransferPort = 34;
@@ -246,7 +246,7 @@ public final class Constants {
     public static final double kShooterD = 0;
 
     public static final double kShooterS = 0.0;
-    public static final double kShooterV = 0.000145;
+    public static final double kShooterV = 0.000185;
 
     public static final double kHoodAngleP = 0.1;
     public static final double kHoodAngleI = 0;
@@ -256,8 +256,8 @@ public final class Constants {
     public static final double kMinSpeed = -kMaxSpeed;
 
     public static final double kHoodAngleMin = 0;
-    public static final double kHoodAngleMax = 180;
-    public static final double kHoodSpeedMax = 1;
+    public static final double kHoodAngleMax = 0.725;
+    public static final double kHoodSpeedMax = 0.2;
 
     public static final int kShootOnTheMoveIterations = 5;
     public static final double kShootOnTheMoveMultiplier = 1.2;

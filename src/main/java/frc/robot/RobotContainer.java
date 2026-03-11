@@ -20,7 +20,9 @@ import edu.wpi.first.units.LinearVelocityUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -50,7 +52,7 @@ import frc.robot.Constants.FieldConstants;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
-  private final TurretSubsystem m_turret = new TurretSubsystem();
+//   private final TurretSubsystem m_turret = new TurretSubsystem();
   private final ShooterSubsystem m_shooter = new ShooterSubsystem();
 
   private final XboxController m_driverController = new XboxController(IOConstants.kDriverControllerPort);
@@ -60,6 +62,8 @@ public class RobotContainer {
   private final StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault().getStructTopic("SotM Target/5 iterations", Pose2d.struct).publish();
   private final StructPublisher<Pose2d> publisher2 = NetworkTableInstance.getDefault().getStructTopic("SotM Target/10 iterations", Pose2d.struct).publish();
   private Pose2d currentTarget = FieldConstants.kHubPose;
+
+  // private final PowerDistribution m_powerDistribution = new PowerDistribution(0, ModuleType.kRev);
 
 
   /**
@@ -102,10 +106,10 @@ public class RobotContainer {
                 true),
                     m_robotDrive));
     
-    m_turret.setDefaultCommand(new RunCommand(() -> {
-        m_turret.calculateSetpoint(m_robotDrive.getPose(), currentTarget, m_robotDrive.getRotationSpeed());
-    },
-    m_turret));
+    // m_turret.setDefaultCommand(new RunCommand(() -> {
+    //     m_turret.calculateSetpoint(m_robotDrive.getPose(), currentTarget, m_robotDrive.getRotationSpeed());
+    // },
+    // m_turret));
     
     //m_shooter.setDefaultCommand(new ShooterCommand(m_shooter, m_robotDrive::getPose, () -> {return currentTarget;}));
 }
@@ -133,28 +137,28 @@ public class RobotContainer {
         .onTrue(new InstantCommand(() -> m_robotDrive.resetOdometry(new Pose2d()), m_robotDrive));
 
 
-    new JoystickButton(m_driverController, Button.kLeftBumper.value)
-        .onTrue(new InstantCommand(() -> {fuelSim.launchFuel(
-            LinearVelocity.ofBaseUnits(
-                Units.rotationsPerMinuteToRadiansPerSecond(m_shooter.getAvgShooterSpeed()) * ShooterConstants.kFlywheelRadius, 
-                LinearVelocityUnit.combine(Meters, Seconds)),
-                Angle.ofBaseUnits(Units.degreesToRadians(m_shooter.getHoodAngle()), Radians),
-                Angle.ofBaseUnits(Units.degreesToRadians(m_turret.getTurretPosition()) + m_robotDrive.getPose().getRotation().getRadians(), Radians),
-                Distance.ofBaseUnits(0.5, Meters));}));
+    // new JoystickButton(m_driverController, Button.kLeftBumper.value)
+    //     .onTrue(new InstantCommand(() -> {fuelSim.launchFuel(
+    //         LinearVelocity.ofBaseUnits(
+    //             Units.rotationsPerMinuteToRadiansPerSecond(m_shooter.getAvgShooterSpeed()) * ShooterConstants.kFlywheelRadius, 
+    //             LinearVelocityUnit.combine(Meters, Seconds)),
+    //             Angle.ofBaseUnits(Units.degreesToRadians(m_shooter.getHoodAngle()), Radians),
+    //             Angle.ofBaseUnits(Units.degreesToRadians(m_turret.getTurretPosition()) + m_robotDrive.getPose().getRotation().getRadians(), Radians),
+    //             Distance.ofBaseUnits(0.5, Meters));}));
     
-    // Simulation launch fuel
-    SmartDashboard.putData(new InstantCommand(() -> {
-        fuelSim.launchFuel(
-            LinearVelocity.ofBaseUnits(
-                Units.rotationsPerMinuteToRadiansPerSecond(m_shooter.getAvgShooterSpeed()) * ShooterConstants.kFlywheelRadius, 
-                LinearVelocityUnit.combine(Meters, Seconds)),
-                Angle.ofBaseUnits(Units.degreesToRadians(m_shooter.getHoodAngle()), Radians),
-                Angle.ofBaseUnits(Units.degreesToRadians(m_turret.getTurretPosition()) - m_robotDrive.getPose().getRotation().getRadians(), Radians),
-                Distance.ofBaseUnits(0.5, Meters));
-    })
-    .withName("Launch Fuel"));
+    // // Simulation launch fuel
+    // SmartDashboard.putData(new InstantCommand(() -> {
+    //     fuelSim.launchFuel(
+    //         LinearVelocity.ofBaseUnits(
+    //             Units.rotationsPerMinuteToRadiansPerSecond(m_shooter.getAvgShooterSpeed()) * ShooterConstants.kFlywheelRadius, 
+    //             LinearVelocityUnit.combine(Meters, Seconds)),
+    //             Angle.ofBaseUnits(Units.degreesToRadians(m_shooter.getHoodAngle()), Radians),
+    //             Angle.ofBaseUnits(Units.degreesToRadians(m_turret.getTurretPosition()) - m_robotDrive.getPose().getRotation().getRadians(), Radians),
+    //             Distance.ofBaseUnits(0.5, Meters));
+    // })
+    // .withName("Launch Fuel"));
 
-    new Trigger(() -> {return m_driverController.getLeftTriggerAxis() > 0.5;})
+    new Trigger(() -> {return m_driverController.getRightTriggerAxis() > 0.5;})
         .whileTrue(new ShooterCommand(m_shooter, m_robotDrive::getPose, () -> {return currentTarget;}));
   }
 
