@@ -46,9 +46,6 @@ public final class Constants {
     public static final double kControllerDeadband = 0.15;
     public static final double kSlowModeScalar = 0.8;
 
-    public static final double kElevatorAxisScalar = 0.05; //TODO: tune
-    public static final double kPivotAxisScalar = -0.25; //TODO: tune
-
     public static final int kDPadUp = 0;
     public static final int kDPadRight = 90;
     public static final int kDPadDown = 180;
@@ -56,6 +53,34 @@ public final class Constants {
 
     public static final double kHapticTime = 0.3;
     public static final double kHapticStrength = 1;
+  }
+
+  public static final class IntakeConstants{
+    // TODO: set motor and encoder constants    
+    public static final int kArmMotorID = 20;
+    public static final int kIntakeMotorID = 21;
+
+    public static final int kIntakeEncoderID = 22; //change later
+
+    public static final double kArmP = 0.5;
+    public static final double kArmD = 0.0;
+
+    //TODO: set constants
+    public static final double kIntakeMass = 8.75;
+    public static final double kIntakeLength = 11;
+    public static final double kArmMOI = 0.210028942;
+    public static final double kRollerMOI = 0.0;
+    public static final double kArmReduction = 240/7;
+    public static final double kArmMaxSpeed = 0.3;
+
+    // In degrees
+    public static final double kIntakeLoweredAngle = 0.53;
+    public static final double kIntakeRaisedAngle = 0.1;
+    public static final double kIntakeFullyRaisedAngle = 0.05;
+
+    /** Encoder offset in rotations */
+    public static final double kArmEncoderOffset = 0;
+    public static final double kIntakeSpeed = 0.5;   
   }
 
   public static final class DriveConstants {
@@ -76,22 +101,22 @@ public final class Constants {
     public static final int kRearRightTurningEncoderPort = 3;
 
     // TODO: Test motor orientations before driving on an actual robot
-    public static final boolean kFrontLeftDriveMotorReversed = true;
-    public static final boolean kRearLeftDriveMotorReversed = true;
-    public static final boolean kFrontRightDriveMotorReversed = false;
-    public static final boolean kRearRightDriveMotorReversed = false;
+    public static final boolean kFrontLeftDriveMotorReversed = false;
+    public static final boolean kRearLeftDriveMotorReversed = false;
+    public static final boolean kFrontRightDriveMotorReversed = true;
+    public static final boolean kRearRightDriveMotorReversed = true;
 
     /** Distance between centers of right and left wheels on robot (in meters). */
-    public static final double kTrackWidth = 0.57785;
+    public static final double kTrackWidth = Units.inchesToMeters(21.75);
 
     /** Distance between front and back wheels on robot (in meters). */
-    public static final double kWheelBase = 0.57785;
+    public static final double kWheelBase = Units.inchesToMeters(21.75);
 
-    /** Diameter of each wheel in the SDS MK4i swerve module (in meters) */
-    public static final double kWheelDiameterMeters = 0.1;
+    /** Diameter of each wheel in the SDS MK5i swerve module (in meters) */
+    public static final double kWheelDiameterMeters = Units.inchesToMeters(4);
 
     /** Gear ratio between the motor and the wheel. */
-    public static final double kDrivingGearRatio = 6.12; // SDS MK4i's in L2 configuration
+    public static final double kDrivingGearRatio = 6.03; // SDS MK5i's in L2 configuration
 
     // TODO: Tune this PID before running on a robot on the ground
     public static final double kPModuleTurningController = 0.3;
@@ -105,13 +130,13 @@ public final class Constants {
 
     public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(kModulePositions);
 
-    /** For a a SDS Mk4i L1 swerve base with Neos */
-    public static final double kMaxSpeedMetersPerSecond = 4.4196;
+    /** For a a SDS Mk5i L2 swerve base with Neos */
+    public static final double kMaxSpeedMetersPerSecond = 5.31876;
 
     // TODO: Set max acceleration constants
     public static final double kMaxAccelerationMetersPerSecondSquared = 1;
     
-    /** For a a SDS Mk4i L1 swerve base with Neos */
+    /** For a a SDS Mk5i L2 swerve base with Neos */
     public static final double kMaxAngularSpeedRadiansPerSecond = 10.8164;
 
     /** Heading Correction */

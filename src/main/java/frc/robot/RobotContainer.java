@@ -18,6 +18,8 @@ import frc.robot.Constants.IOConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.Constants.FieldConstants;
+import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.commands.IntakeCommand;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -30,6 +32,7 @@ public class RobotContainer {
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
   // private final IntakeSubsystem m_intake = new IntakeSubsystem();
   // private final TurretSubsystem m_turret = new TurretSubsystem();
+  private final IntakeSubsystem m_intake = new IntakeSubsystem();
 
   private final XboxController m_driverController = new XboxController(IOConstants.kDriverControllerPort);
   private final XboxController m_operatorController = new XboxController(IOConstants.kOperatorControllerPort);
@@ -100,8 +103,9 @@ public class RobotContainer {
     new JoystickButton(m_driverController, Button.kBack.value)
         .onTrue(new InstantCommand(() -> m_robotDrive.resetOdometry(new Pose2d()), m_robotDrive));
     
-    // new JoystickButton(m_driverController, Button.kLeftBumper.value)
-    //     .whileTrue(new IntakeCommand(m_intake));
+    // run intake
+    new JoystickButton(m_driverController, Button.kLeftBumper.value)
+        .whileTrue(new IntakeCommand(m_intake));
   }
 
   /**
