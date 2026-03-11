@@ -60,8 +60,7 @@ public final class Constants {
     public static final int kArmMotorID = 20;
     public static final int kIntakeMotorID = 21;
 
-    public static final int kArmEncoderChannel = 0; //change later
-    public static final int kIntakeEncoderID = 3; //change later
+    public static final int kIntakeEncoderID = 22; //change later
 
     public static final double kArmP = 0.5;
     public static final double kArmD = 0.0;
@@ -75,13 +74,13 @@ public final class Constants {
     public static final double kArmMaxSpeed = 0.3;
 
     // In degrees
-    public static final double kIntakeLoweredAngle = 160;
-    public static final double kIntakeRaisedAngle = 20;
-    public static final double kIntakeFullyRaisedAngle = 0;
+    public static final double kIntakeLoweredAngle = 0.53;
+    public static final double kIntakeRaisedAngle = 0.1;
+    public static final double kIntakeFullyRaisedAngle = 0.05;
 
     /** Encoder offset in rotations */
     public static final double kArmEncoderOffset = 0;
-    public static final double kIntakeSpeed = 0.5;
+    public static final double kIntakeSpeed = 0.5;   
   }
 
   public static final class DriveConstants {
@@ -102,10 +101,10 @@ public final class Constants {
     public static final int kRearRightTurningEncoderPort = 3;
 
     // TODO: Test motor orientations before driving on an actual robot
-    public static final boolean kFrontLeftDriveMotorReversed = true;
-    public static final boolean kRearLeftDriveMotorReversed = true;
-    public static final boolean kFrontRightDriveMotorReversed = false;
-    public static final boolean kRearRightDriveMotorReversed = false;
+    public static final boolean kFrontLeftDriveMotorReversed = false;
+    public static final boolean kRearLeftDriveMotorReversed = false;
+    public static final boolean kFrontRightDriveMotorReversed = true;
+    public static final boolean kRearRightDriveMotorReversed = true;
 
     /** Distance between centers of right and left wheels on robot (in meters). */
     public static final double kTrackWidth = Units.inchesToMeters(21.75);

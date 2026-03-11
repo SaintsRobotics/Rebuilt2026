@@ -48,9 +48,9 @@ public class IntakeSubsystem extends SubsystemBase {
   private final SparkFlex m_intakeMotor = new SparkFlex(IntakeConstants.kIntakeMotorID, MotorType.kBrushless);
   private final SparkFlex m_armMotor = new SparkFlex(IntakeConstants.kArmMotorID  , MotorType.kBrushless);
 
-  private final PIDController m_armPID = new PIDController(0.02, 0, 0);
+  private final PIDController m_armPID = new PIDController(IntakeConstants.kArmP, 0, 0);
 
-  private CANcoder m_armEncoder = new CANcoder(IntakeConstants.kArmEncoderChannel);
+  private CANcoder m_armEncoder = new CANcoder(IntakeConstants.kIntakeEncoderID);
 
 
   private ArmPosition m_armPosition = ArmPosition.Retracted;
@@ -79,8 +79,8 @@ public class IntakeSubsystem extends SubsystemBase {
     SparkFlexConfig intakeConfig = new SparkFlexConfig();
     intakeConfig.idleMode(IdleMode.kCoast);
 
-    m_armEncoder.getConfigurator().apply(new MagnetSensorConfigs().withSensorDirection(SensorDirectionValue.Clockwise_Positive));
-    //m_armPID.enableContinuousInput(0, 360);
+    // m_armEncoder.getConfigurator().apply(new MagnetSensorConfigs().withSensorDirection(SensorDirectionValue.CounterClockwise_Positive));
+    // m_armPID.enableContinuousInput(0, 1);
 
     m_intakeMotor.configure(intakeConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
 
@@ -91,11 +91,11 @@ public class IntakeSubsystem extends SubsystemBase {
 
     m_armPID.setTolerance(10);
 
-    m_armSetpoint = 10;
+    // m_armSetpoint = 10;
 
-    CANcoderConfiguration config = new CANcoderConfiguration();
-    config.MagnetSensor.MagnetOffset = IntakeConstants.kArmEncoderOffset;
-    m_armEncoder.getConfigurator().apply(config);
+    // CANcoderConfiguration config = new CANcoderConfiguration();
+    // config.MagnetSensor.MagnetOffset = IntakeConstants.kArmEncoderOffset;
+    // m_armEncoder.getConfigurator().apply(config);
 
     //sim
     Mechanism2d intakeMech = new Mechanism2d(1, 1);
@@ -111,21 +111,18 @@ public class IntakeSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    m_armPID.setTolerance(10);
-    m_armPID.setP(0.002);
-    m_armPID.setD(0);
 
-
-    m_armPID.setSetpoint(m_armSetpoint);
-    double armMotorSpeed = m_armPID.atSetpoint() ? 0 : MathUtil.clamp(m_armPID.calculate(m_armEncoder.getAbsolutePosition().getValueAsDouble()), -0.3, 0.3);
+    // m_armPID.setSetpoint(m_armSetpoint);
+    double armMotorSpeed = MathUtil.clamp(m_armPID.calculate(m_armEncoder.getAbsolutePosition().getValueAsDouble()), -0.3, 0.3);
 
     SmartDashboard.putNumber("Motor Speed", armMotorSpeed);
     SmartDashboard.putNumber("Arm Angle", m_armEncoder.getAbsolutePosition().getValueAsDouble());
 
-    // SmartDashboard.putNumber("pid output", armMotorSpeed);
+    SmartDashboard.putNumber("pid output", armMotorSpeed);
+    SmartDashboard.putNumber("arm setpoint", m_armPID.getSetpoint());
 
     m_armMotor.set(armMotorSpeed);
-    m_intakeMotor.set(m_intakeSpeed); 
+    // m_intakeMotor.set(m_intakeSpeed); 
   }
 
   @Override
@@ -166,7 +163,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
   public void reset() {
     m_intakeSpeed = 0;
-    m_armSetpoint = getArmPosition();
+    m_armSetpoint = IntakeConstants.kIntakeRaisedAngle;
   }
 
   public void setArmPosition(ArmPosition position) {
