@@ -42,6 +42,8 @@ import frc.robot.utils.FindTarget;
 import frc.robot.utils.FuelSim;
 import frc.robot.utils.LaunchCalc;
 import frc.robot.Constants.FieldConstants;
+import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.commands.IntakeCommand;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -54,6 +56,9 @@ public class RobotContainer {
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
 //   private final TurretSubsystem m_turret = new TurretSubsystem();
   private final ShooterSubsystem m_shooter = new ShooterSubsystem();
+  // private final IntakeSubsystem m_intake = new IntakeSubsystem();
+  // private final TurretSubsystem m_turret = new TurretSubsystem();
+  private final IntakeSubsystem m_intake = new IntakeSubsystem();
 
   private final XboxController m_driverController = new XboxController(IOConstants.kDriverControllerPort);
   private final XboxController m_operatorController = new XboxController(IOConstants.kOperatorControllerPort);
@@ -163,6 +168,9 @@ public class RobotContainer {
 
     new Trigger(() -> {return FieldConstants.kTrenchesRegion.isInRegion(m_robotDrive.getPose());})
         .whileTrue(new InstantCommand(() -> m_shooter.setHoodAngle(0), m_shooter));
+      
+    new Trigger(() -> {return m_driverController.getLeftTriggerAxis() > 0.5;})
+        .whileTrue(new IntakeCommand(m_intake));
   }
 
   private void configureFuelSim() {
@@ -181,6 +189,10 @@ public class RobotContainer {
         Units.inchesToMeters(5), 
         m_robotDrive::getPose, 
         m_robotDrive::getRobotRelativeSpeeds);
+    
+    // run intake
+    new JoystickButton(m_driverController, Button.kLeftBumper.value)
+        .whileTrue(new IntakeCommand(m_intake));
   }
 
   /**
