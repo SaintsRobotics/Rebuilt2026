@@ -147,7 +147,7 @@ public class DriveSubsystem extends SubsystemBase {
         m_rearRight.getPosition()
     };
 
-    m_poseEstimator.update(Robot.isReal() ? m_gyro.getRotation2d() : new Rotation2d(m_gyroAngle),
+    m_poseEstimator.update(getGyroAngle(),
         m_swerveModulePositions);
 
     measureLimelight(VisionConstants.kLimelightNameLeft, VisionConstants.kUseLeftLL);
@@ -287,13 +287,13 @@ public class DriveSubsystem extends SubsystemBase {
     */
 
     // If we are not driving in field relative, then convert our robot relative speeds to field relative
-    if (!fieldRelative) {
-      Translation2d fieldRelativeTranslation = new Translation2d(xSpeed, ySpeed).rotateBy(Robot.isReal() ? m_gyro.getRotation2d() : new Rotation2d(m_gyroAngle));
+    // if (fieldRelative) {
+    //   Translation2d fieldRelativeTranslation = new Translation2d(xSpeed, ySpeed).rotateBy(getGyroAngle());
 
-      xSpeed = fieldRelativeTranslation.getX();
-      ySpeed = fieldRelativeTranslation.getY();
-      // rotation doesn't need to be updated because it is the same in both field and robot relative
-    }
+    //   xSpeed = fieldRelativeTranslation.getX();
+    //   ySpeed = fieldRelativeTranslation.getY();
+    //   // rotation doesn't need to be updated because it is the same in both field and robot relative
+    // }
 
     xSpeed = m_xSpeedLimiter.calculate(xSpeed);
     ySpeed = m_ySpeedLimiter.calculate(ySpeed);
@@ -301,9 +301,13 @@ public class DriveSubsystem extends SubsystemBase {
 
     // Depending on whether the robot is being driven in field relative, calculate
     // the desired states for each of the modules
-    m_desiredStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(
-        ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, calculatedRotation,
-          Robot.isReal() ? m_gyro.getRotation2d() : new Rotation2d(m_gyroAngle)));
+    // m_desiredStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(
+    //     ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, calculatedRotation,
+    //       getGyroAngle()));
+    m_desiredStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(fieldRelative ?
+      ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, calculatedRotation,
+      getGyroAngle())
+      : new ChassisSpeeds(xSpeed, ySpeed, calculatedRotation));
 
     SwerveDriveKinematics.desaturateWheelSpeeds(m_desiredStates, DriveConstants.kMaxSpeedMetersPerSecond);
   }
@@ -324,7 +328,7 @@ public class DriveSubsystem extends SubsystemBase {
    * @param ignoreRotation True if rotation in pose should be ignored (i.e. use gyro)
    */
   public void resetOdometry(Pose2d pose, boolean ignoreRotation) {
-    Rotation2d rot = Robot.isReal() ? m_gyro.getRotation2d() : new Rotation2d(m_gyroAngle);
+    Rotation2d rot = getGyroAngle();
 
     if (AllianceFlipUtil.shouldFlip()) {
         rot = new Rotation2d(rot.getRadians() + Math.PI);
@@ -387,5 +391,9 @@ public class DriveSubsystem extends SubsystemBase {
   /** Returns the rate of rotation of the robot's yaw (Z-axis rotation) in degrees per second. */
   public double getRotationSpeed() {
     return Robot.isReal()? m_gyro.getRate() : Units.radiansToDegrees(DriveConstants.kDriveKinematics.toChassisSpeeds(m_desiredStates).omegaRadiansPerSecond);
+  }
+
+  private Rotation2d getGyroAngle() {
+    return Robot.isReal() ? m_gyro.getRotation2d().times(-1) : new Rotation2d(m_gyroAngle);
   }
 }
