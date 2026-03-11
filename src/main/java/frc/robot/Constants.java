@@ -191,8 +191,8 @@ public final class Constants {
     public static final int kTurretMotorPort = 40;
 
     // CRT Encoders
-    public static final int kEncoder1CANId = 2;  
-    public static final int kEncoder2CANId = 1;  
+    public static final int kEncoder1CANId = 41;  
+    public static final int kEncoder2CANId = 42;  
 
     public static final double kTurretTeeth = 90.0;
     public static final double kEncoder1Teeth = 13.0;
@@ -211,15 +211,15 @@ public final class Constants {
     public static final double kTurretMaxRotation = 360; 
 
     // PID gains
-    public static final double kTurretP = 0.10;  
+    public static final double kTurretP = 0.005;  
     public static final double kTurretI = 0.0;
-    public static final double kTurretD = 0.015; 
+    public static final double kTurretD = 0; 
 
     // Feedforward gains
     public static final double kTurretS = 0.02;  
     public static final double kTurretV = 0.10;  
 
-    public static final double kTurretMaxSpeed = 0.1;  
+    public static final double kTurretMaxSpeed = 0.5;  
     public static final double kTurretDeadband = 2.0;  
     public static final double kTurretTolerance = 1.5;
     public static final Pose2d kTurretOffset = new Pose2d();

@@ -84,6 +84,7 @@ public class TurretSubsystem extends SubsystemBase {
       m_turretMotor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
 
       m_turretMotor.getEncoder().setPosition(crtPosition);
+      m_turretPID.setSetpoint(crtPosition);
     } 
     else {
       SparkMaxConfig motorConfig = new SparkMaxConfig();
@@ -99,13 +100,13 @@ public class TurretSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
 
     double pos = calculateTurretPosition();
-    SmartDashboard.putNumber("Turret Angle", pos);
-    SmartDashboard.putNumber("Encoder 1 Angle", m_encoder1.getAbsolutePosition().getValueAsDouble()*360);
-    SmartDashboard.putNumber("Encoder 2 Angle", m_encoder2.getAbsolutePosition().getValueAsDouble()*360);
+    SmartDashboard.putNumber("Turret/Turret Angle", pos);
+    SmartDashboard.putNumber("Turret/Encoder 1 Angle", m_encoder1.getAbsolutePosition().getValueAsDouble()*360);
+    SmartDashboard.putNumber("Turret/Encoder 2 Angle", m_encoder2.getAbsolutePosition().getValueAsDouble()*360);
 
-    // SmartDashboard.putNumber("Turret Setpoint", m_turretPID.getSetpoint());
+    SmartDashboard.putNumber("Turret/Turret Setpoint", m_turretPID.getSetpoint());
     // SmartDashboard.putNumber("Turret Error", getError());
-    // SmartDashboard.putNumber("Turret Output", output);
+    // SmartDashboard.putNumber("Turret/Turret Output", output);
   }
 
   public void fastPeriodic() {
@@ -117,11 +118,13 @@ public class TurretSubsystem extends SubsystemBase {
     // Apply deadband
     double error = setpoint - getTurretPosition();
     if (Math.abs(error) < TurretConstants.kTurretDeadband) {
-      output = 0;
+      // output = 0;
     }
 
     output = MathUtil.clamp(output, -TurretConstants.kTurretMaxSpeed, TurretConstants.kTurretMaxSpeed);
     m_turretMotor.set(output);
+
+    SmartDashboard.putNumber("Turret/output", output);
   }
 
   @Override
@@ -230,8 +233,8 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   public double getTurretPosition() {
-    return m_turretMotor.getEncoder().getPosition();
-    // return 0;
+    // return m_turretMotor.getEncoder().getPosition();
+    return calculateTurretPosition();
   }
 
   // Returns the current error between setpoint and position
@@ -243,6 +246,10 @@ public class TurretSubsystem extends SubsystemBase {
   public void setSetpoint(double angle) {
     double clampedAngle = MathUtil.clamp(angle, -TurretConstants.kTurretMaxRotation / 2, TurretConstants.kTurretMaxRotation / 2);
     m_turretPID.setSetpoint(clampedAngle);
+  }
+
+  public double getSetpoint() {
+    return m_turretPID.getSetpoint();
   }
 
   // Reset turret encoder

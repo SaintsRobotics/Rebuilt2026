@@ -76,7 +76,8 @@ public class RobotContainer {
                     m_robotDrive));
 
     // Set turret to continuously aim at the hub
-    m_turret.setDefaultCommand(new AutoAimTurret(m_turret, m_robotDrive));
+    // m_turret.setDefaultCommand(new AutoAimTurret(m_turret, m_robotDrive));
+    m_turret.setDefaultCommand(new RunCommand(() -> {m_turret.setSetpoint(m_turret.getSetpoint() + MathUtil.applyDeadband(m_operatorController.getLeftX(), IOConstants.kControllerDeadband) * 2);}, m_turret));
   }
 
 
@@ -108,6 +109,10 @@ public class RobotContainer {
     // run intake
     // new JoystickButton(m_driverController, Button.kLeftBumper.value)
     //     .whileTrue(new IntakeCommand(m_intake));
+
+    // turret testing
+    // new JoystickButton(m_operatorController, Button.kRightBumper.value)
+      // .whileTrue(new RunCommand(() -> {m_turret.setSetpoint(m_turret.getSetpoint() + m_operatorController.getLeftX() * 2);}, m_turret));
   }
 
   /**
