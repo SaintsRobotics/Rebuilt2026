@@ -18,12 +18,9 @@ import frc.robot.Constants.IOConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.Constants.FieldConstants;
-<<<<<<< HEAD
 import frc.robot.subsystems.TurretSubsystem;
-=======
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.commands.IntakeCommand;
->>>>>>> main
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -34,13 +31,9 @@ import frc.robot.commands.IntakeCommand;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
-<<<<<<< HEAD
-//   private final TurretSubsystem m_turret = new TurretSubsystem();
-=======
   // private final IntakeSubsystem m_intake = new IntakeSubsystem();
   // private final TurretSubsystem m_turret = new TurretSubsystem();
   private final IntakeSubsystem m_intake = new IntakeSubsystem();
->>>>>>> main
 
   private final XboxController m_driverController = new XboxController(IOConstants.kDriverControllerPort);
   private final XboxController m_operatorController = new XboxController(IOConstants.kOperatorControllerPort);
