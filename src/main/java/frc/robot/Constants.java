@@ -168,7 +168,7 @@ public final class Constants {
     );
 
     public static final Pose3d kCamPosFront = new Pose3d(
-      new Translation3d(Units.inchesToMeters(9.663), Units.inchesToMeters(10.319), Units.inchesToMeters(7.652)),
+      new Translation3d(Units.inchesToMeters(9.663), Units.inchesToMeters(-10.319), Units.inchesToMeters(7.652)),
       new Rotation3d(Math.PI, Units.degreesToRadians(25), 0)
     );
 
@@ -191,7 +191,7 @@ public final class Constants {
     public static final double kTagDistScalar = 0.3;
 
     public static final boolean kUseVision = true;
-    public static final boolean kUseLeftLL = false;
+    public static final boolean kUseLeftLL = true;
     public static final boolean kUseBackLL = true;
     public static final boolean kUseFrontLL = false;
   }
