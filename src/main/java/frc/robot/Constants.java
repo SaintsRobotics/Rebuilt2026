@@ -75,8 +75,8 @@ public final class Constants {
 
     // In degrees
     public static final double kIntakeLoweredAngle = 0.53;
-    public static final double kIntakeRaisedAngle = 0.1;
-    public static final double kIntakeFullyRaisedAngle = 0.05;
+    public static final double kIntakeRaisedAngle = 0.15;
+    public static final double kIntakeFullyRaisedAngle = 0.11;
 
     /** Encoder offset in rotations */
     public static final double kArmEncoderOffset = 0;
@@ -273,7 +273,7 @@ public final class Constants {
     public static final double kShooterS = 0.0;
     public static final double kShooterV = 0.000185;
 
-    public static final double kHoodAngleP = 0.1;
+    public static final double kHoodAngleP = 1.0;
     public static final double kHoodAngleI = 0;
     public static final double kHoodAngleD = 0;
     

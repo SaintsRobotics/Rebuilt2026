@@ -100,6 +100,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
         m_shooterPID.setTolerance(200);
         
+        SmartDashboard.putNumber("Shooter/Set Hood Output", 0);
     }
 
     //resets shooter
@@ -225,7 +226,9 @@ public class ShooterSubsystem extends SubsystemBase {
 
         //calculates PID output for hood angle and sets hood motor to that output
         double hoodOutput = m_hoodAnglePID.calculate(getHoodAngle());
-        // setHoodMotor(MathUtil.clamp(hoodOutput, -ShooterConstants.kHoodSpeedMax, ShooterConstants.kHoodSpeedMax));
+        setHoodMotor(MathUtil.clamp(-hoodOutput, -ShooterConstants.kHoodSpeedMax, ShooterConstants.kHoodSpeedMax));
+        // setHoodMotor(SmartDashboard.getNumber("Shooter/Set Hood Output", 0));
+        SmartDashboard.putNumber("Shooter/Hood Output", hoodOutput);
 
         // double spindexerOutput = m_spindexerPID.calculate(
         //     m_spindexerMotor.getEncoder().getVelocity()) 

@@ -113,7 +113,7 @@ public class IntakeSubsystem extends SubsystemBase {
   public void periodic() {
 
     // m_armPID.setSetpoint(m_armSetpoint);
-    double armMotorSpeed = MathUtil.clamp(m_armPID.calculate(m_armEncoder.getAbsolutePosition().getValueAsDouble()), -0.3, 0.3);
+    double armMotorSpeed = MathUtil.clamp(m_armPID.calculate(m_armEncoder.getAbsolutePosition().getValueAsDouble(), m_armSetpoint), -0.3, 0.3);
 
     SmartDashboard.putNumber("Motor Speed", armMotorSpeed);
     SmartDashboard.putNumber("Arm Angle", m_armEncoder.getAbsolutePosition().getValueAsDouble());
@@ -177,8 +177,6 @@ public class IntakeSubsystem extends SubsystemBase {
       default:
         break;
     }
-
-    m_armPID.setSetpoint(m_armSetpoint);
   }
 
   public double getArmPosition() {
