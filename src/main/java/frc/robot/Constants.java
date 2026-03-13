@@ -213,7 +213,7 @@ public final class Constants {
 
     public static final double kEncoderMaxDelta = 40.0;
 
-    public static final double kTurretGearing = 45;
+    public static final double kTurretGearing = 180.0;
 
     // Gear ratios 
     public static final double kEncoder1Ratio = kTurretTeeth / kEncoder1Teeth; 
@@ -227,8 +227,8 @@ public final class Constants {
     public static final double kTurretBackAngle = 54.56;
 
     // PID gains
-    public static final double kTurretP = 0.007;  
-    public static final double kTurretI = 0.01;
+    public static final double kTurretP = 0.02;  
+    public static final double kTurretI = 0.02;
     public static final double kTurretD = 0.0;
     public static final double kTurretIZone = 20;
     public static final double kPIDTolerance = 1;

@@ -107,17 +107,21 @@ public class RobotContainer {
         .onTrue(new InstantCommand(() -> m_robotDrive.resetOdometry(new Pose2d()), m_robotDrive));
     
     // operator manual turret
+    // new JoystickButton(m_operatorController, Button.kB.value)
+    //     .onTrue(new InstantCommand(() -> autoAimTurret = false));
+    // new JoystickButton(m_operatorController, Button.kA.value)
+    //     .onTrue(new InstantCommand(() -> autoAimTurret = true));
     new JoystickButton(m_operatorController, Button.kB.value)
-        .onTrue(new InstantCommand(() -> autoAimTurret = false));
+        .onTrue(new InstantCommand(() -> m_turret.setSetpoint(40)));
     new JoystickButton(m_operatorController, Button.kA.value)
-        .onTrue(new InstantCommand(() -> autoAimTurret = true));
+        .onTrue(new InstantCommand(() -> m_turret.setSetpoint(130)));
 
-    new Trigger(() -> {return autoAimTurret;})
-        .whileTrue(new AutoAimTurret(m_turret, m_robotDrive))
-        .whileFalse(new RunCommand(() -> m_turret.setSetpoint(100), m_turret));
+    // new Trigger(() -> {return autoAimTurret;})
+    //     .whileTrue(new AutoAimTurret(m_turret, m_robotDrive))
+    //     .whileFalse(new RunCommand(() -> m_turret.setSetpoint(100), m_turret));
 
-    // new JoystickButton(m_operatorController, Button.kX.value)
-    //     .whileTrue(new RunCommand(() -> m_turret.setSetpoint(140), m_turret));
+    new JoystickButton(m_operatorController, Button.kX.value)
+        .whileTrue(new RunCommand(() -> m_turret.setSetpoint(140), m_turret));
     
     // run intake
     // new JoystickButton(m_driverController, Button.kLeftBumper.value)
