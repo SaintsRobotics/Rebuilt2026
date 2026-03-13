@@ -77,7 +77,7 @@ public class RobotContainer {
 
     // Set turret to continuously aim at the hub
     // m_turret.setDefaultCommand(new AutoAimTurret(m_turret, m_robotDrive));
-    m_turret.setDefaultCommand(new RunCommand(() -> {m_turret.setSetpoint(m_turret.getSetpoint() + MathUtil.applyDeadband(m_operatorController.getLeftX(), IOConstants.kControllerDeadband) * 2);}, m_turret));
+    m_turret.setDefaultCommand(new RunCommand(() -> {m_turret.setSetpoint(m_turret.getSetpoint() + MathUtil.applyDeadband(m_operatorController.getLeftX(), IOConstants.kControllerDeadband) * 0.5);}, m_turret));
   }
 
 
@@ -103,8 +103,12 @@ public class RobotContainer {
         .onTrue(new InstantCommand(() -> m_robotDrive.resetOdometry(new Pose2d()), m_robotDrive));
     
     // operator manual turret
-    new JoystickButton(m_operatorController, Button.kLeftBumper.value)
-        .whileTrue(new RunCommand(() -> m_turret.setSetpoint(90), m_turret));
+    new JoystickButton(m_operatorController, Button.kB.value)
+        .whileTrue(new RunCommand(() -> m_turret.setSetpoint(40), m_turret));
+    new JoystickButton(m_operatorController, Button.kA.value)
+        .whileTrue(new RunCommand(() -> m_turret.setSetpoint(130), m_turret));
+    new JoystickButton(m_operatorController, Button.kX.value)
+        .whileTrue(new RunCommand(() -> m_turret.setSetpoint(140), m_turret));
     
     // run intake
     // new JoystickButton(m_driverController, Button.kLeftBumper.value)
@@ -134,5 +138,9 @@ public class RobotContainer {
     SmartDashboard.putBoolean("In Red", FieldConstants.kRedAllianceRegion.isInRegion(m_robotDrive.getPose()));
     SmartDashboard.putBoolean("In Trench", FieldConstants.kTrenchesRegion.isInRegion(m_robotDrive.getPose()));
 
+  }
+
+  public void reset() {
+    m_turret.reset();
   }
 }

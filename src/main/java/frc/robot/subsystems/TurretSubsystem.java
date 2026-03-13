@@ -33,12 +33,13 @@ import edu.wpi.first.wpilibj.simulation.RoboRioSim;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.TurretConstants;
 
 public class TurretSubsystem extends SubsystemBase {
 
   private final SparkMax m_turretMotor = new SparkMax(TurretConstants.kTurretMotorPort, MotorType.kBrushless);
-  private final PIDController m_turretPID = new PIDController(TurretConstants.kTurretP, TurretConstants.kTurretI, TurretConstants.kTurretD);
+  private final PIDController m_turretPID = new PIDController(TurretConstants.kTurretP, TurretConstants.kTurretI, TurretConstants.kTurretD, Constants.kFastPeriodicPeriod);
   private final SimpleMotorFeedforward m_turretFeedforward = new SimpleMotorFeedforward(TurretConstants.kTurretS, TurretConstants.kTurretV);
 
   // CRT Encoders
@@ -79,7 +80,7 @@ public class TurretSubsystem extends SubsystemBase {
       double crtPosition = calculateTurretPosition();
 
       SparkMaxConfig motorConfig = new SparkMaxConfig();
-      motorConfig.encoder.positionConversionFactor(360);
+      motorConfig.encoder.positionConversionFactor(360 / TurretConstants.kTurretGearing);
       motorConfig.idleMode(IdleMode.kBrake);
       motorConfig.inverted(true);
       m_turretMotor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
@@ -95,38 +96,46 @@ public class TurretSubsystem extends SubsystemBase {
       m_turretMotor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
       m_turretMotor.getEncoder().setPosition(0);
     }
+
+    m_turretPID.setIZone(TurretConstants.kTurretIZone);
+    m_turretPID.setTolerance(TurretConstants.kPIDTolerance);
+
+    SmartDashboard.putNumber("Turret/set output", 0);
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
 
-    double pos = calculateTurretPosition();
-    SmartDashboard.putNumber("Turret/Turret Angle", pos);
+    // double pos = calculateTurretPosition();
+    SmartDashboard.putNumber("Turret/Turret Angle", getTurretPosition());
     SmartDashboard.putNumber("Turret/Encoder 1 Angle", m_encoder1.getAbsolutePosition().getValueAsDouble()*360);
     SmartDashboard.putNumber("Turret/Encoder 2 Angle", m_encoder2.getAbsolutePosition().getValueAsDouble()*360);
 
     SmartDashboard.putNumber("Turret/Turret Setpoint", m_turretPID.getSetpoint());
+    SmartDashboard.putNumber("Turret/Total PID Error", m_turretPID.getAccumulatedError());
     // SmartDashboard.putNumber("Turret Error", getError());
     // SmartDashboard.putNumber("Turret/Turret Output", output);
   }
 
   public void fastPeriodic() {
-    double setpoint = m_turretPID.getSetpoint();
-    double output = m_turretPID.calculate(getTurretPosition(), setpoint) 
-                    + Math.signum(m_turretPID.getError())
-                    * Math.abs(m_turretFeedforward.calculate(relativeAngularVelocity));
+    double output = m_turretPID.calculate(getTurretPosition()); 
+                    // + Math.signum(m_turretPID.getError())
+                    // * Math.abs(m_turretFeedforward.calculate(relativeAngularVelocity));
 
     // Apply deadband
-    double error = setpoint - getTurretPosition();
-    if (Math.abs(error) < TurretConstants.kTurretDeadband) {
-      // output = 0;
-    }
+    // double error = setpoint - getTurretPosition();
+    // if (Math.abs(error) < TurretConstants.kTurretDeadband) {
+    //   // output = 0;
+    // }
 
+    SmartDashboard.putNumber("Turret/pid error", m_turretPID.getError());
+    SmartDashboard.putNumber("Turret/pid output", output);
     output = MathUtil.clamp(output, -TurretConstants.kTurretMaxSpeed, TurretConstants.kTurretMaxSpeed);
-    m_turretMotor.set(output);
+    m_turretMotor.set(m_turretPID.atSetpoint() ? 0 : output);
+    // m_turretMotor.set(SmartDashboard.getNumber("Turret/set output", 0));
 
-    SmartDashboard.putNumber("Turret/output", output);
+    SmartDashboard.putNumber("Turret/output", m_turretMotor.get());
   }
 
   @Override
@@ -235,8 +244,7 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   public double getTurretPosition() {
-    // return m_turretMotor.getEncoder().getPosition();
-    return calculateTurretPosition();
+    return m_turretMotor.getEncoder().getPosition();
   }
 
   // Returns the current error between setpoint and position
@@ -277,6 +285,12 @@ public class TurretSubsystem extends SubsystemBase {
       diff += 1.0;
     }
     return diff * (1/(TurretConstants.kEncoder1Ratio - TurretConstants.kEncoder2Ratio)) * 360.0;
+  }
+
+  public void reset() {
+    m_turretPID.setSetpoint(getTurretPosition());
+    m_turretPID.reset();
+    m_turretMotor.set(0);
   }
 
 }

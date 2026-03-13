@@ -200,6 +200,8 @@ public final class Constants {
 
     public static final double kEncoderMaxDelta = 40.0;
 
+    public static final double kTurretGearing = 45;
+
     // Gear ratios 
     public static final double kEncoder1Ratio = kTurretTeeth / kEncoder1Teeth; 
     public static final double kEncoder2Ratio = kTurretTeeth / kEncoder2Teeth; 
@@ -208,18 +210,21 @@ public final class Constants {
     public static final double kEncoder1OffsetDegrees = 0.0;  
     public static final double kEncoder2OffsetDegrees = 0.0;  
 
-    public static final double kTurretMaxRotation = 360; 
+    public static final double kTurretMaxRotation = 337; 
+    public static final double kTurretBackAngle = 54.56;
 
     // PID gains
-    public static final double kTurretP = 0.008;  
-    public static final double kTurretI = 0.0;
-    public static final double kTurretD = 0; 
+    public static final double kTurretP = 0.007;  
+    public static final double kTurretI = 0.01;
+    public static final double kTurretD = 0.0;
+    public static final double kTurretIZone = 20;
+    public static final double kPIDTolerance = 1;
 
     // Feedforward gains
     public static final double kTurretS = 0.02;  
     public static final double kTurretV = 0.10;  
 
-    public static final double kTurretMaxSpeed = 0.5;  
+    public static final double kTurretMaxSpeed = 0.6;  
     public static final double kTurretDeadband = 2.0;  
     public static final double kTurretTolerance = 1.5;
     public static final Pose2d kTurretOffset = new Pose2d(Units.inchesToMeters(-4.203), Units.inchesToMeters(7.701), new Rotation2d());
