@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.ShooterConstants;
 
@@ -21,21 +22,21 @@ public class LaunchCalc{
     static {
         // Populate the LUTs with empirical data
         // Example entries (distance in meters, flywheel speed in RPM, hood angle in degrees)
-        FlywheelLUT.put(1.0, 1700.0);
-        FlywheelLUT.put(2.0, 1800.0);
-        FlywheelLUT.put(3.0, 1950.0);
-        FlywheelLUT.put(4.0, 2050.0);
-        FlywheelLUT.put(5.0, 2250.0);
-        FlywheelLUT.put(6.0, 2350.0);
-        FlywheelLUT.put(8.0, 2650.0);
+        FlywheelLUT.put(Units.inchesToMeters(37.625), 3000.0);
+        FlywheelLUT.put(Units.inchesToMeters(37.625 + 36), 3000.0);
+        FlywheelLUT.put(Units.inchesToMeters(37.625 + 72), 3000.0);
+        FlywheelLUT.put(Units.inchesToMeters(37.625 + 108), 3300.0);
+        FlywheelLUT.put(Units.inchesToMeters(37.625 + 144), 3700.0);
+        FlywheelLUT.put(Units.inchesToMeters(37.625 + 180), 3700.0);
+        FlywheelLUT.put(Units.inchesToMeters(180 + 56), 4300.0);
 
-        LaunchAngleLUT.put(1.0, 82.5);
-        LaunchAngleLUT.put(2.0, 77.5);
-        LaunchAngleLUT.put(3.0, 72.5);
-        LaunchAngleLUT.put(4.0, 67.5);
-        LaunchAngleLUT.put(5.0, 67.5);
-        LaunchAngleLUT.put(6.0, 65.0);
-        LaunchAngleLUT.put(8.0, 65.0);
+        LaunchAngleLUT.put(Units.inchesToMeters(37.625), 0.0);
+        LaunchAngleLUT.put(Units.inchesToMeters(37.625 + 36), 0.2);
+        LaunchAngleLUT.put(Units.inchesToMeters(37.625 + 72), 0.3);
+        LaunchAngleLUT.put(Units.inchesToMeters(37.625 + 108), 0.3);
+        LaunchAngleLUT.put(Units.inchesToMeters(37.625 + 144), 0.35);
+        LaunchAngleLUT.put(Units.inchesToMeters(37.625 + 180), 0.4);
+        LaunchAngleLUT.put(Units.inchesToMeters(180 + 56), 0.43);
 
         TimeLUT.put(1.0, 0.97);
         TimeLUT.put(2.0, 0.95);

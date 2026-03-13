@@ -7,6 +7,7 @@ package frc.robot.commands;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
 import frc.robot.subsystems.ShooterSubsystem;
@@ -36,8 +37,8 @@ public class ShooterCommand extends Command {
         m_shooterSubsystem.setShooterParameters(
             // LaunchCalc.findFlywheelSpeed(m_robotPoseSupplier.get(), m_targetSupplier.get()), 
             // 90 - LaunchCalc.findHoodAngle(m_robotPoseSupplier.get(), m_targetSupplier.get())
-            3000,
-            0.36
+            SmartDashboard.getNumber("Shooter/Input Shooter Speed", 0),
+            SmartDashboard.getNumber("Shooter/Hood Angle Input", 0)
         );
         
         if (m_shooterSubsystem.isShooterReady()) {

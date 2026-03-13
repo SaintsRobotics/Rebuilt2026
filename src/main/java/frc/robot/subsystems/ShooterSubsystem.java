@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.Constants.ShooterConstants;
 
@@ -48,7 +49,7 @@ public class ShooterSubsystem extends SubsystemBase {
     private final SparkFlex m_transferMotor = new SparkFlex(ShooterConstants.kTransferPort, MotorType.kBrushless);
 
     //PID controllers and feedforward for shooter speed and hood angle
-    private final PIDController m_shooterPID = new PIDController(ShooterConstants.kShooterP, ShooterConstants.kShooterI, ShooterConstants.kShooterD);
+    private final PIDController m_shooterPID = new PIDController(ShooterConstants.kShooterP, ShooterConstants.kShooterI, ShooterConstants.kShooterD, Constants.kFastPeriodicPeriod);
     private final SimpleMotorFeedforward m_shooterFeedforward = new SimpleMotorFeedforward(ShooterConstants.kShooterS, ShooterConstants.kShooterV);
 
     // TODO: tune these lol
@@ -58,7 +59,7 @@ public class ShooterSubsystem extends SubsystemBase {
     private final PIDController m_transferPID = new PIDController(0.01, 0, 0);
     private final SimpleMotorFeedforward m_transferFF = new SimpleMotorFeedforward(0, 0.01);
 
-    private final PIDController m_hoodAnglePID = new PIDController(ShooterConstants.kHoodAngleP, ShooterConstants.kHoodAngleI, ShooterConstants.kHoodAngleD);
+    private final PIDController m_hoodAnglePID = new PIDController(ShooterConstants.kHoodAngleP, ShooterConstants.kHoodAngleI, ShooterConstants.kHoodAngleD, Constants.kFastPeriodicPeriod);
 
     private boolean spindexerOn = false;
     private boolean transferOn = false;
@@ -101,6 +102,8 @@ public class ShooterSubsystem extends SubsystemBase {
         m_shooterPID.setTolerance(200);
         
         SmartDashboard.putNumber("Shooter/Set Hood Output", 0);
+        SmartDashboard.putNumber("Shooter/Input Shooter Speed", 0);
+        SmartDashboard.putNumber("Shooter/Hood Angle Input", 0);
     }
 
     //resets shooter
