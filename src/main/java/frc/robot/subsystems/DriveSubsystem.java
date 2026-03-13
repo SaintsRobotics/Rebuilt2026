@@ -210,14 +210,18 @@ public class DriveSubsystem extends SubsystemBase {
     boolean LLreal = LimelightHelpers.getLatency_Pipeline(name) != 0.0;
     if (VisionConstants.kUseVision && Robot.isReal() && LLreal) {
       // Update LimeLight with current robot orientation
-      LimelightHelpers.SetRobotOrientation(name, m_poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0.0, 0.0, 0.0, 0.0, 0.0);
+      // LimelightHelpers.SetRobotOrientation(name, m_poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0.0, 0.0, 0.0, 0.0, 0.0);
+      LimelightHelpers.SetRobotOrientation(name, getGyroAngle().getDegrees(), 0.0, 0.0, 0.0, 0.0, 0.0);
       // LimelightHelpers.SetRobotOrientation(name, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 
       // Get the pose estimate
       LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(name);
 
+      // if the pose is wayyy off reject it
+      boolean measurementValid = limelightMeasurement.pose.getTranslation().getDistance(getPose().getTranslation()) < VisionConstants.kTagDistThreshold;
+
       // Add it to your pose estimator if it is a valid measurement
-      if (limelightMeasurement != null && limelightMeasurement.tagCount != 0 && m_gyro.getRate() < 720) {
+      if (limelightMeasurement != null && limelightMeasurement.tagCount != 0 && m_gyro.getRate() < 720 && measurementValid) {
         // scale vision standard deviation by tag count and distance
         double stdDev = VisionConstants.kVisionPosStdDev
         * (1 + VisionConstants.kTagDistScalar * limelightMeasurement.avgTagDist * limelightMeasurement.avgTagDist) // 1 + k * distance^2
