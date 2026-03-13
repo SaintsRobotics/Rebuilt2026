@@ -182,9 +182,11 @@ public class TurretSubsystem extends SubsystemBase {
 
     // Find best target angle
     double currentPosition = getTurretPosition();
-    double targetAngle = findBestAngle(robotRelativeAngle, currentPosition);
+    //double targetAngle = findBestAngle(robotRelativeAngle, currentPosition);
+    double targetAngle = findBestAngle( TurretConstants.kTurretFrontAngle - robotRelativeAngle, currentPosition);
     targetAngle = MathUtil.clamp(targetAngle, 0, TurretConstants.kTurretMaxRotation);
-    m_turretPID.setSetpoint(360 - targetAngle);
+    //m_turretPID.setSetpoint(360 - targetAngle);
+    m_turretPID.setSetpoint(targetAngle);
 
     // Calculate feedforward velocity
     relativeAngularVelocity = (targetAngle - previousTargetAngle) / 0.02 - robotAngularVelocity;
