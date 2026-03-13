@@ -55,6 +55,10 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledPeriodic() {}
 
+  @Override
+  public void autonomousInit() {
+    m_robotContainer.reset();
+  }
 
   /** This function is called periodically during autonomous. */
   @Override
@@ -69,6 +73,7 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+    m_robotContainer.reset();
   }
 
   /** This function is called periodically during operator control. */

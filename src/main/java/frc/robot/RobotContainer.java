@@ -28,11 +28,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.IOConstants;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.TurretConstants;
+import frc.robot.commands.AutoAimTurret;
 import frc.robot.commands.ShooterCommand;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
@@ -42,8 +44,10 @@ import frc.robot.utils.FindTarget;
 import frc.robot.utils.FuelSim;
 import frc.robot.utils.LaunchCalc;
 import frc.robot.Constants.FieldConstants;
+import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.commands.IntakeCommand;
+import frc.robot.subsystems.TurretSubsystem;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -54,14 +58,14 @@ import frc.robot.commands.IntakeCommand;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
-//   private final TurretSubsystem m_turret = new TurretSubsystem();
   private final ShooterSubsystem m_shooter = new ShooterSubsystem();
-  // private final IntakeSubsystem m_intake = new IntakeSubsystem();
-  // private final TurretSubsystem m_turret = new TurretSubsystem();
+  private final TurretSubsystem m_turret = new TurretSubsystem();
   private final IntakeSubsystem m_intake = new IntakeSubsystem();
 
   private final XboxController m_driverController = new XboxController(IOConstants.kDriverControllerPort);
   private final XboxController m_operatorController = new XboxController(IOConstants.kOperatorControllerPort);
+
+  private boolean autoAimTurret = false;
 
   public final FuelSim fuelSim;
   private final StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault().getStructTopic("SotM Target/5 iterations", Pose2d.struct).publish();
@@ -75,7 +79,6 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-
     // Configure the trigger bindings
     configureBindings();
 
@@ -117,7 +120,11 @@ public class RobotContainer {
     // m_turret));
     
     //m_shooter.setDefaultCommand(new ShooterCommand(m_shooter, m_robotDrive::getPose, () -> {return currentTarget;}));
-}
+
+    // Set turret to continuously aim at the hub
+    // m_turret.setDefaultCommand(new AutoAimTurret(m_turret, m_robotDrive));
+    // m_turret.setDefaultCommand(new RunCommand(() -> {m_turret.setSetpoint(m_turret.getSetpoint() + MathUtil.applyDeadband(m_operatorController.getLeftX(), IOConstants.kControllerDeadband) * 0.5);}, m_turret));
+  }
 
 
   /**
@@ -137,7 +144,7 @@ public class RobotContainer {
     new JoystickButton(m_driverController, Button.kStart.value)
         .onTrue(new InstantCommand(m_robotDrive::zeroHeading, m_robotDrive));
 
-    // driver reset odometry
+    // // driver reset odometry
     new JoystickButton(m_driverController, Button.kBack.value)
         .onTrue(new InstantCommand(() -> m_robotDrive.resetOdometry(new Pose2d()), m_robotDrive));
 
@@ -171,6 +178,38 @@ public class RobotContainer {
       
     new Trigger(() -> {return m_driverController.getLeftTriggerAxis() > 0.5;})
         .whileTrue(new IntakeCommand(m_intake));
+    
+    // operator manual turret
+    new JoystickButton(m_operatorController, Button.kB.value)
+        .onTrue(new InstantCommand(() -> autoAimTurret = false));
+    new JoystickButton(m_operatorController, Button.kA.value)
+        .onTrue(new InstantCommand(() -> autoAimTurret = true));
+    new Trigger(() -> {return autoAimTurret;})
+        .whileTrue(new AutoAimTurret(m_turret, m_robotDrive))
+        .whileFalse(new RunCommand(() -> m_turret.setSetpoint(100), m_turret));
+    
+    // operator turret cardinal directions
+    new POVButton(m_driverController, 0)
+        .onTrue(new InstantCommand(() -> m_turret.setSetpoint(TurretConstants.kTurretFrontAngle), m_turret));
+    new POVButton(m_driverController, 90)
+        .onTrue(new InstantCommand(() -> m_turret.setSetpoint(TurretConstants.kTurretRightAngle), m_turret));
+    new POVButton(m_driverController, 180)
+        .onTrue(new InstantCommand(() -> m_turret.setSetpoint(TurretConstants.kTurretBackAngle), m_turret));
+    new POVButton(m_driverController, 270)
+        .onTrue(new InstantCommand(() -> m_turret.setSetpoint(TurretConstants.kTurretLeftAngle), m_turret));
+
+    // new JoystickButton(m_operatorController, Button.kB.value)
+    //     .onTrue(new InstantCommand(() -> m_turret.setSetpoint(40)));
+    // new JoystickButton(m_operatorController, Button.kA.value)
+    //     .onTrue(new InstantCommand(() -> m_turret.setSetpoint(130)));
+    // new JoystickButton(m_operatorController, Button.kX.value)
+    //     .whileTrue(new RunCommand(() -> m_turret.setSetpoint(140), m_turret));
+    
+    // run intake
+    new JoystickButton(m_driverController, Button.kLeftBumper.value)
+        .whileTrue(new IntakeCommand(m_intake));
+    
+    
   }
 
   private void configureFuelSim() {
@@ -189,11 +228,7 @@ public class RobotContainer {
         Units.inchesToMeters(5), 
         m_robotDrive::getPose, 
         m_robotDrive::getRobotRelativeSpeeds);
-    
-    // run intake
-    new JoystickButton(m_driverController, Button.kLeftBumper.value)
-        .whileTrue(new IntakeCommand(m_intake));
-  }
+    }
 
   /**
    * This periodic loop runs every 10ms (100Hz)
@@ -205,6 +240,7 @@ public class RobotContainer {
    */
   public void fastPeriodic() {
     m_robotDrive.fastPeriodic();
+    m_turret.fastPeriodic();
     m_shooter.fastPeriodic();
 
     ChassisSpeeds speeds = ChassisSpeeds.fromRobotRelativeSpeeds(m_robotDrive.getRobotRelativeSpeeds(), m_robotDrive.getPose().getRotation());
@@ -224,4 +260,7 @@ public class RobotContainer {
 
   }
 
+  public void reset() {
+    m_turret.reset();
+  }
 }
