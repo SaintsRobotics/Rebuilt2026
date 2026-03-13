@@ -172,7 +172,11 @@ public class ShooterSubsystem extends SubsystemBase {
 
     //returns hood angle from the hood encoder
     public double getHoodAngle() {
-        return m_hoodEncoder.getAbsolutePosition().getValueAsDouble();
+        double angle = m_hoodEncoder.getAbsolutePosition().getValueAsDouble();
+        if (angle > ShooterConstants.kHoodAngleMax + 0.1) {
+            angle -= 1;
+        }
+        return angle;
         // return m_hoodAnglePID.getSetpoint();
     }
 

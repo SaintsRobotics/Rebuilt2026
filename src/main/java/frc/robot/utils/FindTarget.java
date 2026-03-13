@@ -53,7 +53,8 @@ public class FindTarget {
     return new Pose2d(
       DriverStation.getAlliance().isPresent() && DriverStation.getAlliance().get().equals(Alliance.Blue) ? Meters.zero() : Meters.of(FieldConstants.kFieldLength),
       robotPose.getMeasureY(),
-      robotPose.getRotation()
+      // robotPose.getRotation()
+      new Rotation2d()
     );
     
   }

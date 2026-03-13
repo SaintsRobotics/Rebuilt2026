@@ -303,7 +303,7 @@ public final class Constants {
     public static final Pose2d kHubPose = new Pose2d(
       new Translation2d(
         Units.inchesToMeters(182.11),
-        Units.inchesToMeters(158.84)),
+        Units.inchesToMeters(158.84 /*  - 6 */)), //offset to test on our hub which may be offset
       new Rotation2d()
     );
 

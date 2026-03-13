@@ -46,7 +46,7 @@ import frc.robot.utils.LaunchCalc;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.commands.IntakeCommand;
+import frc.robot.commands.RunIntake;
 import frc.robot.subsystems.TurretSubsystem;
 
 /*
@@ -170,23 +170,28 @@ public class RobotContainer {
     // })
     // .withName("Launch Fuel"));
 
+    // driver shoot
     new Trigger(() -> {return m_driverController.getRightTriggerAxis() > 0.5;})
         .whileTrue(new ShooterCommand(m_shooter, m_robotDrive::getPose, () -> {return currentTarget;}));
 
+    // keep hood down in trench
     new Trigger(() -> {return FieldConstants.kTrenchesRegion.isInRegion(m_robotDrive.getPose());})
         .whileTrue(new InstantCommand(() -> m_shooter.setHoodAngle(0), m_shooter));
-      
-    new Trigger(() -> {return m_driverController.getLeftTriggerAxis() > 0.5;})
-        .whileTrue(new IntakeCommand(m_intake));
     
-    // // operator manual turret
-    // new JoystickButton(m_operatorController, Button.kB.value)
-    //     .onTrue(new InstantCommand(() -> autoAimTurret = false));
-    // new JoystickButton(m_operatorController, Button.kA.value)
-    //     .onTrue(new InstantCommand(() -> autoAimTurret = true));
-    // new Trigger(() -> {return autoAimTurret;})
-    //     .whileTrue(new AutoAimTurret(m_turret, m_robotDrive))
-    //     .whileFalse(new RunCommand(() -> m_turret.setSetpoint(100), m_turret));
+    // intake toggle pivot and run intake
+    new Trigger(() -> {return m_driverController.getLeftTriggerAxis() > 0.5;})
+        .whileTrue(new RunIntake(m_intake));
+    new JoystickButton(m_driverController, Button.kLeftBumper.value)
+        .onTrue(new InstantCommand(m_intake::togglePivot));
+    
+    // operator manual turret
+    new JoystickButton(m_operatorController, Button.kB.value)
+        .onTrue(new InstantCommand(() -> autoAimTurret = false));
+    new JoystickButton(m_operatorController, Button.kA.value)
+        .onTrue(new InstantCommand(() -> autoAimTurret = true));
+    new Trigger(() -> {return autoAimTurret;})
+        .whileTrue(new AutoAimTurret(m_turret, m_robotDrive))
+        .onFalse(new InstantCommand(() -> m_turret.setSetpoint(100), m_turret));
     
     // operator turret cardinal directions
     new JoystickButton(m_driverController, Button.kY.value)
@@ -252,6 +257,8 @@ public class RobotContainer {
     SmartDashboard.putBoolean("In Blue", FieldConstants.kBlueAllianceRegion.isInRegion(m_robotDrive.getPose()));
     SmartDashboard.putBoolean("In Red", FieldConstants.kRedAllianceRegion.isInRegion(m_robotDrive.getPose()));
     SmartDashboard.putBoolean("In Trench", FieldConstants.kTrenchesRegion.isInRegion(m_robotDrive.getPose()));
+
+    SmartDashboard.putBoolean("Should Score Hub", FindTarget.shouldScoreHub(m_robotDrive.getPose()));
 
   }
 

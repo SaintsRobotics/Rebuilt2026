@@ -199,6 +199,17 @@ public class IntakeSubsystem extends SubsystemBase {
     m_intakeMotor.set(speed);
   }
 
+  public void togglePivot() {
+    switch (m_armPosition) {
+      case Extended:
+        setArmPosition(ArmPosition.Retracted);
+        break;
+      case Retracted:
+        setArmPosition(ArmPosition.Extended);
+        break;
+    }
+  }
+
 
 
   public static enum ArmPosition {

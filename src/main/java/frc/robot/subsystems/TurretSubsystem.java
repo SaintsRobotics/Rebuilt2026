@@ -236,8 +236,7 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   public double getTurretPosition() {
-    // return m_turretMotor.getEncoder().getPosition();
-    return m_turretPID.getSetpoint();
+    return m_turretMotor.getEncoder().getPosition();
   }
 
   // Returns the current error between setpoint and position
