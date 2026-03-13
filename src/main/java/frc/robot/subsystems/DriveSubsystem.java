@@ -218,7 +218,8 @@ public class DriveSubsystem extends SubsystemBase {
       LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(name);
 
       // if the pose is wayyy off reject it
-      boolean measurementValid = limelightMeasurement.pose.getTranslation().getDistance(getPose().getTranslation()) < VisionConstants.kTagDistThreshold;
+      // boolean measurementValid = limelightMeasurement.pose.getTranslation().getDistance(getPose().getTranslation()) < VisionConstants.kTagDistThreshold;
+      boolean measurementValid = true;
 
       // Add it to your pose estimator if it is a valid measurement
       if (limelightMeasurement != null && limelightMeasurement.tagCount != 0 && m_gyro.getRate() < 720 && measurementValid) {

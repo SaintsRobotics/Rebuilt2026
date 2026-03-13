@@ -109,6 +109,8 @@ public class TurretSubsystem extends SubsystemBase {
 
     // double pos = calculateTurretPosition();
     SmartDashboard.putNumber("Turret/Turret Angle", getTurretPosition());
+    SmartDashboard.putNumber("Turret/Absolute Angle", calculateTurretPosition());
+    SmartDashboard.putNumber("Turret/Drift value", calculateTurretPosition() - getTurretPosition() );
     SmartDashboard.putNumber("Turret/Encoder 1 Angle", m_encoder1.getAbsolutePosition().getValueAsDouble()*360);
     SmartDashboard.putNumber("Turret/Encoder 2 Angle", m_encoder2.getAbsolutePosition().getValueAsDouble()*360);
 
@@ -176,12 +178,12 @@ public class TurretSubsystem extends SubsystemBase {
     double robotRelativeAngle = targetDistance.getTranslation().getAngle().getDegrees();
 
     // Normalize to -180 to 180 range
-    robotRelativeAngle = MathUtil.inputModulus(robotRelativeAngle, -180, 180);
+    // robotRelativeAngle = MathUtil.inputModulus(robotRelativeAngle, 0, 360);
 
     // Find best target angle
     double currentPosition = getTurretPosition();
     double targetAngle = findBestAngle(robotRelativeAngle, currentPosition);
-    targetAngle = MathUtil.clamp(targetAngle, -TurretConstants.kTurretMaxRotation / 2, TurretConstants.kTurretMaxRotation / 2);
+    targetAngle = MathUtil.clamp(targetAngle, 0, TurretConstants.kTurretMaxRotation);
     m_turretPID.setSetpoint(targetAngle);
 
     // Calculate feedforward velocity
@@ -207,7 +209,7 @@ public class TurretSubsystem extends SubsystemBase {
 
   // Finds best angle within physical limits
   private double findBestAngle(double targetAngle, double currentPosition) {
-    double maxRotation = TurretConstants.kTurretMaxRotation / 2;
+    double maxRotation = TurretConstants.kTurretMaxRotation;
     double[] candidates = {
       targetAngle - 360,
       targetAngle,
@@ -216,7 +218,7 @@ public class TurretSubsystem extends SubsystemBase {
     double bestInBounds = Double.NaN;
     double minDist = Double.MAX_VALUE;
     for (double candidate : candidates) {
-      if (Math.abs(candidate) <= maxRotation) {
+      if (candidate <= maxRotation && 0 <= candidate) {
         double moveDist = Math.abs(candidate - currentPosition);
         if (moveDist < minDist) {
           minDist = moveDist;
@@ -226,19 +228,7 @@ public class TurretSubsystem extends SubsystemBase {
     }
     if (!Double.isNaN(bestInBounds)) {
       return bestInBounds;
-    }
-    // If is out of bounds, figure out where we want to be anyways
-    if (currentPosition > 0) {
-      double targetOnNegativeSide = targetAngle < 0 ? targetAngle : targetAngle - 360;
-      if (targetOnNegativeSide < -(maxRotation - 90.0)) {
-        return -maxRotation;
-      }
-    } else {
-      double targetOnPositiveSide = targetAngle > 0 ? targetAngle : targetAngle + 360;
-      if (targetOnPositiveSide > (maxRotation - 90.0)) {
-        return maxRotation;
-      }
-    }
+    }  
 
     return currentPosition;
   }
@@ -288,9 +278,10 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   public void reset() {
+    m_turretMotor.getEncoder().setPosition(calculateTurretPosition() > 500 ? calculateTurretPosition() - 727.92 : calculateTurretPosition());
+    m_turretMotor.set(0);
     m_turretPID.setSetpoint(getTurretPosition());
     m_turretPID.reset();
-    m_turretMotor.set(0);
   }
 
 }

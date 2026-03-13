@@ -192,7 +192,7 @@ public final class Constants {
     public static final double kTagDistThreshold = 3.0; // Vision measurements further from the current pose than this value will be rejected
 
     public static final boolean kUseVision = true;
-    public static final boolean kUseLeftLL = true;
+    public static final boolean kUseLeftLL = false;
     public static final boolean kUseBackLL = true;
     public static final boolean kUseFrontLL = false;
   }
@@ -223,7 +223,7 @@ public final class Constants {
     public static final double kEncoder1OffsetDegrees = 0.0;  
     public static final double kEncoder2OffsetDegrees = 0.0;  
 
-    public static final double kTurretMaxRotation = 337; 
+    public static final double kTurretMaxRotation = 334; 
     public static final double kTurretBackAngle = 54.56;
 
     // PID gains
@@ -240,7 +240,10 @@ public final class Constants {
     public static final double kTurretMaxSpeed = 0.6;  
     public static final double kTurretDeadband = 2.0;  
     public static final double kTurretTolerance = 1.5;
-    public static final Pose2d kTurretOffset = new Pose2d(Units.inchesToMeters(-4.203), Units.inchesToMeters(7.701), new Rotation2d());
+    public static final Pose2d kTurretOffset = new Pose2d(
+        Units.inchesToMeters(-4.203), 
+        Units.inchesToMeters(7.701), 
+        new Rotation2d(Units.degreesToRadians(-217.28082275390625)));
 
     public static final double kTurretSimGearRatio = 100.0; 
     public static final double kTurretSimMOI = 0.5;

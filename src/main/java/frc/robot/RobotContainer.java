@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.IOConstants;
 import frc.robot.commands.AutoAimTurret;
@@ -38,6 +39,8 @@ public class RobotContainer {
 
   private final XboxController m_driverController = new XboxController(IOConstants.kDriverControllerPort);
   private final XboxController m_operatorController = new XboxController(IOConstants.kOperatorControllerPort);
+
+  private boolean autoAimTurret = false;
 
 
   /**
@@ -78,7 +81,7 @@ public class RobotContainer {
 
     // Set turret to continuously aim at the hub
     // m_turret.setDefaultCommand(new AutoAimTurret(m_turret, m_robotDrive));
-    m_turret.setDefaultCommand(new RunCommand(() -> {m_turret.setSetpoint(m_turret.getSetpoint() + MathUtil.applyDeadband(m_operatorController.getLeftX(), IOConstants.kControllerDeadband) * 0.5);}, m_turret));
+    // m_turret.setDefaultCommand(new RunCommand(() -> {m_turret.setSetpoint(m_turret.getSetpoint() + MathUtil.applyDeadband(m_operatorController.getLeftX(), IOConstants.kControllerDeadband) * 0.5);}, m_turret));
   }
 
 
@@ -105,11 +108,16 @@ public class RobotContainer {
     
     // operator manual turret
     new JoystickButton(m_operatorController, Button.kB.value)
-        .whileTrue(new RunCommand(() -> m_turret.setSetpoint(40), m_turret));
+        .onTrue(new InstantCommand(() -> autoAimTurret = false));
     new JoystickButton(m_operatorController, Button.kA.value)
-        .whileTrue(new RunCommand(() -> m_turret.setSetpoint(130), m_turret));
-    new JoystickButton(m_operatorController, Button.kX.value)
-        .whileTrue(new RunCommand(() -> m_turret.setSetpoint(140), m_turret));
+        .onTrue(new InstantCommand(() -> autoAimTurret = true));
+
+    new Trigger(() -> {return autoAimTurret;})
+        .whileTrue(new AutoAimTurret(m_turret, m_robotDrive))
+        .whileFalse(new RunCommand(() -> m_turret.setSetpoint(100), m_turret));
+
+    // new JoystickButton(m_operatorController, Button.kX.value)
+    //     .whileTrue(new RunCommand(() -> m_turret.setSetpoint(140), m_turret));
     
     // run intake
     // new JoystickButton(m_driverController, Button.kLeftBumper.value)
