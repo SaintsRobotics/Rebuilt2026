@@ -81,6 +81,7 @@ public class TurretSubsystem extends SubsystemBase {
       SparkMaxConfig motorConfig = new SparkMaxConfig();
       motorConfig.encoder.positionConversionFactor(360);
       motorConfig.idleMode(IdleMode.kBrake);
+      motorConfig.inverted(true);
       m_turretMotor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
 
       m_turretMotor.getEncoder().setPosition(crtPosition);
@@ -90,6 +91,7 @@ public class TurretSubsystem extends SubsystemBase {
       SparkMaxConfig motorConfig = new SparkMaxConfig();
       motorConfig.encoder.positionConversionFactor(360);
       motorConfig.idleMode(IdleMode.kBrake);
+      motorConfig.inverted(true);
       m_turretMotor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
       m_turretMotor.getEncoder().setPosition(0);
     }
@@ -244,7 +246,7 @@ public class TurretSubsystem extends SubsystemBase {
 
   // Set turret setpoint
   public void setSetpoint(double angle) {
-    double clampedAngle = MathUtil.clamp(angle, -TurretConstants.kTurretMaxRotation / 2, TurretConstants.kTurretMaxRotation / 2);
+    double clampedAngle = MathUtil.clamp(angle, 0, TurretConstants.kTurretMaxRotation);
     m_turretPID.setSetpoint(clampedAngle);
   }
 

@@ -211,7 +211,7 @@ public final class Constants {
     public static final double kTurretMaxRotation = 360; 
 
     // PID gains
-    public static final double kTurretP = 0.005;  
+    public static final double kTurretP = 0.008;  
     public static final double kTurretI = 0.0;
     public static final double kTurretD = 0; 
 
@@ -222,7 +222,7 @@ public final class Constants {
     public static final double kTurretMaxSpeed = 0.5;  
     public static final double kTurretDeadband = 2.0;  
     public static final double kTurretTolerance = 1.5;
-    public static final Pose2d kTurretOffset = new Pose2d();
+    public static final Pose2d kTurretOffset = new Pose2d(Units.inchesToMeters(-4.203), Units.inchesToMeters(7.701), new Rotation2d());
 
     public static final double kTurretSimGearRatio = 100.0; 
     public static final double kTurretSimMOI = 0.5;
