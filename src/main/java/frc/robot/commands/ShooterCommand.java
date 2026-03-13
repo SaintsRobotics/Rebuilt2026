@@ -35,10 +35,10 @@ public class ShooterCommand extends Command {
     public void execute() {
         
         m_shooterSubsystem.setShooterParameters(
-            // LaunchCalc.findFlywheelSpeed(m_robotPoseSupplier.get(), m_targetSupplier.get()), 
-            // 90 - LaunchCalc.findHoodAngle(m_robotPoseSupplier.get(), m_targetSupplier.get())
-            SmartDashboard.getNumber("Shooter/Input Shooter Speed", 0),
-            SmartDashboard.getNumber("Shooter/Hood Angle Input", 0)
+            LaunchCalc.findFlywheelSpeed(m_robotPoseSupplier.get(), m_targetSupplier.get()), 
+            LaunchCalc.findHoodAngle(m_robotPoseSupplier.get(), m_targetSupplier.get())
+            // SmartDashboard.getNumber("Shooter/Input Shooter Speed", 0),
+            // SmartDashboard.getNumber("Shooter/Hood Angle Input", 0)
         );
         
         if (m_shooterSubsystem.isShooterReady()) {
