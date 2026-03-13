@@ -18,6 +18,7 @@ import frc.robot.Constants.IOConstants;
 import frc.robot.commands.AutoAimTurret;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.Constants.FieldConstants;
+import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.commands.IntakeCommand;
 import frc.robot.subsystems.TurretSubsystem;

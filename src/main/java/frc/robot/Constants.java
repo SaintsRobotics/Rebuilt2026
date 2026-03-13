@@ -158,19 +158,25 @@ public final class Constants {
     // TODO: Update cam pose relative to center of bot
     public static final Pose3d kCamPosLeft = new Pose3d(
       // new Translation3d(0.3048,0.254,0),
-      new Translation3d(0.3429, -0.2413, 0.2413),
-      new Rotation3d(0,10,0)
+      new Translation3d(Units.inchesToMeters(-10.534), Units.inchesToMeters(-9.664), Units.inchesToMeters(7.646)),
+      new Rotation3d(Math.PI, Units.degreesToRadians(25), Math.PI/2) // these angles are in radians counterclockwise
     );
 
-    public static final Pose3d kCamPosRight = new Pose3d(
-      new Translation3d(0.3429, 0.2413, 0.2413),
-      new Rotation3d(0,0,0)
+    public static final Pose3d kCamPosBack = new Pose3d(
+      new Translation3d(Units.inchesToMeters(-9.664), Units.inchesToMeters(10.534), Units.inchesToMeters(7.646)),
+      new Rotation3d(Math.PI, Units.degreesToRadians(25), Math.PI)
+    );
+
+    public static final Pose3d kCamPosFront = new Pose3d(
+      new Translation3d(Units.inchesToMeters(9.663), Units.inchesToMeters(-10.319), Units.inchesToMeters(7.652)),
+      new Rotation3d(Math.PI, Units.degreesToRadians(25), 0)
     );
 
     
 
+    public static final String kLimelightNameBack = "limelight-sr";
     public static final String kLimelightNameLeft = "limelight";
-    public static final String kLimelightNameRight = "limelight-sr";
+    public static final String kLimelightNameFront = "limelight-topaz";
 
     // https://docs.limelightvision.io/docs/docs-limelight/pipeline-apriltag/apriltag-robot-localization-megatag2
     public static final int kIMUMode = 0;
@@ -179,9 +185,16 @@ public final class Constants {
     public static final Vector<N3> kOdometrySTDDevs = VecBuilder.fill(0.1, 0.1, 0.1);
     public static final Vector<N3> kVisionSTDDevs = VecBuilder.fill(0.7, 0.7, 999999);
 
-    public static final boolean kUseVision = false;
+    public static final double kVisionPosStdDev = 0.7;
+    public static final double kVisionAngleStdDev = 999999; // really high because we always trust gyro angle more
+    public static final double kTagCountScalar = 0.7;
+    public static final double kTagDistScalar = 0.3;
+    public static final double kTagDistThreshold = 3.0; // Vision measurements further from the current pose than this value will be rejected
+
+    public static final boolean kUseVision = true;
     public static final boolean kUseLeftLL = true;
-    public static final boolean kUseRightLL = true;
+    public static final boolean kUseBackLL = true;
+    public static final boolean kUseFrontLL = false;
   }
 
   public static final class TurretConstants {
