@@ -13,9 +13,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.IOConstants;
+import frc.robot.Constants.TurretConstants;
 import frc.robot.commands.AutoAimTurret;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.Constants.FieldConstants;
@@ -107,21 +109,30 @@ public class RobotContainer {
         .onTrue(new InstantCommand(() -> m_robotDrive.resetOdometry(new Pose2d()), m_robotDrive));
     
     // operator manual turret
-    // new JoystickButton(m_operatorController, Button.kB.value)
-    //     .onTrue(new InstantCommand(() -> autoAimTurret = false));
-    // new JoystickButton(m_operatorController, Button.kA.value)
-    //     .onTrue(new InstantCommand(() -> autoAimTurret = true));
     new JoystickButton(m_operatorController, Button.kB.value)
-        .onTrue(new InstantCommand(() -> m_turret.setSetpoint(40)));
+        .onTrue(new InstantCommand(() -> autoAimTurret = false));
     new JoystickButton(m_operatorController, Button.kA.value)
-        .onTrue(new InstantCommand(() -> m_turret.setSetpoint(130)));
+        .onTrue(new InstantCommand(() -> autoAimTurret = true));
+    new Trigger(() -> {return autoAimTurret;})
+        .whileTrue(new AutoAimTurret(m_turret, m_robotDrive))
+        .whileFalse(new RunCommand(() -> m_turret.setSetpoint(100), m_turret));
+    
+    // operator turret cardinal directions
+    new POVButton(m_driverController, 0)
+        .onTrue(new InstantCommand(() -> m_turret.setSetpoint(TurretConstants.kTurretFrontAngle), m_turret));
+    new POVButton(m_driverController, 90)
+        .onTrue(new InstantCommand(() -> m_turret.setSetpoint(TurretConstants.kTurretRightAngle), m_turret));
+    new POVButton(m_driverController, 180)
+        .onTrue(new InstantCommand(() -> m_turret.setSetpoint(TurretConstants.kTurretBackAngle), m_turret));
+    new POVButton(m_driverController, 270)
+        .onTrue(new InstantCommand(() -> m_turret.setSetpoint(TurretConstants.kTurretLeftAngle), m_turret));
 
-    // new Trigger(() -> {return autoAimTurret;})
-    //     .whileTrue(new AutoAimTurret(m_turret, m_robotDrive))
-    //     .whileFalse(new RunCommand(() -> m_turret.setSetpoint(100), m_turret));
-
-    new JoystickButton(m_operatorController, Button.kX.value)
-        .whileTrue(new RunCommand(() -> m_turret.setSetpoint(140), m_turret));
+    // new JoystickButton(m_operatorController, Button.kB.value)
+    //     .onTrue(new InstantCommand(() -> m_turret.setSetpoint(40)));
+    // new JoystickButton(m_operatorController, Button.kA.value)
+    //     .onTrue(new InstantCommand(() -> m_turret.setSetpoint(130)));
+    // new JoystickButton(m_operatorController, Button.kX.value)
+    //     .whileTrue(new RunCommand(() -> m_turret.setSetpoint(140), m_turret));
     
     // run intake
     // new JoystickButton(m_driverController, Button.kLeftBumper.value)
