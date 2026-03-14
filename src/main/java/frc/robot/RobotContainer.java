@@ -190,7 +190,7 @@ public class RobotContainer {
     new JoystickButton(m_operatorController, Button.kA.value)
         .onTrue(new InstantCommand(() -> autoAimTurret = true));
     new Trigger(() -> {return autoAimTurret;})
-        .whileTrue(new AutoAimTurret(m_turret, m_robotDrive))
+        .whileTrue(new AutoAimTurret(m_turret, m_robotDrive, currentTarget, false))
         .onFalse(new InstantCommand(() -> m_turret.setSetpoint(100), m_turret));
     
     // operator turret cardinal directions

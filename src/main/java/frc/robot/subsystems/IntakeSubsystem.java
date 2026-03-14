@@ -118,7 +118,7 @@ public class IntakeSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Motor Speed", armMotorSpeed);
     SmartDashboard.putNumber("Arm Angle", m_armEncoder.getAbsolutePosition().getValueAsDouble());
 
-    SmartDashboard.putNumber("pid output", armMotorSpeed);
+    // SmartDashboard.putNumber("pid output", armMotorSpeed);
     SmartDashboard.putNumber("arm setpoint", m_armPID.getSetpoint());
 
     m_armMotor.set(armMotorSpeed);

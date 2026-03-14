@@ -113,9 +113,11 @@ public class TurretSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Turret/Drift value", calculateTurretPosition() - getTurretPosition() );
     SmartDashboard.putNumber("Turret/Encoder 1 Angle", m_encoder1.getAbsolutePosition().getValueAsDouble()*360);
     SmartDashboard.putNumber("Turret/Encoder 2 Angle", m_encoder2.getAbsolutePosition().getValueAsDouble()*360);
+    SmartDashboard.putNumber("Turret/Encoder 1 Relative Angle", m_encoder1.getPosition().getValueAsDouble()*360/TurretConstants.kEncoder1Ratio);
+    SmartDashboard.putNumber("Turret/Encoder 2 Relative Angle", m_encoder1.getPosition().getValueAsDouble()*360/TurretConstants.kEncoder2Ratio);
 
     SmartDashboard.putNumber("Turret/Turret Setpoint", m_turretPID.getSetpoint());
-    SmartDashboard.putNumber("Turret/Total PID Error", m_turretPID.getAccumulatedError());
+    // SmartDashboard.putNumber("Turret/Total PID Error", m_turretPID.getAccumulatedError());
     // SmartDashboard.putNumber("Turret Error", getError());
     // SmartDashboard.putNumber("Turret/Turret Output", output);
   }
@@ -131,13 +133,13 @@ public class TurretSubsystem extends SubsystemBase {
     //   // output = 0;
     // }
 
-    SmartDashboard.putNumber("Turret/pid error", m_turretPID.getError());
-    SmartDashboard.putNumber("Turret/pid output", output);
+    // SmartDashboard.putNumber("Turret/pid error", m_turretPID.getError());
+    // SmartDashboard.putNumber("Turret/pid output", output);
     output = MathUtil.clamp(output, -TurretConstants.kTurretMaxSpeed, TurretConstants.kTurretMaxSpeed);
     m_turretMotor.set(m_turretPID.atSetpoint() ? 0 : output);
     // m_turretMotor.set(SmartDashboard.getNumber("Turret/set output", 0));
 
-    SmartDashboard.putNumber("Turret/output", m_turretMotor.get());
+    // SmartDashboard.putNumber("Turret/output", m_turretMotor.get());
   }
 
   @Override

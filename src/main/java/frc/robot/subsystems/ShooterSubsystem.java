@@ -101,9 +101,9 @@ public class ShooterSubsystem extends SubsystemBase {
 
         m_shooterPID.setTolerance(200);
         
-        SmartDashboard.putNumber("Shooter/Set Hood Output", 0);
-        SmartDashboard.putNumber("Shooter/Input Shooter Speed", 0);
-        SmartDashboard.putNumber("Shooter/Hood Angle Input", 0);
+        // SmartDashboard.putNumber("Shooter/Set Hood Output", 0);
+        // SmartDashboard.putNumber("Shooter/Input Shooter Speed", 0);
+        // SmartDashboard.putNumber("Shooter/Hood Angle Input", 0);
     }
 
     //resets shooter
