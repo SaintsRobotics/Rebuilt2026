@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "LCenterToLTrench"
+            "pathName": "Left Mid Shoot"
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "LTrenchToTower"
+            "name": "Score"
           }
         }
       ]

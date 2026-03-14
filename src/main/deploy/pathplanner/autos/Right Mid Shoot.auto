@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "LEnemyToLSideline"
+            "pathName": "Right Mid Shoot"
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "LSidelineToLTrench"
+            "name": "Score"
           }
         }
       ]
