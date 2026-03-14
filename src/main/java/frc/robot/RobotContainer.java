@@ -12,6 +12,7 @@ import static edu.wpi.first.units.Units.Seconds;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.events.EventTrigger;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -107,10 +108,7 @@ public class RobotContainer {
         () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
         m_robotDrive);
     
-    NamedCommands.registerCommand("Score", Commands.none());
-    NamedCommands.registerCommand("Climb", Commands.none());
-    NamedCommands.registerCommand("Ferry", Commands.none());
-    NamedCommands.registerCommand("Intake", Commands.none());
+    configureAuton();
 
     m_autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData(m_autoChooser);
@@ -240,6 +238,19 @@ public class RobotContainer {
     // new JoystickButton(m_operatorController, Button.kX.value)
     //     .whileTrue(new RunCommand(() -> m_turret.setSetpoint(140), m_turret));
     
+  }
+
+  private void configureAuton() {
+
+    NamedCommands.registerCommand("Score", new ShooterCommand(m_shooter, m_robotDrive::getPose, () -> {return currentTarget;}));
+    NamedCommands.registerCommand("Climb", Commands.none());
+    NamedCommands.registerCommand("Ferry", Commands.none());
+    NamedCommands.registerCommand("Intake", new RunIntake(m_intake));
+    NamedCommands.registerCommand("Deploy Intake", new InstantCommand(m_intake::togglePivot));
+    NamedCommands.registerCommand("Toggle Auto Aim", new InstantCommand(() -> autoAimTurret = !autoAimTurret));
+
+    new EventTrigger("Intake")
+        .whileTrue(new RunIntake(m_intake));
   }
 
   private void configureFuelSim() {
