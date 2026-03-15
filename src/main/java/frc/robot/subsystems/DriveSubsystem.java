@@ -21,6 +21,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -211,7 +212,7 @@ public class DriveSubsystem extends SubsystemBase {
     if (VisionConstants.kUseVision && Robot.isReal() && LLreal) {
       // Update LimeLight with current robot orientation
       // LimelightHelpers.SetRobotOrientation(name, m_poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0.0, 0.0, 0.0, 0.0, 0.0);
-      LimelightHelpers.SetRobotOrientation(name, getGyroAngle().getDegrees(), 0.0, 0.0, 0.0, 0.0, 0.0);
+      LimelightHelpers.SetRobotOrientation(name, getGyroAngle().getDegrees() + (AllianceFlipUtil.shouldFlip() ? 180 : 0), 0.0, 0.0, 0.0, 0.0, 0.0);
       // LimelightHelpers.SetRobotOrientation(name, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 
       // Get the pose estimate

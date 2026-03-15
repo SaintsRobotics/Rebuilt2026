@@ -5,6 +5,18 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "Deploy Intake"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Toggle Auto Aim"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "Left Mid Shoot"

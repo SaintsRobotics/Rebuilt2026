@@ -202,7 +202,7 @@ public class IntakeSubsystem extends SubsystemBase {
   public void togglePivot() {
     switch (m_armPosition) {
       case Extended:
-        setArmPosition(ArmPosition.Retracted);
+        setArmPosition(ArmPosition.Retracted); 
         break;
       case Retracted:
         setArmPosition(ArmPosition.Extended);

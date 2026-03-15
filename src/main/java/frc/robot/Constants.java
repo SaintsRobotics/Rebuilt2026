@@ -294,7 +294,7 @@ public final class Constants {
     public static final double kAllianceZoneLength = Units.inchesToMeters(156.61);
 
     public static final double kTrenchWidth = Units.inchesToMeters(47.00);
-    public static final double kTrenchLength = Units.inchesToMeters(49.84);
+    public static final double kTrenchLength = Units.inchesToMeters(49.84 + 5); // add some buffer zone
 
     public static final Region kBlueAllianceRegion = new Region(
       new Rectangle2d(
@@ -333,7 +333,7 @@ public final class Constants {
     public static final Pose2d kHubPose = new Pose2d(
       new Translation2d(
         Units.inchesToMeters(182.11),
-        Units.inchesToMeters(158.84 /*  - 6 */)), //offset to test on our hub which may be offset
+        Units.inchesToMeters(158.84 - 0)), //offset to test on our hub which may be offset
       new Rotation2d()
     );
 
@@ -365,7 +365,7 @@ public final class Constants {
     public static final double kMaxSpeed = 1.0;
     public static final double kMinSpeed = -kMaxSpeed;
 
-    public static final double kHoodAngleMin = 0;
+    public static final double kHoodAngleMin = 0.005;
     public static final double kHoodAngleMax = 0.725;
     public static final double kHoodSpeedMax = 0.2;
 

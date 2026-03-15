@@ -63,6 +63,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
     private boolean spindexerOn = false;
     private boolean transferOn = false;
+    private double spindexerSpeed = 0;
+    private double transferSpeed = 0;
 
     // Simulation classes
     private final DCMotor m_flywheelDCMotor = DCMotor.getNeoVortex(2);
@@ -110,6 +112,7 @@ public class ShooterSubsystem extends SubsystemBase {
     public void reset() {
         
         shooterStop();
+        setHoodAngle(ShooterConstants.kHoodAngleMin);
 
     }
 
@@ -181,19 +184,19 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     public void setSpindexer(double setpoint) {
-        m_spindexerPID.setSetpoint(setpoint);
+        spindexerSpeed = setpoint;
     }
 
     public void setSpindexer(boolean on) {
-        spindexerOn = on;
+        spindexerSpeed = on ? 1.0 : 0;
     }
 
     public void setTransfer(double setpoint) {
-        m_transferPID.setSetpoint(setpoint);
+        transferSpeed = setpoint;
     }
 
     public void setTransfer(boolean on) {
-        transferOn = on;
+        transferSpeed = on ? 0.5 : 0;
     }
 
     //periodic
@@ -241,13 +244,13 @@ public class ShooterSubsystem extends SubsystemBase {
         //     m_spindexerMotor.getEncoder().getVelocity()) 
         //     + m_spindexerFF.calculate(m_spindexerPID.getSetpoint());
         // m_spindexerMotor.set(MathUtil.clamp(spindexerOutput, -ShooterConstants.kSpindexerMaxSpd, ShooterConstants.kSpindexerMaxSpd));
-        m_spindexerMotor.set(spindexerOn ? 1.0 : 0);
+        m_spindexerMotor.set(spindexerSpeed);
 
         // double transferOutput = m_transferPID.calculate(
         //     m_transferMotor.getEncoder().getVelocity()) 
         //     + m_transferFF.calculate(m_transferPID.getSetpoint());
         // m_transferMotor.set(MathUtil.clamp(transferOutput, -ShooterConstants.kTransferMaxSpd, ShooterConstants.kTransferMaxSpd));
-        m_transferMotor.set(transferOn ? 0.5 : 0);
+        m_transferMotor.set(transferSpeed);
     }
 
 }

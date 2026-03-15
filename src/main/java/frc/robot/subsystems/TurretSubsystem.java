@@ -81,8 +81,9 @@ public class TurretSubsystem extends SubsystemBase {
 
       SparkMaxConfig motorConfig = new SparkMaxConfig();
       motorConfig.encoder.positionConversionFactor(360 / TurretConstants.kTurretGearing);
+      // motorConfig.encoder.inverted(true);
       motorConfig.idleMode(IdleMode.kBrake);
-      motorConfig.inverted(true);
+      motorConfig.inverted(false);
       m_turretMotor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
 
       m_turretMotor.getEncoder().setPosition(crtPosition);
@@ -238,6 +239,7 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   public double getTurretPosition() {
+    // return ((-m_turretMotor.getEncoder().getPosition() % 360) + 360) % 360;
     return m_turretMotor.getEncoder().getPosition();
   }
 

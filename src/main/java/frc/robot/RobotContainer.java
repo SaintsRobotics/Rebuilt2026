@@ -46,6 +46,8 @@ import frc.robot.Constants.IOConstants;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.commands.AutoAimTurret;
+import frc.robot.commands.ManualShooterCommand;
+import frc.robot.commands.ManualSpindexerCommand;
 import frc.robot.commands.ShooterCommand;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
@@ -224,11 +226,11 @@ public class RobotContainer {
     // operator turret cardinal directions
     new JoystickButton(m_driverController, Button.kY.value)
         .onTrue(new InstantCommand(() -> m_turret.setSetpoint(TurretConstants.kTurretFrontAngle), m_turret));
-    new POVButton(m_driverController, Button.kB.value)
+    new JoystickButton(m_driverController, Button.kB.value)
         .onTrue(new InstantCommand(() -> m_turret.setSetpoint(TurretConstants.kTurretRightAngle), m_turret));
-    new POVButton(m_driverController, Button.kA.value)
+    new JoystickButton(m_driverController, Button.kA.value)
         .onTrue(new InstantCommand(() -> m_turret.setSetpoint(TurretConstants.kTurretBackAngle), m_turret));
-    new POVButton(m_driverController, Button.kX.value)
+    new JoystickButton(m_driverController, Button.kX.value)
         .onTrue(new InstantCommand(() -> m_turret.setSetpoint(TurretConstants.kTurretLeftAngle), m_turret));
 
     // new JoystickButton(m_operatorController, Button.kB.value)
@@ -237,6 +239,14 @@ public class RobotContainer {
     //     .onTrue(new InstantCommand(() -> m_turret.setSetpoint(130)));
     // new JoystickButton(m_operatorController, Button.kX.value)
     //     .whileTrue(new RunCommand(() -> m_turret.setSetpoint(140), m_turret));
+
+    // operator manual shoot
+    new Trigger(() -> {return m_operatorController.getRightTriggerAxis() > 0.5;})
+        .whileTrue(new ManualShooterCommand(m_shooter, 3300, 0.3));
+
+    // operator reverse spindexer
+    new JoystickButton(m_operatorController, Button.kRightBumper.value)
+        .whileTrue(new ManualSpindexerCommand(m_shooter, -1.0, -0.5));
     
   }
 
@@ -244,13 +254,16 @@ public class RobotContainer {
 
     NamedCommands.registerCommand("Score", new ShooterCommand(m_shooter, m_robotDrive::getPose, () -> {return currentTarget;}));
     NamedCommands.registerCommand("Climb", Commands.none());
-    NamedCommands.registerCommand("Ferry", Commands.none());
+    NamedCommands.registerCommand("Ferry", new ShooterCommand(m_shooter, m_robotDrive::getPose, () -> {return currentTarget;}));
     NamedCommands.registerCommand("Intake", new RunIntake(m_intake));
     NamedCommands.registerCommand("Deploy Intake", new InstantCommand(m_intake::togglePivot));
-    NamedCommands.registerCommand("Toggle Auto Aim", new InstantCommand(() -> autoAimTurret = !autoAimTurret));
+    NamedCommands.registerCommand("Toggle Auto Aim", new InstantCommand(() -> autoAimTurret = false));
 
     new EventTrigger("Intake")
         .whileTrue(new RunIntake(m_intake));
+
+    new EventTrigger("Score")
+        .whileTrue(new ShooterCommand(m_shooter, m_robotDrive::getPose, () -> {return currentTarget;}));
   }
 
   private void configureFuelSim() {
@@ -289,11 +302,11 @@ public class RobotContainer {
     m_shooter.fastPeriodic();
 
     ChassisSpeeds speeds = ChassisSpeeds.fromRobotRelativeSpeeds(m_robotDrive.getRobotRelativeSpeeds(), m_robotDrive.getPose().getRotation());
-    currentTarget = LaunchCalc.findTargetOnTheMove(
+    currentTarget = FindTarget.getTarget(m_robotDrive.getPose()); /* LaunchCalc.findTargetOnTheMove(
         m_robotDrive.getPose(), 
         FindTarget.getTarget(m_robotDrive.getPose()), 
         new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond));
-    publisher.set(currentTarget);
+    publisher.set(currentTarget); */
     // publisher2.set(LaunchCalc.findTargetOnTheMove(m_robotDrive.getPose(), TurretConstants.kHubPose, new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond), 10));
   }
 
@@ -309,6 +322,7 @@ public class RobotContainer {
 
   public void reset() {
     m_turret.reset();
+    m_shooter.reset();
   }
 }
 
