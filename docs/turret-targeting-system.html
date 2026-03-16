@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Turret Targeting System — End-to-End Documentation</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --text-muted: #8b949e;
+    --accent: #58a6ff;
+    --accent2: #f78166;
+    --green: #3fb950;
+    --purple: #bc8cff;
+    --yellow: #d29922;
+    --red: #f85149;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    padding: 2rem;
+  }
+  .container { max-width: 1200px; margin: 0 auto; }
+  h1 { color: var(--accent); font-size: 2.2rem; border-bottom: 2px solid var(--accent); padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
+  h2 { color: var(--accent2); font-size: 1.6rem; margin-top: 2.5rem; margin-bottom: 1rem; border-left: 4px solid var(--accent2); padding-left: 0.75rem; }
+  h3 { color: var(--purple); font-size: 1.2rem; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+  p, li { margin-bottom: 0.5rem; }
+  ul { padding-left: 1.5rem; }
+  code {
+    background: #1f2937;
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: var(--green);
+    font-family: 'Fira Code', 'Cascadia Code', monospace;
+  }
+  pre {
+    background: #1f2937;
+    padding: 1rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    margin: 1rem 0;
+    font-size: 0.85em;
+    line-height: 1.5;
+  }
+  pre code { background: none; padding: 0; color: var(--text); }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+  }
+  .card-title {
+    font-size: 1.1rem;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+  }
+  th, td {
+    border: 1px solid var(--border);
+    padding: 0.6rem 1rem;
+    text-align: left;
+  }
+  th { background: #1f2937; color: var(--accent); font-weight: 600; }
+  tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+  .tag {
+    display: inline-block;
+    padding: 0.15em 0.6em;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: 600;
+  }
+  .tag-100hz { background: rgba(63,185,80,0.15); color: var(--green); border: 1px solid rgba(63,185,80,0.3); }
+  .tag-50hz { background: rgba(88,166,255,0.15); color: var(--accent); border: 1px solid rgba(88,166,255,0.3); }
+  .tag-pid { background: rgba(188,140,255,0.15); color: var(--purple); border: 1px solid rgba(188,140,255,0.3); }
+  .tag-ff { background: rgba(210,153,34,0.15); color: var(--yellow); border: 1px solid rgba(210,153,34,0.3); }
+
+  /* Flowchart styles */
+  .flowchart {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 0;
+    gap: 0;
+  }
+  .fc-node {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 500;
+    min-width: 260px;
+    max-width: 420px;
+    position: relative;
+  }
+  .fc-start { background: rgba(63,185,80,0.15); border: 2px solid var(--green); color: var(--green); border-radius: 24px; }
+  .fc-process { background: rgba(88,166,255,0.12); border: 2px solid var(--accent); color: var(--text); }
+  .fc-decision {
+    background: rgba(210,153,34,0.12);
+    border: 2px solid var(--yellow);
+    color: var(--text);
+    transform: rotate(0deg);
+    border-radius: 4px;
+    padding: 0.6rem 1rem;
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 200px;
+  }
+  .fc-decision-box {
+    background: rgba(210,153,34,0.12);
+    border: 2px solid var(--yellow);
+    color: var(--text);
+    border-radius: 4px;
+    padding: 0.75rem 1.5rem;
+  }
+  .fc-end { background: rgba(248,81,73,0.15); border: 2px solid var(--red); color: var(--red); border-radius: 24px; }
+  .fc-data { background: rgba(188,140,255,0.12); border: 2px solid var(--purple); color: var(--text); border-radius: 4px; clip-path: polygon(10% 0%, 100% 0%, 90% 100%, 0% 100%); padding: 0.75rem 2rem; }
+  .fc-arrow {
+    width: 2px;
+    height: 32px;
+    background: var(--text-muted);
+    position: relative;
+  }
+  .fc-arrow::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid var(--text-muted);
+  }
+  .fc-arrow-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    white-space: nowrap;
+  }
+  .fc-branch {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+  }
+  .fc-branch-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+  .fc-label {
+    font-size: 0.75rem;
+    color: var(--yellow);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .fc-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255,255,255,0.02);
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+  }
+  .fc-group-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Horizontal flow */
+  .hflow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 1rem 0;
+  }
+  .hflow .fc-node { min-width: 160px; font-size: 0.82rem; padding: 0.5rem 0.8rem; }
+  .fc-harrow {
+    width: 40px;
+    height: 2px;
+    background: var(--text-muted);
+    position: relative;
+    flex-shrink: 0;
+  }
+  .fc-harrow::after {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+    border-left: 8px solid var(--text-muted);
+  }
+
+  .toc { margin: 1rem 0 2rem 0; }
+  .toc a { color: var(--accent); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .toc li { margin-bottom: 0.3rem; }
+
+  .note {
+    background: rgba(210,153,34,0.1);
+    border-left: 3px solid var(--yellow);
+    padding: 0.75rem 1rem;
+    margin: 1rem 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.9rem;
+  }
+  .note strong { color: var(--yellow); }
+
+  .file-ref {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-style: italic;
+  }
+
+  .legend {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin: 1rem 0;
+    font-size: 0.85rem;
+  }
+  .legend-item { display: flex; align-items: center; gap: 0.4rem; }
+  .legend-swatch {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    border: 2px solid;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>🎯 Turret Targeting System — End-to-End Documentation</h1>
+<p class="file-ref">Branch: <code>glacier-peak</code> &nbsp;|&nbsp; Generated from source code analysis</p>
+
+<div class="toc card">
+  <div class="card-title">Table of Contents</div>
+  <ol>
+    <li><a href="#overview">System Overview</a></li>
+    <li><a href="#architecture">Architecture &amp; Data Flow</a></li>
+    <li><a href="#crt">CRT Absolute Positioning</a></li>
+    <li><a href="#targeting">Target Acquisition Pipeline</a></li>
+    <li><a href="#turret-pid">Turret PID Control Loop</a></li>
+    <li><a href="#shooter">Shooter Integration (Flywheel + Hood)</a></li>
+    <li><a href="#launch-calc">Launch Calculator &amp; Lookup Tables</a></li>
+    <li><a href="#sotm">Shoot-on-the-Move (SOTM)</a></li>
+    <li><a href="#controls">Operator Controls &amp; Mode Switching</a></li>
+    <li><a href="#constants">Constants Reference</a></li>
+    <li><a href="#timing">Timing &amp; Execution Rates</a></li>
+    <li><a href="#improvements" style="color: var(--accent2); font-weight: 600;">Recommended Improvements (15 items)</a></li>
+  </ol>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="overview">1. System Overview</h2>
+<!-- ============================================================ -->
+
+<p>The turret targeting system is responsible for automatically aiming a rotating turret and variable-angle shooter at field targets (the Hub for scoring, or the alliance wall for ferrying). It involves three tightly integrated subsystems:</p>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-swatch" style="border-color: var(--accent); background: rgba(88,166,255,0.12);"></div> TurretSubsystem</div>
+  <div class="legend-item"><div class="legend-swatch" style="border-color: var(--purple); background: rgba(188,140,255,0.12);"></div> ShooterSubsystem</div>
+  <div class="legend-item"><div class="legend-swatch" style="border-color: var(--green); background: rgba(63,185,80,0.12);"></div> DriveSubsystem (pose provider)</div>
+  <div class="legend-item"><div class="legend-swatch" style="border-color: var(--yellow); background: rgba(210,153,34,0.12);"></div> Utility classes (FindTarget, LaunchCalc)</div>
+</div>
+
+<!-- Top-level architecture flowchart -->
+<div class="card">
+  <div class="card-title">High-Level System Flow</div>
+  <div class="flowchart">
+    <div class="fc-node fc-start">Robot Periodic Loop (fastPeriodic @ 100 Hz)</div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-process">DriveSubsystem → getPose() &amp; getRotationSpeed()<br><span class="file-ref">DriveSubsystem.java</span></div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-process" style="border-color: var(--yellow);">FindTarget.getTarget(robotPose)<br>Decide: Hub vs Alliance Wall<br><span class="file-ref">FindTarget.java</span></div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-process">currentTarget → stored in RobotContainer<br><span class="file-ref">RobotContainer.java:fastPeriodic()</span></div>
+    <div class="fc-arrow"></div>
+
+    <div class="fc-branch">
+      <div class="fc-branch-col">
+        <div class="fc-label">TURRET PATH</div>
+        <div class="fc-node fc-process">AutoAimTurret command<br>calculateSetpoint(pose, target, ω)<br><span class="file-ref">AutoAimTurret.java</span></div>
+        <div class="fc-arrow"></div>
+        <div class="fc-node fc-process" style="border-color: var(--purple);">TurretSubsystem.fastPeriodic()<br>PID + Feedforward → Motor Output<br><span class="file-ref">TurretSubsystem.java</span></div>
+      </div>
+
+      <div class="fc-branch-col">
+        <div class="fc-label">SHOOTER PATH</div>
+        <div class="fc-node fc-process" style="border-color: var(--purple);">ShooterCommand<br>LaunchCalc → speed &amp; angle<br><span class="file-ref">ShooterCommand.java</span></div>
+        <div class="fc-arrow"></div>
+        <div class="fc-node fc-process" style="border-color: var(--purple);">ShooterSubsystem.fastPeriodic()<br>Flywheel PID + Hood PID<br><span class="file-ref">ShooterSubsystem.java</span></div>
+      </div>
+    </div>
+
+    <div class="fc-arrow" style="margin-top: 1rem;"></div>
+    <div class="fc-node fc-end">Physical: Turret angle + Flywheel speed + Hood angle → Ball trajectory</div>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<h2 id="architecture">2. Architecture &amp; Data Flow</h2>
+<!-- ============================================================ -->
+
+<div class="card">
+  <div class="card-title">Execution Pipeline — Every 10 ms (100 Hz fast periodic)</div>
+  <div class="hflow">
+    <div class="fc-node fc-process" style="border-color: var(--green);">Drive<br>Odometry<br>+ Vision</div>
+    <div class="fc-harrow"></div>
+    <div class="fc-node fc-process" style="border-color: var(--yellow);">FindTarget<br>→ Hub or Wall</div>
+    <div class="fc-harrow"></div>
+    <div class="fc-node fc-process" style="border-color: var(--accent);">Turret<br>Angle Calc</div>
+    <div class="fc-harrow"></div>
+    <div class="fc-node fc-process" style="border-color: var(--purple);">Turret<br>PID</div>
+    <div class="fc-harrow"></div>
+    <div class="fc-node fc-end" style="min-width: 100px;">Motor</div>
+  </div>
+  <div class="hflow">
+    <div class="fc-node fc-process" style="border-color: var(--green);">Drive<br>Pose</div>
+    <div class="fc-harrow"></div>
+    <div class="fc-node fc-process" style="border-color: var(--yellow);">LaunchCalc<br>LUT Lookup</div>
+    <div class="fc-harrow"></div>
+    <div class="fc-node fc-process" style="border-color: var(--purple);">Flywheel<br>PID+FF</div>
+    <div class="fc-harrow"></div>
+    <div class="fc-node fc-process" style="border-color: var(--purple);">Hood<br>PID</div>
+    <div class="fc-harrow"></div>
+    <div class="fc-node fc-end" style="min-width: 100px;">Motors</div>
+  </div>
+</div>
+
+<h3>Key Files</h3>
+<table>
+  <tr><th>File</th><th>Role</th></tr>
+  <tr><td><code>TurretSubsystem.java</code></td><td>Turret motor control, PID, CRT encoder, position tracking</td></tr>
+  <tr><td><code>ShooterSubsystem.java</code></td><td>Flywheel PID+FF, hood angle PID, spindexer/transfer motors</td></tr>
+  <tr><td><code>AutoAimTurret.java</code></td><td>Command: continuously calculates turret setpoint from pose + target</td></tr>
+  <tr><td><code>ShooterCommand.java</code></td><td>Command: calculates flywheel speed + hood angle via LaunchCalc, feeds balls when ready</td></tr>
+  <tr><td><code>FindTarget.java</code></td><td>Target selection logic: Hub (score) vs wall (ferry)</td></tr>
+  <tr><td><code>LaunchCalc.java</code></td><td>Distance-based lookup tables for flywheel RPM, hood angle, time-of-flight</td></tr>
+  <tr><td><code>RobotContainer.java</code></td><td>Wiring: binds commands, runs fast periodic, manages auto-aim toggle</td></tr>
+  <tr><td><code>Constants.java</code></td><td>All tuning values, CAN IDs, field geometry, PID gains</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<h2 id="crt">3. CRT Absolute Positioning</h2>
+<!-- ============================================================ -->
+
+<p>The turret uses a <strong>Chinese Remainder Theorem (CRT)</strong> technique with two CANcoders geared at different ratios to resolve absolute turret position across the full 334° range (beyond a single encoder's 360° ambiguity).</p>
+
+<div class="card">
+  <div class="card-title">CRT Position Calculation Flow</div>
+  <div class="flowchart">
+    <div class="fc-node fc-start">Turret Initialization / Reset</div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-data">Read CANcoder 1 (absolute)<br>Ratio: 90/13 teeth = 6.923:1<br><code>CAN ID 41</code></div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-data">Read CANcoder 2 (absolute)<br>Ratio: 90/14 teeth = 6.429:1<br><code>CAN ID 42</code></div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-process">
+      <strong>diff</strong> = enc1 − enc2<br>
+      if (diff &lt; 0) diff += 1.0<br>
+      <strong>position</strong> = diff × (1 / (6.923 − 6.429)) × 360°
+    </div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-process">Seed SparkMax relative encoder with CRT position<br><code>m_turretMotor.getEncoder().setPosition(crtPosition)</code></div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-end">Runtime: use SparkMax relative encoder<br>(faster reads, no CAN latency)</div>
+  </div>
+</div>
+
+<div class="note"><strong>Why CRT?</strong> Each encoder goes through ~6.9 or ~6.4 full rotations for one turret revolution. Their <em>difference</em> in phase uniquely identifies the absolute turret position without needing a single-speed absolute encoder that covers the full range. The effective factor is <code>1/(R1 − R2) = 1/(90/13 − 90/14) = 1/(90·(14−13)/(13·14)) = 13·14/90 ≈ 2.022</code>, so <code>position = diff × 2.022 × 360°</code>.</div>
+
+<h3>Runtime Position Tracking</h3>
+<p>After initialization, position comes from the SparkMax's built-in relative encoder with a conversion factor of <code>360 / 180 = 2 degrees per motor rotation</code>. A drift monitor logs <code>calculateTurretPosition() − getTurretPosition()</code> to SmartDashboard for diagnostics.</p>
+
+
+<!-- ============================================================ -->
+<h2 id="targeting">4. Target Acquisition Pipeline</h2>
+<!-- ============================================================ -->
+
+<div class="card">
+  <div class="card-title">FindTarget Decision Flowchart</div>
+  <div class="flowchart">
+    <div class="fc-node fc-start">FindTarget.getTarget(robotPose)</div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-decision-box">shouldScoreHub(robotPose)?<br>Is robot in own alliance zone?</div>
+    <div class="fc-arrow"></div>
+
+    <div class="fc-branch">
+      <div class="fc-branch-col">
+        <div class="fc-label">YES — in alliance zone</div>
+        <div class="fc-node fc-process" style="border-color: var(--green);">
+          Target = AllianceFlipUtil.apply(kHubPose)<br>
+          Blue Hub: (4.63m, 4.03m)<br>
+          Red Hub: mirrored
+        </div>
+      </div>
+      <div class="fc-branch-col">
+        <div class="fc-label">NO — in neutral / opponent zone</div>
+        <div class="fc-node fc-process" style="border-color: var(--accent2);">
+          Target = own alliance wall<br>
+          Blue: x=0, Red: x=16.54m<br>
+          y = robot's current Y
+        </div>
+      </div>
+    </div>
+
+    <div class="fc-arrow" style="margin-top: 1rem;"></div>
+    <div class="fc-node fc-end">Returns Pose2d target → stored as currentTarget</div>
+  </div>
+</div>
+
+<h3>Alliance Zone Geometry</h3>
+<table>
+  <tr><th>Region</th><th>Bounds</th></tr>
+  <tr><td>Blue Alliance Zone</td><td>(0, 0) → (3.98m, 8.07m)</td></tr>
+  <tr><td>Red Alliance Zone</td><td>(12.56m, 0) → (16.54m, 8.07m)</td></tr>
+  <tr><td>Trenches (4 rectangles)</td><td>Near each alliance zone, ~1.27m wide × 1.39m long</td></tr>
+</table>
+
+<h3>Alliance Flipping</h3>
+<p><code>AllianceFlipUtil.apply()</code> mirrors both X and Y coordinates and rotates heading by 180° when on Red alliance. The Hub pose is defined for Blue and flipped at runtime.</p>
+
+
+<!-- ============================================================ -->
+<h2 id="turret-pid">5. Turret PID Control Loop</h2>
+<!-- ============================================================ -->
+
+<div class="card">
+  <div class="card-title">Turret Setpoint Calculation (calculateSetpoint)</div>
+  <div class="flowchart">
+    <div class="fc-node fc-start">AutoAimTurret.execute() — called every 20ms</div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-data">Inputs:<br>robotPose, targetPose, robotAngularVelocity</div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-process">
+      1. Apply turret physical offset to robot pose<br>
+      <code>kTurretOffset = (-4.2in, 7.7in, −180°)</code><br>
+      Rotated by robot heading → turretLocation on field
+    </div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-process">
+      2. Compute relative angle to target<br>
+      <code>robotRelativeAngle = atan2(Δy, Δx)</code><br>
+      using <code>targetPose.relativeTo(turretLocation)</code>
+    </div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-process">
+      3. Convert to turret coordinate system<br>
+      <code>rawAngle = kTurretFrontAngle (204°) − (360° − robotRelativeAngle)</code>
+    </div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-process">
+      4. <strong>findBestAngle()</strong><br>
+      Check candidates: angle−360, angle, angle+360<br>
+      Pick one within [0, 334°] closest to current position
+    </div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-process">
+      5. Clamp to [0, kTurretMaxRotation (334°)]
+    </div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-end">m_turretPID.setSetpoint(targetAngle)</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Turret PID Execution (fastPeriodic @ 100 Hz)</div>
+  <div class="flowchart">
+    <div class="fc-node fc-start">TurretSubsystem.fastPeriodic() — every 10ms</div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-data">Read position: getTurretPosition()<br>(SparkMax relative encoder, degrees)</div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-process" style="border-color: var(--purple);">
+      <span class="tag tag-pid">PID</span> Calculate output<br>
+      <code>output = PID.calculate(position)</code><br>
+      P=0.02 &nbsp; I=0.02 &nbsp; D=0.0<br>
+      I-Zone: ±20° &nbsp; Tolerance: 1°
+    </div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-process">
+      Clamp output to [−0.6, +0.6]<br>
+      <code>kTurretMaxSpeed = 0.6</code>
+    </div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-decision-box">atSetpoint()?<br>|error| &lt; 1°</div>
+    <div class="fc-arrow"></div>
+
+    <div class="fc-branch">
+      <div class="fc-branch-col">
+        <div class="fc-label">YES</div>
+        <div class="fc-node fc-process" style="border-color: var(--green);">Motor output = 0<br>(hold position via brake mode)</div>
+      </div>
+      <div class="fc-branch-col">
+        <div class="fc-label">NO</div>
+        <div class="fc-node fc-process" style="border-color: var(--accent2);">Motor output = clamped PID value</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>PID Tuning Parameters</h3>
+<table>
+  <tr><th>Parameter</th><th>Value</th><th>Notes</th></tr>
+  <tr><td>kP</td><td>0.02</td><td>Proportional gain</td></tr>
+  <tr><td>kI</td><td>0.02</td><td>Integral gain — eliminates steady-state error</td></tr>
+  <tr><td>kD</td><td>0.0</td><td>Derivative disabled</td></tr>
+  <tr><td>I-Zone</td><td>20°</td><td>I term only accumulates within ±20° of setpoint</td></tr>
+  <tr><td>PID Tolerance</td><td>1°</td><td>atSetpoint() threshold (stops motor at this error)</td></tr>
+  <tr><td>Turret Tolerance</td><td>1.5°</td><td>atSetpoint() for external readiness checks</td></tr>
+  <tr><td>Max Speed</td><td>0.6</td><td>Clamp range for motor output (% output)</td></tr>
+  <tr><td>Loop Period</td><td>10 ms</td><td>PIDController constructed with this dt</td></tr>
+</table>
+
+<h3>Feedforward (Currently Disabled)</h3>
+<p>A <code>SimpleMotorFeedforward</code> is instantiated with <code>kS=0.02, kV=0.10</code> but is currently <strong>commented out</strong> in <code>fastPeriodic()</code>. When active, it would add a velocity-proportional term based on the rate of change of the target angle, helping the turret track moving targets more smoothly.</p>
+
+<h3>findBestAngle Logic</h3>
+<p>The turret has a physical range of [0°, 334°]. Since the robot-relative angle can be any value, <code>findBestAngle()</code> generates three candidate angles (angle−360, angle, angle+360) and selects the in-bounds candidate closest to the current position, minimizing travel distance and preventing wrap-around collisions.</p>
+
+<div class="card">
+  <div class="card-title">findBestAngle Flowchart</div>
+  <div class="flowchart">
+    <div class="fc-node fc-start">Input: targetAngle, currentPosition</div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-process">Generate candidates:<br>[target−360, target, target+360]</div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-process">For each candidate:<br>Is it within [0°, 334°]?</div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-decision-box">Any valid<br>candidates?</div>
+    <div class="fc-arrow"></div>
+    <div class="fc-branch">
+      <div class="fc-branch-col">
+        <div class="fc-label">YES</div>
+        <div class="fc-node fc-process" style="border-color:var(--green);">Pick valid candidate<br>closest to currentPosition</div>
+      </div>
+      <div class="fc-branch-col">
+        <div class="fc-label">NO</div>
+        <div class="fc-node fc-process" style="border-color:var(--red);">Return currentPosition<br>(don't move)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>Turret Cardinal Directions</h3>
+<p>The turret has named cardinal positions for quick manual aiming:</p>
+<table>
+  <tr><th>Direction</th><th>Turret Angle (degrees)</th><th>Button</th></tr>
+  <tr><td>Back</td><td>37°</td><td>A</td></tr>
+  <tr><td>Left</td><td>121°</td><td>X</td></tr>
+  <tr><td>Front</td><td>204°</td><td>Y</td></tr>
+  <tr><td>Right</td><td>290°</td><td>B</td></tr>
+</table>
+
+
+<!-- ============================================================ -->
+<h2 id="shooter">6. Shooter Integration (Flywheel + Hood)</h2>
+<!-- ============================================================ -->
+
+<div class="card">
+  <div class="card-title">Shooter Subsystem Control Flow (fastPeriodic @ 100 Hz)</div>
+  <div class="flowchart">
+    <div class="fc-node fc-start">ShooterSubsystem.fastPeriodic()</div>
+    <div class="fc-arrow"></div>
+
+    <div class="fc-group">
+      <div class="fc-group-label">Flywheel Control</div>
+      <div class="fc-node fc-data">Read: left motor encoder velocity (RPM)</div>
+      <div class="fc-arrow"></div>
+      <div class="fc-node fc-process" style="border-color: var(--purple);">
+        <span class="tag tag-pid">PID</span> P=0.0002 I=0 D=0<br>
+        <span class="tag tag-ff">FF</span> kS=0.0 kV=0.000185<br>
+        <code>output = PID(speed) + FF(setpoint)</code>
+      </div>
+      <div class="fc-arrow"></div>
+      <div class="fc-node fc-process">Clamp to [−1.0, +1.0]<br>Left motor drives, right follows (inverted)</div>
+    </div>
+
+    <div class="fc-arrow"></div>
+
+    <div class="fc-group">
+      <div class="fc-group-label">Hood Angle Control</div>
+      <div class="fc-node fc-data">Read: CANcoder absolute position (rotations 0–1)</div>
+      <div class="fc-arrow"></div>
+      <div class="fc-node fc-process" style="border-color: var(--purple);">
+        <span class="tag tag-pid">PID</span> P=1.0 I=0 D=0<br>
+        <code>output = −PID(hoodAngle)</code>
+      </div>
+      <div class="fc-arrow"></div>
+      <div class="fc-node fc-process">Clamp to [−0.2, +0.2]<br><code>kHoodSpeedMax = 0.2</code></div>
+    </div>
+
+    <div class="fc-arrow"></div>
+
+    <div class="fc-group">
+      <div class="fc-group-label">Feed System</div>
+      <div class="fc-node fc-process">Spindexer: direct speed set (no PID)<br>Transfer: direct speed set (no PID)</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">ShooterCommand Execution Flow</div>
+  <div class="flowchart">
+    <div class="fc-node fc-start">ShooterCommand.execute() — every 20ms</div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-process">
+      LaunchCalc.findFlywheelSpeed(robotPose, target)<br>
+      LaunchCalc.findHoodAngle(robotPose, target)<br>
+      ↓ distance-based interpolation from LUTs
+    </div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-process">setShooterParameters(flywheelRPM, hoodAngle)<br>→ updates PID setpoints</div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-decision-box">isShooterReady()?<br>Flywheel within 200 RPM of setpoint</div>
+    <div class="fc-arrow"></div>
+    <div class="fc-branch">
+      <div class="fc-branch-col">
+        <div class="fc-label">YES</div>
+        <div class="fc-node fc-process" style="border-color: var(--green);">Enable spindexer (1.0) + transfer (0.5)<br>→ balls fed into shooter</div>
+      </div>
+      <div class="fc-branch-col">
+        <div class="fc-label">NO</div>
+        <div class="fc-node fc-process" style="border-color: var(--yellow);">Wait — flywheel still spinning up<br>Spindexer &amp; transfer remain off</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>Trench Safety Interlock</h3>
+<p>When the robot enters a trench region (low ceiling), a trigger automatically forces the hood angle to 0 to prevent mechanical collision:</p>
+<pre><code>new Trigger(() -> FieldConstants.kTrenchesRegion.isInRegion(m_robotDrive.getPose()))
+    .whileTrue(new InstantCommand(() -> m_shooter.setHoodAngle(0), m_shooter));</code></pre>
+
+
+<!-- ============================================================ -->
+<h2 id="launch-calc">7. Launch Calculator &amp; Lookup Tables</h2>
+<!-- ============================================================ -->
+
+<p><code>LaunchCalc</code> uses <code>InterpolatingDoubleTreeMap</code> (linear interpolation between data points) to map distance-to-target → flywheel RPM and hood angle.</p>
+
+<div class="card">
+  <div class="card-title">Flywheel Speed Lookup Table</div>
+  <table>
+    <tr><th>Distance (inches)</th><th>Distance (meters)</th><th>Flywheel RPM</th></tr>
+    <tr><td>37.6</td><td>0.96</td><td>3100</td></tr>
+    <tr><td>73.6</td><td>1.87</td><td>3100</td></tr>
+    <tr><td>109.6</td><td>2.78</td><td>3100</td></tr>
+    <tr><td>145.6</td><td>3.70</td><td>3300</td></tr>
+    <tr><td>181.6</td><td>4.61</td><td>3800</td></tr>
+    <tr><td>217.6</td><td>5.53</td><td>3800</td></tr>
+    <tr><td>236.0</td><td>5.99</td><td>4400</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <div class="card-title">Hood Angle Lookup Table</div>
+  <table>
+    <tr><th>Distance (inches)</th><th>Distance (meters)</th><th>Hood Angle (rotations 0–1)</th></tr>
+    <tr><td>37.6</td><td>0.96</td><td>0.00</td></tr>
+    <tr><td>73.6</td><td>1.87</td><td>0.20</td></tr>
+    <tr><td>109.6</td><td>2.78</td><td>0.30</td></tr>
+    <tr><td>145.6</td><td>3.70</td><td>0.30</td></tr>
+    <tr><td>181.6</td><td>4.61</td><td>0.35</td></tr>
+    <tr><td>217.6</td><td>5.53</td><td>0.40</td></tr>
+    <tr><td>236.0</td><td>5.99</td><td>0.43</td></tr>
+  </table>
+</div>
+
+
+<!-- ============================================================ -->
+<h2 id="sotm">8. Shoot-on-the-Move (SOTM)</h2>
+<!-- ============================================================ -->
+
+<p><code>LaunchCalc.findTargetOnTheMove()</code> implements an iterative algorithm to compute a corrected aim point that accounts for the robot's velocity and the ball's time of flight. It is currently <strong>disabled</strong> in <code>RobotContainer.fastPeriodic()</code> (commented out).</p>
+
+<div class="card">
+  <div class="card-title">SOTM Iterative Algorithm</div>
+  <div class="flowchart">
+    <div class="fc-node fc-start">Inputs: robotPose, targetPose, robotVelocity<br>iterations = 5</div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-process">Initialize: newTarget = targetPose</div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-process" style="border-color: var(--yellow);">
+      <strong>For each iteration:</strong><br>
+      1. distance = |robotPose − newTarget|<br>
+      2. timeOfFlight = TimeLUT.get(distance)<br>
+      3. newTarget = target − velocity × ToF × 1.2<br>
+      4. If moving: offset target slightly away from robot (×0.1)
+    </div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-end">Return corrected newTarget</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Time-of-Flight Lookup Table</div>
+  <table>
+    <tr><th>Distance (m)</th><th>Time of Flight (s)</th></tr>
+    <tr><td>1.0</td><td>0.97</td></tr>
+    <tr><td>2.0</td><td>0.95</td></tr>
+    <tr><td>3.0</td><td>1.09</td></tr>
+    <tr><td>4.0</td><td>1.00</td></tr>
+    <tr><td>5.0</td><td>1.17</td></tr>
+  </table>
+</div>
+
+
+<!-- ============================================================ -->
+<h2 id="controls">9. Operator Controls &amp; Mode Switching</h2>
+<!-- ============================================================ -->
+
+<div class="card">
+  <div class="card-title">Auto-Aim Toggle Flowchart</div>
+  <div class="flowchart">
+    <div class="fc-node fc-start">Operator presses A or B</div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-decision-box">Which button?</div>
+    <div class="fc-arrow"></div>
+    <div class="fc-branch">
+      <div class="fc-branch-col">
+        <div class="fc-label">A pressed</div>
+        <div class="fc-node fc-process" style="border-color: var(--green);">autoAimTurret = true</div>
+        <div class="fc-arrow"></div>
+        <div class="fc-node fc-process">AutoAimTurret command runs<br>Turret tracks currentTarget</div>
+      </div>
+      <div class="fc-branch-col">
+        <div class="fc-label">B pressed</div>
+        <div class="fc-node fc-process" style="border-color: var(--red);">autoAimTurret = false</div>
+        <div class="fc-arrow"></div>
+        <div class="fc-node fc-process">Turret → setpoint 100°<br>(safe default position)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>Full Control Mapping (Turret &amp; Shooter)</h3>
+<table>
+  <tr><th>Controller</th><th>Input</th><th>Action</th></tr>
+  <tr><td>Driver</td><td>Y button</td><td>Turret → Front (204°)</td></tr>
+  <tr><td>Driver</td><td>B button</td><td>Turret → Right (290°)</td></tr>
+  <tr><td>Driver</td><td>A button</td><td>Turret → Back (37°)</td></tr>
+  <tr><td>Driver</td><td>X button</td><td>Turret → Left (121°)</td></tr>
+  <tr><td>Driver</td><td>Right Trigger (&gt;50%)</td><td>Auto shoot (ShooterCommand with LaunchCalc)</td></tr>
+  <tr><td>Operator</td><td>A button</td><td>Enable auto-aim turret</td></tr>
+  <tr><td>Operator</td><td>B button</td><td>Disable auto-aim turret</td></tr>
+  <tr><td>Operator</td><td>Right Trigger (&gt;50%)</td><td>Manual shoot (3300 RPM, 0.3 hood)</td></tr>
+  <tr><td>Operator</td><td>Right Bumper</td><td>Reverse spindexer (−1.0) &amp; transfer (−0.5)</td></tr>
+</table>
+
+
+<!-- ============================================================ -->
+<h2 id="constants">10. Constants Reference</h2>
+<!-- ============================================================ -->
+
+<h3>TurretConstants</h3>
+<table>
+  <tr><th>Constant</th><th>Value</th><th>Description</th></tr>
+  <tr><td>kTurretMotorPort</td><td>40</td><td>SparkMax CAN ID</td></tr>
+  <tr><td>kEncoder1CANId</td><td>41</td><td>CRT encoder 1 CAN ID</td></tr>
+  <tr><td>kEncoder2CANId</td><td>42</td><td>CRT encoder 2 CAN ID</td></tr>
+  <tr><td>kTurretTeeth</td><td>90</td><td>Turret gear teeth count</td></tr>
+  <tr><td>kEncoder1Teeth</td><td>13</td><td>Encoder 1 pinion teeth</td></tr>
+  <tr><td>kEncoder2Teeth</td><td>14</td><td>Encoder 2 pinion teeth</td></tr>
+  <tr><td>kTurretGearing</td><td>180:1</td><td>Motor-to-turret gear ratio</td></tr>
+  <tr><td>kTurretMaxRotation</td><td>334°</td><td>Mechanical travel limit</td></tr>
+  <tr><td>kTurretFrontAngle</td><td>204°</td><td>Front-facing turret angle</td></tr>
+  <tr><td>kTurretBackAngle</td><td>37°</td><td>Back-facing turret angle</td></tr>
+  <tr><td>kTurretLeftAngle</td><td>121°</td><td>Left-facing turret angle</td></tr>
+  <tr><td>kTurretRightAngle</td><td>290°</td><td>Right-facing turret angle</td></tr>
+  <tr><td>kTurretP</td><td>0.02</td><td>PID proportional gain</td></tr>
+  <tr><td>kTurretI</td><td>0.02</td><td>PID integral gain</td></tr>
+  <tr><td>kTurretD</td><td>0.0</td><td>PID derivative gain</td></tr>
+  <tr><td>kTurretIZone</td><td>20°</td><td>I accumulation zone</td></tr>
+  <tr><td>kTurretMaxSpeed</td><td>0.6</td><td>Max motor output (% power)</td></tr>
+  <tr><td>kTurretDeadband</td><td>2.0°</td><td>Error deadband (unused currently)</td></tr>
+  <tr><td>kTurretTolerance</td><td>1.5°</td><td>Position tolerance for atSetpoint()</td></tr>
+  <tr><td>kTurretOffset</td><td>(−4.2in, 7.7in, −180°)</td><td>Turret center relative to robot center</td></tr>
+</table>
+
+<h3>ShooterConstants</h3>
+<table>
+  <tr><th>Constant</th><th>Value</th><th>Description</th></tr>
+  <tr><td>kShooterMotorLeftPort</td><td>30</td><td>Left flywheel motor CAN ID</td></tr>
+  <tr><td>kShooterMotorRightPort</td><td>31</td><td>Right flywheel motor (follower, inverted)</td></tr>
+  <tr><td>kHoodMotorPort</td><td>32</td><td>Hood angle motor CAN ID</td></tr>
+  <tr><td>kHoodEncoderChannel</td><td>35</td><td>Hood CANcoder CAN ID</td></tr>
+  <tr><td>kSpindexerPort</td><td>33</td><td>Spindexer motor CAN ID</td></tr>
+  <tr><td>kTransferPort</td><td>34</td><td>Transfer motor CAN ID</td></tr>
+  <tr><td>kShooterP / I / D</td><td>0.0002 / 0 / 0</td><td>Flywheel PID gains</td></tr>
+  <tr><td>kShooterS / V</td><td>0.0 / 0.000185</td><td>Flywheel feedforward gains</td></tr>
+  <tr><td>kHoodAngleP / I / D</td><td>1.0 / 0 / 0</td><td>Hood PID gains</td></tr>
+  <tr><td>kHoodAngleMin</td><td>0.005</td><td>Min hood position (rotations)</td></tr>
+  <tr><td>kHoodAngleMax</td><td>0.725</td><td>Max hood position (rotations)</td></tr>
+  <tr><td>kHoodSpeedMax</td><td>0.2</td><td>Max hood motor speed</td></tr>
+</table>
+
+<h3>FieldConstants (Targeting)</h3>
+<table>
+  <tr><th>Constant</th><th>Value</th><th>Description</th></tr>
+  <tr><td>kHubPose</td><td>(4.63m, 4.03m, 0°)</td><td>Blue alliance Hub center</td></tr>
+  <tr><td>kFieldLength</td><td>16.54m</td><td>Full field length</td></tr>
+  <tr><td>kFieldWidth</td><td>8.07m</td><td>Full field width</td></tr>
+  <tr><td>kAllianceZoneLength</td><td>3.98m</td><td>Depth of alliance zone</td></tr>
+</table>
+
+
+<!-- ============================================================ -->
+<h2 id="timing">11. Timing &amp; Execution Rates</h2>
+<!-- ============================================================ -->
+
+<div class="card">
+  <div class="card-title">Execution Timeline — One Robot Cycle</div>
+  <div class="flowchart">
+    <div class="fc-node fc-process" style="border-color: var(--green); min-width: 500px;">
+      <strong>Every 10 ms (100 Hz) — fastPeriodic</strong><br>
+      <span class="tag tag-100hz">100 Hz</span><br><br>
+      ① DriveSubsystem.fastPeriodic() — set swerve module states<br>
+      ② TurretSubsystem.fastPeriodic() — PID → motor output<br>
+      ③ ShooterSubsystem.fastPeriodic() — flywheel PID+FF, hood PID<br>
+      ④ FindTarget.getTarget() → update currentTarget<br>
+    </div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-process" style="border-color: var(--accent); min-width: 500px;">
+      <strong>Every 20 ms (50 Hz) — CommandScheduler</strong><br>
+      <span class="tag tag-50hz">50 Hz</span><br><br>
+      ① AutoAimTurret.execute() — calculateSetpoint()<br>
+      ② ShooterCommand.execute() — LaunchCalc lookup + feed check<br>
+      ③ DriveSubsystem.periodic() — odometry update, vision fusion<br>
+      ④ TurretSubsystem.periodic() — SmartDashboard telemetry<br>
+      ⑤ ShooterSubsystem.periodic() — SmartDashboard telemetry
+    </div>
+  </div>
+</div>
+
+<div class="note">
+  <strong>Design rationale:</strong> The PID control loops (turret motor, flywheel, hood) run at 100 Hz for tighter control and reduced latency. The setpoint calculations and command logic run at 50 Hz since they depend on pose estimation which updates at a similar rate. This separation ensures responsive motor control while keeping CPU usage reasonable.
+</div>
+
+
+<!-- ============================================================ -->
+<h2 id="improvements">12. Recommended Improvements</h2>
+<!-- ============================================================ -->
+
+<p>The following improvements were identified from a code review of the turret targeting pipeline. They are ordered by estimated impact — <strong>bugs first</strong>, then performance, then quality-of-life.</p>
+
+<!-- ===== BUG FIXES ===== -->
+<div class="card" style="border-color: var(--red);">
+  <div class="card-title" style="color: var(--red);">🐛 Bug Fixes</div>
+
+  <h3>1. Telemetry Copy-Paste Bug — Encoder 2 reads Encoder 1</h3>
+  <p>In <code>TurretSubsystem.periodic()</code>, the "Encoder 2 Relative Angle" telemetry reads <code>m_encoder1</code> instead of <code>m_encoder2</code>:</p>
+  <pre><code>// BUG: both lines read m_encoder1
+SmartDashboard.putNumber("Turret/Encoder 1 Relative Angle",
+    m_encoder1.getPosition().getValueAsDouble() * 360 / kEncoder1Ratio);
+SmartDashboard.putNumber("Turret/Encoder 2 Relative Angle",
+    m_encoder1.getPosition().getValueAsDouble() * 360 / kEncoder2Ratio);  // ← should be m_encoder2
+
+// FIX:
+SmartDashboard.putNumber("Turret/Encoder 2 Relative Angle",
+    m_encoder2.getPosition().getValueAsDouble() * 360 / kEncoder2Ratio);</code></pre>
+
+  <h3>2. Trench Hood Override Conflicts with ShooterCommand</h3>
+  <p>The trench safety trigger creates an <code>InstantCommand</code> that requires <code>m_shooter</code>:</p>
+  <pre><code>new Trigger(() -> FieldConstants.kTrenchesRegion.isInRegion(...))
+    .whileTrue(new InstantCommand(() -> m_shooter.setHoodAngle(0), m_shooter));</code></pre>
+  <p>When <code>ShooterCommand</code> is also running (driver holding right trigger), these two commands both require <code>m_shooter</code>, causing the <code>InstantCommand</code> to cancel the <code>ShooterCommand</code> (or vice versa). <strong>Fix:</strong> Remove the subsystem requirement from the trench interlock, or integrate the trench check directly into <code>ShooterSubsystem.fastPeriodic()</code> as a hard clamp on the hood setpoint.</p>
+
+  <h3>3. ShooterCommand.initialize() Missing @Override</h3>
+  <p><code>ShooterCommand</code> declares <code>public void initialize()</code>, <code>execute()</code>, <code>end()</code>, and <code>isFinished()</code> without <code>@Override</code> annotations. If the method signature doesn't exactly match the parent, it silently becomes a new method instead of overriding. This means the flywheel reset in <code>initialize()</code> might not actually run. Always use <code>@Override</code>.</p>
+</div>
+
+<!-- ===== HIGH IMPACT ===== -->
+<div class="card" style="border-color: var(--accent2);">
+  <div class="card-title" style="color: var(--accent2);">🔥 High Impact Improvements</div>
+
+  <h3>4. Enable Turret Feedforward for Tracking</h3>
+  <p>The feedforward is fully computed (<code>relativeAngularVelocity</code> is calculated every cycle) but <strong>commented out</strong> in <code>fastPeriodic()</code>. For a turret that needs to track a moving target (especially while the robot rotates), feedforward is critical to reduce tracking lag. Without it, the PID must react to error after it appears, causing the turret to always trail the target.</p>
+
+  <div class="flowchart">
+    <div class="fc-node fc-process" style="border-color: var(--red); min-width: 400px;">
+      <strong>Current (PID only):</strong><br>
+      Target moves → error builds → PID reacts → turret lags
+    </div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-process" style="border-color: var(--green); min-width: 400px;">
+      <strong>With feedforward:</strong><br>
+      Target moves → FF predicts motion → PID corrects residual → near-zero lag
+    </div>
+  </div>
+
+  <pre><code>// In TurretSubsystem.fastPeriodic(), uncomment and add:
+double output = m_turretPID.calculate(getTurretPosition())
+    + Math.signum(m_turretPID.getError())
+    * Math.abs(m_turretFeedforward.calculate(relativeAngularVelocity));</code></pre>
+
+  <h3>5. Gate Shooting on Turret Alignment — Not Just Flywheel Speed</h3>
+  <p><code>ShooterCommand.execute()</code> enables the spindexer/transfer as soon as <code>isShooterReady()</code> (flywheel within 200 RPM). It does <strong>not</strong> check whether the turret is actually aimed at the target. This means balls can be fed while the turret is still slewing, wasting shots.</p>
+
+  <div class="flowchart">
+    <div class="fc-node fc-process" style="border-color: var(--red);">
+      <strong>Current:</strong> Feed when flywheel ready
+    </div>
+    <div class="fc-arrow"></div>
+    <div class="fc-node fc-process" style="border-color: var(--green);">
+      <strong>Proposed:</strong> Feed when flywheel ready <strong>AND</strong> turret.atSetpoint()
+    </div>
+  </div>
+
+  <p><strong>Fix:</strong> Pass the <code>TurretSubsystem</code> into <code>ShooterCommand</code> and add a turret alignment check:</p>
+  <pre><code>if (m_shooterSubsystem.isShooterReady() && m_turretSubsystem.atSetpoint()) {
+    m_shooterSubsystem.setSpindexer(true);
+    m_shooterSubsystem.setTransfer(true);
+}</code></pre>
+
+  <h3>6. Enable Shoot-on-the-Move (SOTM)</h3>
+  <p>The iterative SOTM algorithm in <code>LaunchCalc.findTargetOnTheMove()</code> is fully implemented but <strong>commented out</strong> in <code>RobotContainer.fastPeriodic()</code>. Enabling it would let the robot score while translating, significantly improving cycle times. The algorithm already handles velocity compensation and time-of-flight correction.</p>
+  <pre><code>// In fastPeriodic(), replace:
+currentTarget = FindTarget.getTarget(m_robotDrive.getPose());
+
+// With:
+ChassisSpeeds fieldSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(
+    m_robotDrive.getRobotRelativeSpeeds(), m_robotDrive.getPose().getRotation());
+currentTarget = LaunchCalc.findTargetOnTheMove(
+    m_robotDrive.getPose(),
+    FindTarget.getTarget(m_robotDrive.getPose()),
+    new Translation2d(fieldSpeeds.vxMetersPerSecond, fieldSpeeds.vyMetersPerSecond));</code></pre>
+
+  <h3>7. Reset PID Integral on Large Setpoint Changes</h3>
+  <p>When the turret setpoint changes dramatically (e.g., switching from Hub to wall target, or cardinal direction buttons), the accumulated integral from the old setpoint is invalid and can cause significant overshoot at the new setpoint. <strong>Fix:</strong> Reset the PID when the setpoint changes by more than a threshold:</p>
+  <pre><code>public void setSetpoint(double angle) {
+    double clampedAngle = MathUtil.clamp(angle, 0, kTurretMaxRotation);
+    if (Math.abs(clampedAngle - m_turretPID.getSetpoint()) > 10.0) {
+        m_turretPID.reset();  // clear accumulated integral
+    }
+    m_turretPID.setSetpoint(clampedAngle);
+}</code></pre>
+</div>
+
+<!-- ===== MEDIUM IMPACT ===== -->
+<div class="card" style="border-color: var(--yellow);">
+  <div class="card-title" style="color: var(--yellow);">⚡ Medium Impact Improvements</div>
+
+  <h3>8. Add Flywheel Pre-Spin</h3>
+  <p><code>ShooterCommand.initialize()</code> calls <code>reset()</code> which sets the flywheel to 0 RPM. Every time the driver pulls the trigger, the flywheel must spin up from zero, wasting ~0.5–1s. Instead, keep the flywheel spinning at a baseline speed whenever auto-aim is active, or start the flywheel as soon as the robot enters its alliance zone:</p>
+  <pre><code>// Option A: idle flywheel speed as a default command
+m_shooter.setDefaultCommand(new RunCommand(() -> {
+    if (FindTarget.shouldScoreHub(m_robotDrive.getPose())) {
+        m_shooter.setShooterParameters(3100, ShooterConstants.kHoodAngleMin);
+    }
+}, m_shooter));</code></pre>
+
+  <h3>9. Add Software Soft Limits to Turret Motor</h3>
+  <p>There are no software limits on the SparkMax. If the PID overshoots or the encoder drifts, the turret could slam into a mechanical hard stop. Add soft limits in the motor config:</p>
+  <pre><code>motorConfig.softLimit
+    .forwardSoftLimit(kTurretMaxRotation)
+    .forwardSoftLimitEnabled(true)
+    .reverseSoftLimit(0)
+    .reverseSoftLimitEnabled(true);</code></pre>
+
+  <h3>10. Periodic CRT Drift Correction</h3>
+  <p>The drift between the CRT absolute position and the SparkMax relative encoder is logged (<code>"Turret/Drift value"</code>) but never corrected. Over a long match, the relative encoder can drift several degrees. <strong>Fix:</strong> Periodically re-seed the relative encoder when the turret is stationary and the drift exceeds a threshold:</p>
+  <pre><code>// In periodic(), add:
+double drift = calculateTurretPosition() - getTurretPosition();
+if (Math.abs(drift) > 2.0 && Math.abs(m_turretMotor.getEncoder().getVelocity()) < 0.1) {
+    m_turretMotor.getEncoder().setPosition(calculateTurretPosition());
+}</code></pre>
+
+  <h3>11. Clamp Hood Angle Setpoint</h3>
+  <p><code>setHoodAngle()</code> passes the value directly to the PID with no bounds checking. If the LaunchCalc LUT extrapolates beyond the table or a bad value is passed, the hood could be driven past its limits. Add a clamp:</p>
+  <pre><code>public void setHoodAngle(double angle) {
+    m_hoodAnglePID.setSetpoint(
+        MathUtil.clamp(angle, ShooterConstants.kHoodAngleMin, ShooterConstants.kHoodAngleMax));
+}</code></pre>
+
+  <h3>12. Add D-term to Turret PID</h3>
+  <p><code>kTurretD</code> is 0.0. For a turret tracking a moving target, a small derivative term would dampen oscillations around the setpoint and reduce overshoot during fast slews. Start with <code>kD = 0.001</code> and tune from there. The fast 100 Hz loop rate makes D-term noise less of a concern.</p>
+</div>
+
+<!-- ===== QUALITY OF LIFE ===== -->
+<div class="card" style="border-color: var(--accent);">
+  <div class="card-title" style="color: var(--accent);">✨ Quality-of-Life Improvements</div>
+
+  <h3>13. Driver Feedback — Haptic/LED When Ready to Fire</h3>
+  <p>There is no feedback to the driver indicating when the turret + flywheel + hood are all locked on target. The driver is shooting blind. Add controller rumble when the system is ready:</p>
+  <pre><code>// In RobotContainer.periodic():
+boolean readyToFire = m_turret.atSetpoint() && m_shooter.isShooterReady();
+m_driverController.setRumble(RumbleType.kBothRumble, readyToFire ? 0.3 : 0);</code></pre>
+
+  <h3>14. Simplify calculateSetpoint Coordinate Transform</h3>
+  <p>The current angle conversion uses a confusing double-inversion:</p>
+  <pre><code>findBestAngle(kTurretFrontAngle - (360 - robotRelativeAngle), (360 - currentPosition))</code></pre>
+  <p>This is difficult to reason about and debug. Consider refactoring to explicit, well-named intermediate variables:</p>
+  <pre><code>// Robot-relative angle from atan2
+double fieldRelativeAngle = robotRelativeAngle + robotPose.getRotation().getDegrees();
+// Convert to turret coordinate system (turret 0° = some physical reference)
+double turretAngle = kTurretFrontAngle - (360 - robotRelativeAngle);
+double targetAngle = findBestAngle(turretAngle, getTurretPosition());  // use actual position, not inverted</code></pre>
+
+  <h3>15. Move Auto-Aim Toggle to a Subsystem State</h3>
+  <p>The <code>autoAimTurret</code> boolean lives as a raw field in <code>RobotContainer</code> and is toggled by button bindings that don't require any subsystem. This means the turret has no default behavior when auto-aim is off — it just holds whatever setpoint was last written. Consider making this a proper state in <code>TurretSubsystem</code> with a default command that always runs (either tracking or holding a manual setpoint from operator joystick input).</p>
+</div>
+
+<!-- ===== SUMMARY TABLE ===== -->
+<div class="card">
+  <div class="card-title">Summary — Priority Matrix</div>
+  <table>
+    <tr><th>#</th><th>Improvement</th><th>Category</th><th>Impact</th><th>Effort</th></tr>
+    <tr><td>1</td><td>Fix encoder 2 telemetry copy-paste bug</td><td style="color:var(--red);">Bug</td><td>Low</td><td>1 line</td></tr>
+    <tr><td>2</td><td>Fix trench hood override subsystem conflict</td><td style="color:var(--red);">Bug</td><td>Medium</td><td>Small</td></tr>
+    <tr><td>3</td><td>Add @Override to ShooterCommand methods</td><td style="color:var(--red);">Bug</td><td>Medium</td><td>4 lines</td></tr>
+    <tr><td>4</td><td>Enable turret feedforward</td><td style="color:var(--accent2);">High</td><td>High</td><td>Uncomment + tune</td></tr>
+    <tr><td>5</td><td>Gate feeding on turret alignment</td><td style="color:var(--accent2);">High</td><td>High</td><td>Small</td></tr>
+    <tr><td>6</td><td>Enable shoot-on-the-move</td><td style="color:var(--accent2);">High</td><td>High</td><td>Uncomment + tune</td></tr>
+    <tr><td>7</td><td>Reset PID integral on large setpoint changes</td><td style="color:var(--accent2);">High</td><td>Medium</td><td>Small</td></tr>
+    <tr><td>8</td><td>Flywheel pre-spin</td><td style="color:var(--yellow);">Medium</td><td>Medium</td><td>Medium</td></tr>
+    <tr><td>9</td><td>Software soft limits on turret</td><td style="color:var(--yellow);">Medium</td><td>Medium</td><td>Small</td></tr>
+    <tr><td>10</td><td>CRT drift correction at runtime</td><td style="color:var(--yellow);">Medium</td><td>Medium</td><td>Small</td></tr>
+    <tr><td>11</td><td>Clamp hood angle setpoint</td><td style="color:var(--yellow);">Medium</td><td>Low</td><td>1 line</td></tr>
+    <tr><td>12</td><td>Add D-term to turret PID</td><td style="color:var(--yellow);">Medium</td><td>Medium</td><td>Tune</td></tr>
+    <tr><td>13</td><td>Driver haptic feedback when ready</td><td style="color:var(--accent);">QoL</td><td>Medium</td><td>Small</td></tr>
+    <tr><td>14</td><td>Simplify calculateSetpoint math</td><td style="color:var(--accent);">QoL</td><td>Low</td><td>Medium</td></tr>
+    <tr><td>15</td><td>Turret state management refactor</td><td style="color:var(--accent);">QoL</td><td>Low</td><td>Medium</td></tr>
+  </table>
+</div>
+
+<hr style="border-color: var(--border); margin: 3rem 0 1rem 0;">
+<p style="color: var(--text-muted); font-size: 0.85rem; text-align: center;">
+  Generated from <code>glacier-peak</code> branch source code &nbsp;|&nbsp; Team 5000 Hammerheads &nbsp;|&nbsp; FRC 2026
+</p>
+
+</div>
+</body>
+</html>

@@ -71,7 +71,7 @@ import frc.robot.subsystems.TurretSubsystem;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
-  private final ShooterSubsystem m_shooter = new ShooterSubsystem();
+  private final ShooterSubsystem m_shooter = new ShooterSubsystem(m_robotDrive::getPose);
   private final TurretSubsystem m_turret = new TurretSubsystem();
   private final IntakeSubsystem m_intake = new IntakeSubsystem();
 
@@ -202,11 +202,8 @@ public class RobotContainer {
 
     // driver shoot
     new Trigger(() -> {return m_driverController.getRightTriggerAxis() > 0.5;})
-        .whileTrue(new ShooterCommand(m_shooter, m_robotDrive::getPose, () -> {return currentTarget;}));
+        .whileTrue(new ShooterCommand(m_shooter, m_turret, m_robotDrive::getPose, () -> {return currentTarget;}));
 
-    // keep hood down in trench
-    new Trigger(() -> {return FieldConstants.kTrenchesRegion.isInRegion(m_robotDrive.getPose());})
-        .whileTrue(new InstantCommand(() -> m_shooter.setHoodAngle(0), m_shooter));
     
     // intake toggle pivot and run intake
     new Trigger(() -> {return m_driverController.getLeftTriggerAxis() > 0.5;})
@@ -242,7 +239,7 @@ public class RobotContainer {
 
     // operator manual shoot
     new Trigger(() -> {return m_operatorController.getRightTriggerAxis() > 0.5;})
-        .whileTrue(new ManualShooterCommand(m_shooter, 3300, 0.3));
+        .whileTrue(new ManualShooterCommand(m_shooter, m_turret, 3300, 0.3));
 
     // operator reverse spindexer
     new JoystickButton(m_operatorController, Button.kRightBumper.value)
@@ -252,9 +249,9 @@ public class RobotContainer {
 
   private void configureAuton() {
 
-    NamedCommands.registerCommand("Score", new ShooterCommand(m_shooter, m_robotDrive::getPose, () -> {return currentTarget;}));
+    NamedCommands.registerCommand("Score", new ShooterCommand(m_shooter, m_turret, m_robotDrive::getPose, () -> {return currentTarget;}));
     NamedCommands.registerCommand("Climb", Commands.none());
-    NamedCommands.registerCommand("Ferry", new ShooterCommand(m_shooter, m_robotDrive::getPose, () -> {return currentTarget;}));
+    NamedCommands.registerCommand("Ferry", new ShooterCommand(m_shooter, m_turret, m_robotDrive::getPose, () -> {return currentTarget;}));
     NamedCommands.registerCommand("Intake", new RunIntake(m_intake));
     NamedCommands.registerCommand("Deploy Intake", new InstantCommand(m_intake::togglePivot));
     NamedCommands.registerCommand("Toggle Auto Aim", new InstantCommand(() -> autoAimTurret = false));
@@ -263,7 +260,7 @@ public class RobotContainer {
         .whileTrue(new RunIntake(m_intake));
 
     new EventTrigger("Score")
-        .whileTrue(new ShooterCommand(m_shooter, m_robotDrive::getPose, () -> {return currentTarget;}));
+        .whileTrue(new ShooterCommand(m_shooter, m_turret, m_robotDrive::getPose, () -> {return currentTarget;}));
   }
 
   private void configureFuelSim() {

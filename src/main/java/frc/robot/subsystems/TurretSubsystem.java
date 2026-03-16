@@ -115,7 +115,7 @@ public class TurretSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Turret/Encoder 1 Angle", m_encoder1.getAbsolutePosition().getValueAsDouble()*360);
     SmartDashboard.putNumber("Turret/Encoder 2 Angle", m_encoder2.getAbsolutePosition().getValueAsDouble()*360);
     SmartDashboard.putNumber("Turret/Encoder 1 Relative Angle", m_encoder1.getPosition().getValueAsDouble()*360/TurretConstants.kEncoder1Ratio);
-    SmartDashboard.putNumber("Turret/Encoder 2 Relative Angle", m_encoder1.getPosition().getValueAsDouble()*360/TurretConstants.kEncoder2Ratio);
+    SmartDashboard.putNumber("Turret/Encoder 2 Relative Angle", m_encoder2.getPosition().getValueAsDouble()*360/TurretConstants.kEncoder2Ratio);
 
     SmartDashboard.putNumber("Turret/Turret Setpoint", m_turretPID.getSetpoint());
     // SmartDashboard.putNumber("Turret/Total PID Error", m_turretPID.getAccumulatedError());
