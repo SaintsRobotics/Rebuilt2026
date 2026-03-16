@@ -186,7 +186,7 @@ public class TurretSubsystem extends SubsystemBase {
     // Find best target angle
     double currentPosition = getTurretPosition();
     //double targetAngle = findBestAngle(robotRelativeAngle, currentPosition);
-    double targetAngle = findBestAngle( TurretConstants.kTurretFrontAngle - (360 - robotRelativeAngle), (360-currentPosition));
+    double targetAngle = findBestAngle( TurretConstants.kTurretFrontAngle + (360 - robotRelativeAngle), currentPosition);
     targetAngle = MathUtil.clamp(targetAngle, 0, TurretConstants.kTurretMaxRotation);
     //m_turretPID.setSetpoint(360 - targetAngle);
     m_turretPID.setSetpoint(targetAngle);
