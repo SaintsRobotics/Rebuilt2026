@@ -254,10 +254,10 @@ public final class Constants {
     public static final double kEncoder2OffsetDegrees = 0.0;  
 
     public static final double kTurretMaxRotation = 334; 
-    public static final double kTurretBackAngle = 18.86;
-    public static final double kTurretLeftAngle = 103.33;
-    public static final double kTurretFrontAngle = 189.96;
-    public static final double kTurretRightAngle = 274.85;
+    public static final double kTurretBackAngle = 37;
+    public static final double kTurretLeftAngle = 121;
+    public static final double kTurretFrontAngle = 204;
+    public static final double kTurretRightAngle = 290;
 
     // PID gains
     public static final double kTurretP = 0.02;  
@@ -276,7 +276,7 @@ public final class Constants {
     public static final Pose2d kTurretOffset = new Pose2d(
         Units.inchesToMeters(-4.203), 
         Units.inchesToMeters(7.701), 
-        new Rotation2d(Units.degreesToRadians(-217.28082275390625)));
+        new Rotation2d(Units.degreesToRadians(-180)));
 
     public static final double kTurretSimGearRatio = 100.0; 
     public static final double kTurretSimMOI = 0.5;

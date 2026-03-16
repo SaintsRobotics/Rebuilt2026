@@ -154,7 +154,7 @@ public class TurretSubsystem extends SubsystemBase {
       Units.radiansPerSecondToRotationsPerMinute(m_turretSim.getVelocityRadPerSec()), 
       RobotController.getBatteryVoltage(), 
       0.02);
-    m_turretMotorSim.getRelativeEncoderSim().setPosition(Units.radiansToDegrees(m_turretSim.getAngleRads()));
+    m_turretMotorSim.getRelativeEncoderSim().setPosition(Units.radiansToDegrees(2*Math.PI - m_turretSim.getAngleRads()));
 
     m_encoder1.getSimState().addPosition(
       Radians.of(
@@ -186,7 +186,7 @@ public class TurretSubsystem extends SubsystemBase {
     // Find best target angle
     double currentPosition = getTurretPosition();
     //double targetAngle = findBestAngle(robotRelativeAngle, currentPosition);
-    double targetAngle = findBestAngle( TurretConstants.kTurretFrontAngle - robotRelativeAngle, currentPosition);
+    double targetAngle = findBestAngle( TurretConstants.kTurretFrontAngle - (360 - robotRelativeAngle), (360-currentPosition));
     targetAngle = MathUtil.clamp(targetAngle, 0, TurretConstants.kTurretMaxRotation);
     //m_turretPID.setSetpoint(360 - targetAngle);
     m_turretPID.setSetpoint(targetAngle);

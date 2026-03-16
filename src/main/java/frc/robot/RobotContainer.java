@@ -79,7 +79,7 @@ public class RobotContainer {
   private final XboxController m_operatorController = new XboxController(IOConstants.kOperatorControllerPort);
 
   private final SendableChooser<Command> m_autoChooser;
-  private boolean autoAimTurret = false;
+  private boolean autoAimTurret = false; // swtich back to false later
 
   public final FuelSim fuelSim;
   private final StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault().getStructTopic("SotM Target/5 iterations", Pose2d.struct).publish();
@@ -220,7 +220,7 @@ public class RobotContainer {
     new JoystickButton(m_operatorController, Button.kA.value)
         .onTrue(new InstantCommand(() -> autoAimTurret = true));
     new Trigger(() -> {return autoAimTurret;})
-        .whileTrue(new AutoAimTurret(m_turret, m_robotDrive, currentTarget, false))
+        .whileTrue(new AutoAimTurret(m_turret, m_robotDrive, () -> currentTarget, false))
         .onFalse(new InstantCommand(() -> m_turret.setSetpoint(100), m_turret));
     
     // operator turret cardinal directions
@@ -305,8 +305,8 @@ public class RobotContainer {
     currentTarget = FindTarget.getTarget(m_robotDrive.getPose()); /* LaunchCalc.findTargetOnTheMove(
         m_robotDrive.getPose(), 
         FindTarget.getTarget(m_robotDrive.getPose()), 
-        new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond));
-    publisher.set(currentTarget); */
+        new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond)); */
+    publisher.set(currentTarget);
     // publisher2.set(LaunchCalc.findTargetOnTheMove(m_robotDrive.getPose(), TurretConstants.kHubPose, new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond), 10));
   }
 
@@ -317,7 +317,7 @@ public class RobotContainer {
     SmartDashboard.putBoolean("In Trench", FieldConstants.kTrenchesRegion.isInRegion(m_robotDrive.getPose()));
 
     SmartDashboard.putBoolean("Should Score Hub", FindTarget.shouldScoreHub(m_robotDrive.getPose()));
-
+    SmartDashboard.putBoolean("Auto Aim Enabled", autoAimTurret);
   }
 
   public void reset() {

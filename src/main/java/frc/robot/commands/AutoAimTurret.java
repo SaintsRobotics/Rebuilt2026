@@ -4,6 +4,8 @@
 
 package frc.robot.commands;
 
+import java.util.function.Supplier;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.FieldConstants;
@@ -14,14 +16,14 @@ import frc.robot.subsystems.TurretSubsystem;
 public class AutoAimTurret extends Command {
   private final TurretSubsystem m_turretSubsystem;
   private final DriveSubsystem m_driveSubsystem;
-  private final Pose2d m_targetPose;
+  private final Supplier<Pose2d> m_targetPose;
   private final boolean m_finishWhenAtTarget;
 
   /* Creates a new AutoAimTurret */
   public AutoAimTurret(
       TurretSubsystem turretSubsystem,
       DriveSubsystem driveSubsystem,
-      Pose2d targetPose,
+      Supplier<Pose2d> targetPose,
       boolean finishWhenAtTarget) {
     m_turretSubsystem = turretSubsystem;
     m_driveSubsystem = driveSubsystem;
@@ -32,7 +34,7 @@ public class AutoAimTurret extends Command {
   }
 
   public AutoAimTurret(TurretSubsystem turretSubsystem, DriveSubsystem driveSubsystem) {
-    this(turretSubsystem, driveSubsystem, FieldConstants.kHubPose, false);
+    this(turretSubsystem, driveSubsystem, () -> {return FieldConstants.kHubPose;}, false);
   }
 
   @Override
@@ -44,7 +46,7 @@ public class AutoAimTurret extends Command {
     // Calculate and update the turret setpoint
     m_turretSubsystem.calculateSetpoint(
         m_driveSubsystem.getPose(),
-        m_targetPose,
+        m_targetPose.get(),
         m_driveSubsystem.getRotationSpeed());
   }
 
