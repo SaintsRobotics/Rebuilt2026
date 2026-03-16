@@ -202,7 +202,7 @@ public class RobotContainer {
 
     // driver shoot
     new Trigger(() -> {return m_driverController.getRightTriggerAxis() > 0.5;})
-        .whileTrue(new ShooterCommand(m_shooter, m_robotDrive::getPose, () -> {return currentTarget;}));
+        .whileTrue(new ShooterCommand(m_shooter, m_turret, m_robotDrive::getPose, () -> {return currentTarget;}));
 
     
     // intake toggle pivot and run intake
@@ -239,7 +239,7 @@ public class RobotContainer {
 
     // operator manual shoot
     new Trigger(() -> {return m_operatorController.getRightTriggerAxis() > 0.5;})
-        .whileTrue(new ManualShooterCommand(m_shooter, 3300, 0.3));
+        .whileTrue(new ManualShooterCommand(m_shooter, m_turret, 3300, 0.3));
 
     // operator reverse spindexer
     new JoystickButton(m_operatorController, Button.kRightBumper.value)
@@ -249,9 +249,9 @@ public class RobotContainer {
 
   private void configureAuton() {
 
-    NamedCommands.registerCommand("Score", new ShooterCommand(m_shooter, m_robotDrive::getPose, () -> {return currentTarget;}));
+    NamedCommands.registerCommand("Score", new ShooterCommand(m_shooter, m_turret, m_robotDrive::getPose, () -> {return currentTarget;}));
     NamedCommands.registerCommand("Climb", Commands.none());
-    NamedCommands.registerCommand("Ferry", new ShooterCommand(m_shooter, m_robotDrive::getPose, () -> {return currentTarget;}));
+    NamedCommands.registerCommand("Ferry", new ShooterCommand(m_shooter, m_turret, m_robotDrive::getPose, () -> {return currentTarget;}));
     NamedCommands.registerCommand("Intake", new RunIntake(m_intake));
     NamedCommands.registerCommand("Deploy Intake", new InstantCommand(m_intake::togglePivot));
     NamedCommands.registerCommand("Toggle Auto Aim", new InstantCommand(() -> autoAimTurret = false));
@@ -260,7 +260,7 @@ public class RobotContainer {
         .whileTrue(new RunIntake(m_intake));
 
     new EventTrigger("Score")
-        .whileTrue(new ShooterCommand(m_shooter, m_robotDrive::getPose, () -> {return currentTarget;}));
+        .whileTrue(new ShooterCommand(m_shooter, m_turret, m_robotDrive::getPose, () -> {return currentTarget;}));
   }
 
   private void configureFuelSim() {

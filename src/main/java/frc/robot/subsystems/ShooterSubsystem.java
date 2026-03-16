@@ -167,6 +167,10 @@ public class ShooterSubsystem extends SubsystemBase {
         return m_shooterPID.atSetpoint();
     }
 
+    public boolean isHoodReady() {
+        return Math.abs(m_hoodAnglePID.getSetpoint() - getHoodAngle()) < 0.03;
+    }
+
     //sets hood angle by setting the setpoint of the hood angle PID controller
     public void setHoodAngle(double angle) {
 

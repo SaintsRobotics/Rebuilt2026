@@ -11,16 +11,19 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
 import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.utils.LaunchCalc;
 
 public class ShooterCommand extends Command {
 
     private final ShooterSubsystem m_shooterSubsystem;
+    private final TurretSubsystem m_turretSubsystem;
     private final Supplier<Pose2d> m_robotPoseSupplier;
     private final Supplier<Pose2d> m_targetSupplier;
 
-    public ShooterCommand(ShooterSubsystem shooterSubsystem, Supplier<Pose2d> robotPose, Supplier<Pose2d> currentTarget) {
+    public ShooterCommand(ShooterSubsystem shooterSubsystem, TurretSubsystem turretSubsystem, Supplier<Pose2d> robotPose, Supplier<Pose2d> currentTarget) {
         m_shooterSubsystem = shooterSubsystem;
+        m_turretSubsystem = turretSubsystem;
         m_targetSupplier = currentTarget;
         m_robotPoseSupplier = robotPose;
         addRequirements(m_shooterSubsystem);
@@ -41,7 +44,7 @@ public class ShooterCommand extends Command {
             // SmartDashboard.getNumber("Shooter/Hood Angle Input", 0)
         );
         
-        if (m_shooterSubsystem.isShooterReady()) {
+        if (m_shooterSubsystem.isShooterReady() && m_shooterSubsystem.isHoodReady() && m_turretSubsystem.atSetpoint()) {
             m_shooterSubsystem.setSpindexer(true);
             m_shooterSubsystem.setTransfer(true);
         }
