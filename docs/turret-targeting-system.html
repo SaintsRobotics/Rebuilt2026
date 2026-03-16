@@ -644,25 +644,31 @@
     <div class="fc-arrow"></div>
     <div class="fc-node fc-process">setShooterParameters(flywheelRPM, hoodAngle)<br>→ updates PID setpoints</div>
     <div class="fc-arrow"></div>
-    <div class="fc-node fc-decision-box">isShooterReady()?<br>Flywheel within 200 RPM of setpoint</div>
+    <div class="fc-node fc-decision-box">isShooterReady() &amp;&amp; isHoodReady() &amp;&amp; turret.atSetpoint()?<br>Flywheel within 200 RPM &bull; Hood within 0.03 &bull; Turret at setpoint</div>
     <div class="fc-arrow"></div>
     <div class="fc-branch">
       <div class="fc-branch-col">
-        <div class="fc-label">YES</div>
+        <div class="fc-label">ALL THREE YES</div>
         <div class="fc-node fc-process" style="border-color: var(--green);">Enable spindexer (1.0) + transfer (0.5)<br>→ balls fed into shooter</div>
       </div>
       <div class="fc-branch-col">
-        <div class="fc-label">NO</div>
-        <div class="fc-node fc-process" style="border-color: var(--yellow);">Wait — flywheel still spinning up<br>Spindexer &amp; transfer remain off</div>
+        <div class="fc-label">ANY NO</div>
+        <div class="fc-node fc-process" style="border-color: var(--yellow);">Wait — system not fully aligned<br>Spindexer &amp; transfer remain off</div>
       </div>
     </div>
   </div>
 </div>
 
 <h3>Trench Safety Interlock</h3>
-<p>When the robot enters a trench region (low ceiling), a trigger automatically forces the hood angle to 0 to prevent mechanical collision:</p>
-<pre><code>new Trigger(() -> FieldConstants.kTrenchesRegion.isInRegion(m_robotDrive.getPose()))
-    .whileTrue(new InstantCommand(() -> m_shooter.setHoodAngle(0), m_shooter));</code></pre>
+<p>When the robot enters a trench region (low ceiling), the hood angle is automatically forced to 0 to prevent mechanical collision. This safety check is built directly into <code>ShooterSubsystem.fastPeriodic()</code> via a <code>Supplier&lt;Pose2d&gt;</code> passed at construction time, which avoids subsystem-requirement conflicts with <code>ShooterCommand</code>:</p>
+<pre><code>// In ShooterSubsystem.fastPeriodic() — runs at 100 Hz
+if (FieldConstants.kTrenchesRegion.isInRegion(m_poseSupplier.get())) {
+    setHoodAngle(ShooterConstants.kHoodAngleMin);
+}
+// ... then hood PID runs with the (possibly overridden) setpoint</code></pre>
+<div class="note">
+  <strong>Note:</strong> The previous implementation used a <code>Trigger</code>/<code>InstantCommand</code> in <code>RobotContainer</code> that required <code>m_shooter</code>, which conflicted with <code>ShooterCommand</code> also requiring the same subsystem. Moving the check into the subsystem's own fast loop eliminates this conflict and also runs at 100 Hz instead of 50 Hz.
+</div>
 
 
 <!-- ============================================================ -->
@@ -880,23 +886,21 @@
 <div class="card" style="border-color: var(--red);">
   <div class="card-title" style="color: var(--red);">🐛 Bug Fixes</div>
 
-  <h3>1. Telemetry Copy-Paste Bug — Encoder 2 reads Encoder 1</h3>
-  <p>In <code>TurretSubsystem.periodic()</code>, the "Encoder 2 Relative Angle" telemetry reads <code>m_encoder1</code> instead of <code>m_encoder2</code>:</p>
-  <pre><code>// BUG: both lines read m_encoder1
-SmartDashboard.putNumber("Turret/Encoder 1 Relative Angle",
-    m_encoder1.getPosition().getValueAsDouble() * 360 / kEncoder1Ratio);
-SmartDashboard.putNumber("Turret/Encoder 2 Relative Angle",
-    m_encoder1.getPosition().getValueAsDouble() * 360 / kEncoder2Ratio);  // ← should be m_encoder2
-
-// FIX:
+  <h3>1. ✅ Telemetry Copy-Paste Bug — Encoder 2 reads Encoder 1 <span class="tag" style="background: var(--green); color: #000;">FIXED</span></h3>
+  <p>In <code>TurretSubsystem.periodic()</code>, the "Encoder 2 Relative Angle" telemetry was reading <code>m_encoder1</code> instead of <code>m_encoder2</code>. <strong>This has been fixed</strong> — the line now correctly reads <code>m_encoder2</code>.</p>
+  <pre><code>// FIXED: now correctly reads m_encoder2
 SmartDashboard.putNumber("Turret/Encoder 2 Relative Angle",
     m_encoder2.getPosition().getValueAsDouble() * 360 / kEncoder2Ratio);</code></pre>
 
-  <h3>2. Trench Hood Override Conflicts with ShooterCommand</h3>
-  <p>The trench safety trigger creates an <code>InstantCommand</code> that requires <code>m_shooter</code>:</p>
-  <pre><code>new Trigger(() -> FieldConstants.kTrenchesRegion.isInRegion(...))
-    .whileTrue(new InstantCommand(() -> m_shooter.setHoodAngle(0), m_shooter));</code></pre>
-  <p>When <code>ShooterCommand</code> is also running (driver holding right trigger), these two commands both require <code>m_shooter</code>, causing the <code>InstantCommand</code> to cancel the <code>ShooterCommand</code> (or vice versa). <strong>Fix:</strong> Remove the subsystem requirement from the trench interlock, or integrate the trench check directly into <code>ShooterSubsystem.fastPeriodic()</code> as a hard clamp on the hood setpoint.</p>
+  <h3>2. ✅ Trench Hood Override Conflicts with ShooterCommand <span class="tag" style="background: var(--green); color: #000;">FIXED</span></h3>
+  <p>The trench safety trigger previously created an <code>InstantCommand</code> requiring <code>m_shooter</code>, which conflicted with <code>ShooterCommand</code> also requiring the same subsystem. <strong>This has been fixed</strong> — the trench check is now built into <code>ShooterSubsystem.fastPeriodic()</code> using a <code>Supplier&lt;Pose2d&gt;</code> passed at construction time. The conflicting Trigger has been removed from <code>RobotContainer</code>.</p>
+  <pre><code>// ShooterSubsystem now takes a pose supplier in its constructor:
+new ShooterSubsystem(m_robotDrive::getPose)
+
+// In fastPeriodic(), trench safety runs at 100 Hz with no subsystem conflicts:
+if (FieldConstants.kTrenchesRegion.isInRegion(m_poseSupplier.get())) {
+    setHoodAngle(ShooterConstants.kHoodAngleMin);
+}</code></pre>
 
   <h3>3. ShooterCommand.initialize() Missing @Override</h3>
   <p><code>ShooterCommand</code> declares <code>public void initialize()</code>, <code>execute()</code>, <code>end()</code>, and <code>isFinished()</code> without <code>@Override</code> annotations. If the method signature doesn't exactly match the parent, it silently becomes a new method instead of overriding. This means the flywheel reset in <code>initialize()</code> might not actually run. Always use <code>@Override</code>.</p>
@@ -926,23 +930,30 @@ double output = m_turretPID.calculate(getTurretPosition())
     + Math.signum(m_turretPID.getError())
     * Math.abs(m_turretFeedforward.calculate(relativeAngularVelocity));</code></pre>
 
-  <h3>5. Gate Shooting on Turret Alignment — Not Just Flywheel Speed</h3>
-  <p><code>ShooterCommand.execute()</code> enables the spindexer/transfer as soon as <code>isShooterReady()</code> (flywheel within 200 RPM). It does <strong>not</strong> check whether the turret is actually aimed at the target. This means balls can be fed while the turret is still slewing, wasting shots.</p>
+  <h3>5. ✅ Gate Shooting on Turret Alignment — Not Just Flywheel Speed <span class="tag" style="background: var(--green); color: #000;">IMPLEMENTED</span></h3>
+  <p><strong>This has been implemented.</strong> <code>ShooterCommand</code> and <code>ManualShooterCommand</code> now accept a <code>TurretSubsystem</code> parameter (read-only, not added to requirements). Ball feeding is gated on all three conditions: flywheel speed, hood angle, and turret alignment. A new <code>isHoodReady()</code> method was also added to <code>ShooterSubsystem</code>.</p>
 
   <div class="flowchart">
     <div class="fc-node fc-process" style="border-color: var(--red);">
-      <strong>Current:</strong> Feed when flywheel ready
+      <strong>Before:</strong> Feed when flywheel ready only
     </div>
     <div class="fc-arrow"></div>
     <div class="fc-node fc-process" style="border-color: var(--green);">
-      <strong>Proposed:</strong> Feed when flywheel ready <strong>AND</strong> turret.atSetpoint()
+      <strong>Now:</strong> Feed when flywheel ready <strong>AND</strong> hood ready <strong>AND</strong> turret.atSetpoint()
     </div>
   </div>
 
-  <p><strong>Fix:</strong> Pass the <code>TurretSubsystem</code> into <code>ShooterCommand</code> and add a turret alignment check:</p>
-  <pre><code>if (m_shooterSubsystem.isShooterReady() && m_turretSubsystem.atSetpoint()) {
+  <pre><code>// ShooterCommand.execute() — implemented triple gate:
+if (m_shooterSubsystem.isShooterReady()
+    && m_shooterSubsystem.isHoodReady()
+    && m_turretSubsystem.atSetpoint()) {
     m_shooterSubsystem.setSpindexer(true);
     m_shooterSubsystem.setTransfer(true);
+}
+
+// isHoodReady() in ShooterSubsystem:
+public boolean isHoodReady() {
+    return Math.abs(m_hoodAnglePID.getSetpoint() - getHoodAngle()) < 0.03;
 }</code></pre>
 
   <h3>6. Enable Shoot-on-the-Move (SOTM)</h3>
@@ -1038,11 +1049,11 @@ double targetAngle = findBestAngle(turretAngle, getTurretPosition());  // use ac
   <div class="card-title">Summary — Priority Matrix</div>
   <table>
     <tr><th>#</th><th>Improvement</th><th>Category</th><th>Impact</th><th>Effort</th></tr>
-    <tr><td>1</td><td>Fix encoder 2 telemetry copy-paste bug</td><td style="color:var(--red);">Bug</td><td>Low</td><td>1 line</td></tr>
-    <tr><td>2</td><td>Fix trench hood override subsystem conflict</td><td style="color:var(--red);">Bug</td><td>Medium</td><td>Small</td></tr>
+    <tr style="background: rgba(0,200,83,0.1);"><td>1</td><td>✅ Fix encoder 2 telemetry copy-paste bug</td><td style="color:var(--green);">Bug</td><td>Low</td><td>Done</td></tr>
+    <tr style="background: rgba(0,200,83,0.1);"><td>2</td><td>✅ Fix trench hood override subsystem conflict</td><td style="color:var(--green);">Bug</td><td>Medium</td><td>Done</td></tr>
     <tr><td>3</td><td>Add @Override to ShooterCommand methods</td><td style="color:var(--red);">Bug</td><td>Medium</td><td>4 lines</td></tr>
     <tr><td>4</td><td>Enable turret feedforward</td><td style="color:var(--accent2);">High</td><td>High</td><td>Uncomment + tune</td></tr>
-    <tr><td>5</td><td>Gate feeding on turret alignment</td><td style="color:var(--accent2);">High</td><td>High</td><td>Small</td></tr>
+    <tr style="background: rgba(0,200,83,0.1);"><td>5</td><td>✅ Gate feeding on turret alignment + hood + flywheel</td><td style="color:var(--green);">High</td><td>High</td><td>Done</td></tr>
     <tr><td>6</td><td>Enable shoot-on-the-move</td><td style="color:var(--accent2);">High</td><td>High</td><td>Uncomment + tune</td></tr>
     <tr><td>7</td><td>Reset PID integral on large setpoint changes</td><td style="color:var(--accent2);">High</td><td>Medium</td><td>Small</td></tr>
     <tr><td>8</td><td>Flywheel pre-spin</td><td style="color:var(--yellow);">Medium</td><td>Medium</td><td>Medium</td></tr>
