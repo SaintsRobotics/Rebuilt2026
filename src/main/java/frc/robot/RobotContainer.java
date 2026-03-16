@@ -71,7 +71,7 @@ import frc.robot.subsystems.TurretSubsystem;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
-  private final ShooterSubsystem m_shooter = new ShooterSubsystem();
+  private final ShooterSubsystem m_shooter = new ShooterSubsystem(m_robotDrive::getPose);
   private final TurretSubsystem m_turret = new TurretSubsystem();
   private final IntakeSubsystem m_intake = new IntakeSubsystem();
 
@@ -204,9 +204,6 @@ public class RobotContainer {
     new Trigger(() -> {return m_driverController.getRightTriggerAxis() > 0.5;})
         .whileTrue(new ShooterCommand(m_shooter, m_robotDrive::getPose, () -> {return currentTarget;}));
 
-    // keep hood down in trench
-    new Trigger(() -> {return FieldConstants.kTrenchesRegion.isInRegion(m_robotDrive.getPose());})
-        .whileTrue(new InstantCommand(() -> m_shooter.setHoodAngle(0), m_shooter));
     
     // intake toggle pivot and run intake
     new Trigger(() -> {return m_driverController.getLeftTriggerAxis() > 0.5;})

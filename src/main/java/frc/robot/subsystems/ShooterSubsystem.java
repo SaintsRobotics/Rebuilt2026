@@ -28,7 +28,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import java.util.function.Supplier;
+
+import edu.wpi.first.math.geometry.Pose2d;
+
 import frc.robot.Constants;
+import frc.robot.Constants.FieldConstants;
 import frc.robot.Robot;
 import frc.robot.Constants.ShooterConstants;
 
@@ -61,6 +66,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
     private final PIDController m_hoodAnglePID = new PIDController(ShooterConstants.kHoodAngleP, ShooterConstants.kHoodAngleI, ShooterConstants.kHoodAngleD, Constants.kFastPeriodicPeriod);
 
+    private final Supplier<Pose2d> m_poseSupplier;
+
     private boolean spindexerOn = false;
     private boolean transferOn = false;
     private double spindexerSpeed = 0;
@@ -77,7 +84,8 @@ public class ShooterSubsystem extends SubsystemBase {
     private final SparkFlexSim m_sparkFlexSim = new SparkFlexSim(m_shooterMotorLeft, m_flywheelDCMotor);
 
     //constructor
-    public ShooterSubsystem() {
+    public ShooterSubsystem(Supplier<Pose2d> poseSupplier) {
+        m_poseSupplier = poseSupplier;
 
         SparkFlexConfig motorConfig = new SparkFlexConfig();
         motorConfig.idleMode(IdleMode.kCoast);
@@ -233,6 +241,11 @@ public class ShooterSubsystem extends SubsystemBase {
         double ffSpeed = m_shooterFeedforward.calculate(m_shooterPID.getSetpoint());
 
         setShooterMotors(MathUtil.clamp(flywheelPIDValue + ffSpeed, ShooterConstants.kMinSpeed, ShooterConstants.kMaxSpeed));
+
+        // If in a trench, force hood flat to prevent mechanical collision
+        if (FieldConstants.kTrenchesRegion.isInRegion(m_poseSupplier.get())) {
+            m_hoodAnglePID.setSetpoint(ShooterConstants.kHoodAngleMin);
+        }
 
         //calculates PID output for hood angle and sets hood motor to that output
         double hoodOutput = m_hoodAnglePID.calculate(getHoodAngle());
