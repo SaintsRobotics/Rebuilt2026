@@ -135,7 +135,7 @@ public class TurretSubsystem extends SubsystemBase {
     // }
 
     // SmartDashboard.putNumber("Turret/pid error", m_turretPID.getError());
-    // SmartDashboard.putNumber("Turret/pid output", output);
+    SmartDashboard.putNumber("Turret/pid output", output);
     output = MathUtil.clamp(output, -TurretConstants.kTurretMaxSpeed, TurretConstants.kTurretMaxSpeed);
     m_turretMotor.set(m_turretPID.atSetpoint() ? 0 : output);
     // m_turretMotor.set(SmartDashboard.getNumber("Turret/set output", 0));

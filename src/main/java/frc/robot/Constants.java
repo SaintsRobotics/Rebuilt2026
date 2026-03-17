@@ -256,13 +256,13 @@ public final class Constants {
     public static final double kTurretMaxRotation = 334; 
     public static final double kTurretBackAngle = 37;
     public static final double kTurretLeftAngle = 121;
-    public static final double kTurretFrontAngle = 204;
+    public static final double kTurretFrontAngle = 208;
     public static final double kTurretRightAngle = 290;
 
     // PID gains
-    public static final double kTurretP = 0.02;  
-    public static final double kTurretI = 0.02;
-    public static final double kTurretD = 0.0;
+    public static final double kTurretP = 0.07;  
+    public static final double kTurretI = 0.002; //0.02;
+    public static final double kTurretD = 0.00021;
     public static final double kTurretIZone = 20;
     public static final double kPIDTolerance = 1;
 
@@ -270,7 +270,7 @@ public final class Constants {
     public static final double kTurretS = 0.02;  
     public static final double kTurretV = 0.10;  
 
-    public static final double kTurretMaxSpeed = 0.6;  
+    public static final double kTurretMaxSpeed = 1.0;  
     public static final double kTurretDeadband = 2.0;  
     public static final double kTurretTolerance = 1.5;
     public static final Pose2d kTurretOffset = new Pose2d(

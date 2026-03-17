@@ -109,7 +109,7 @@ public class ShooterSubsystem extends SubsystemBase {
         m_spindexerMotor.configure(spindexerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         m_transferMotor.configure(spindexerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-        m_shooterPID.setTolerance(200);
+        m_shooterPID.setTolerance(150);
         
         // SmartDashboard.putNumber("Shooter/Set Hood Output", 0);
         // SmartDashboard.putNumber("Shooter/Input Shooter Speed", 0);
@@ -168,7 +168,7 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     public boolean isHoodReady() {
-        return Math.abs(m_hoodAnglePID.getSetpoint() - getHoodAngle()) < 0.03;
+        return Math.abs(m_hoodAnglePID.getSetpoint() - getHoodAngle()) < 0.1;
     }
 
     //sets hood angle by setting the setpoint of the hood angle PID controller

@@ -22,20 +22,20 @@ public class LaunchCalc{
     static {
         // Populate the LUTs with empirical data
         // Example entries (distance in meters, flywheel speed in RPM, hood angle in degrees)
-        FlywheelLUT.put(Units.inchesToMeters(37.625), 3100.0);
-        FlywheelLUT.put(Units.inchesToMeters(37.625 + 36), 3100.0);
-        FlywheelLUT.put(Units.inchesToMeters(37.625 + 72), 3100.0);
-        FlywheelLUT.put(Units.inchesToMeters(37.625 + 108), 3300.0);
-        FlywheelLUT.put(Units.inchesToMeters(37.625 + 144), 3800.0);
+        FlywheelLUT.put(Units.inchesToMeters(37.625), 2700.0); //updated 3/16
+        FlywheelLUT.put(Units.inchesToMeters(37.625 + 36), 2800.0); //updated 3/16
+        FlywheelLUT.put(Units.inchesToMeters(37.625 + 72), 3200.0); //updated 3/16
+        FlywheelLUT.put(Units.inchesToMeters(37.625 + 108), 3500.0); //updated 3/16 //3.973m
+        FlywheelLUT.put(Units.inchesToMeters(37.625 + 144), 3800.0); //4.902m
         FlywheelLUT.put(Units.inchesToMeters(37.625 + 180), 3800.0);
         FlywheelLUT.put(Units.inchesToMeters(180 + 56), 4400.0);
 
         LaunchAngleLUT.put(Units.inchesToMeters(37.625), 0.0);
-        LaunchAngleLUT.put(Units.inchesToMeters(37.625 + 36), 0.2);
-        LaunchAngleLUT.put(Units.inchesToMeters(37.625 + 72), 0.3);
+        LaunchAngleLUT.put(Units.inchesToMeters(37.625 + 36), 0.15);
+        LaunchAngleLUT.put(Units.inchesToMeters(37.625 + 72), 0.25);
         LaunchAngleLUT.put(Units.inchesToMeters(37.625 + 108), 0.3);
-        LaunchAngleLUT.put(Units.inchesToMeters(37.625 + 144), 0.35);
-        LaunchAngleLUT.put(Units.inchesToMeters(37.625 + 180), 0.4);
+        LaunchAngleLUT.put(Units.inchesToMeters(37.625 + 144), 0.32);
+        LaunchAngleLUT.put(Units.inchesToMeters(37.625 + 180), 0.43);
         LaunchAngleLUT.put(Units.inchesToMeters(180 + 56), 0.43);
 
         TimeLUT.put(1.0, 0.97);
