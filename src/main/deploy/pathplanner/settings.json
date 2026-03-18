@@ -3,6 +3,7 @@
   "robotLength": 0.8382,
   "holonomicMode": true,
   "pathFolders": [
+    "daniel",
     "august"
   ],
   "autoFolders": [

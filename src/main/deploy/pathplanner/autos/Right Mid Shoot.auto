@@ -21,12 +21,6 @@
           "data": {
             "pathName": "Right Mid Shoot"
           }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Score"
-          }
         }
       ]
     }

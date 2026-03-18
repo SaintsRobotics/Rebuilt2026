@@ -25,6 +25,7 @@ import edu.wpi.first.units.LinearVelocityUnit;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
@@ -34,6 +35,7 @@ import edu.wpi.first.wpilibj.XboxController.Button;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -154,7 +156,8 @@ public class RobotContainer {
     // Set turret to continuously aim at the hub
     // m_turret.setDefaultCommand(new AutoAimTurret(m_turret, m_robotDrive));
     // m_turret.setDefaultCommand(new RunCommand(() -> {m_turret.setSetpoint(m_turret.getSetpoint() + MathUtil.applyDeadband(m_operatorController.getLeftX(), IOConstants.kControllerDeadband) * 0.5);}, m_turret));
-  }
+    SmartDashboard.putData(CommandScheduler.getInstance());
+}
 
 
   /**
@@ -249,7 +252,7 @@ public class RobotContainer {
 
   private void configureAuton() {
 
-    NamedCommands.registerCommand("Score", new ShooterCommand(m_shooter, m_turret, m_robotDrive::getPose, () -> {return currentTarget;}));
+    NamedCommands.registerCommand("Score", new ShooterCommand(m_shooter, m_turret, m_robotDrive::getPose, () -> {return currentTarget;}).withTimeout(20.0));
     NamedCommands.registerCommand("Climb", Commands.none());
     NamedCommands.registerCommand("Ferry", new ShooterCommand(m_shooter, m_turret, m_robotDrive::getPose, () -> {return currentTarget;}));
     NamedCommands.registerCommand("Intake", new RunIntake(m_intake));
@@ -260,7 +263,7 @@ public class RobotContainer {
         .whileTrue(new RunIntake(m_intake));
 
     new EventTrigger("Score")
-        .whileTrue(new ShooterCommand(m_shooter, m_turret, m_robotDrive::getPose, () -> {return currentTarget;}));
+        .onTrue(new ShooterCommand(m_shooter, m_turret, m_robotDrive::getPose, () -> {return currentTarget;}).withTimeout(20.0));
   }
 
   private void configureFuelSim() {
