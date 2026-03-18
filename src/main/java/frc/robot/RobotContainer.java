@@ -4,11 +4,6 @@
 
 package frc.robot;
 
-
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.Seconds;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -16,16 +11,10 @@ import com.pathplanner.lib.events.EventTrigger;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
-import edu.wpi.first.units.LinearVelocityUnit;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
-import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
@@ -45,7 +34,6 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.AutonConstants;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.IOConstants;
-import frc.robot.Constants.ShooterConstants;
 import frc.robot.Constants.TurretConstants;
 import frc.robot.commands.AutoAimTurret;
 import frc.robot.commands.ManualShooterCommand;
@@ -59,10 +47,8 @@ import frc.robot.utils.FindTarget;
 import frc.robot.utils.FuelSim;
 import frc.robot.utils.LaunchCalc;
 import frc.robot.Constants.FieldConstants;
-import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.commands.RunIntake;
-import frc.robot.subsystems.TurretSubsystem;
 
 /*
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -247,6 +233,10 @@ public class RobotContainer {
     // operator reverse spindexer
     new JoystickButton(m_operatorController, Button.kRightBumper.value)
         .whileTrue(new ManualSpindexerCommand(m_shooter, -1.0, -0.5));
+    
+    // operator turret joystick (for testing purposes)
+    new JoystickButton(m_operatorController, Button.kLeftStick.value)
+        .whileTrue(new RunCommand(() -> m_turret.setSetpoint(m_turret.getTurretPosition()+m_operatorController.getRightX()), m_turret));
 
     SmartDashboard.putData("Rotate Turret +90", new InstantCommand(() -> m_turret.setSetpoint(m_turret.getTurretPosition() + 90)));
     SmartDashboard.putData("Rotate Turret -90", new InstantCommand(() -> m_turret.setSetpoint(m_turret.getTurretPosition() - 90)));

@@ -47,9 +47,10 @@ public class TurretSubsystem extends SubsystemBase {
   private final CANcoder m_encoder2;
 
 
-  private double relativeAngularVelocity;
-  private double previousTargetAngle;  
-  private double lastCalculatedPosition;
+  private double m_relativeAngularVelocity;
+  private double m_targetAngle;
+  private double m_setpoint;
+  private double m_previousTargetAngle;
 
   // simulation classes
   private final DCMotor m_motorSim = DCMotor.getNeo550(1);
@@ -87,7 +88,7 @@ public class TurretSubsystem extends SubsystemBase {
       m_turretMotor.configure(motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
 
       m_turretMotor.getEncoder().setPosition(crtPosition);
-      m_turretPID.setSetpoint(crtPosition);
+      setTarget(crtPosition);
     } 
     else {
       SparkMaxConfig motorConfig = new SparkMaxConfig();
@@ -124,9 +125,11 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   public void fastPeriodic() {
-    double output = m_turretPID.calculate(getTurretPosition()); 
-                    // + Math.signum(m_turretPID.getError())
-                    // * Math.abs(m_turretFeedforward.calculate(relativeAngularVelocity));
+    m_setpoint = MathUtil.clamp(m_targetAngle, 0, TurretConstants.kTurretMaxRotation);
+    m_turretPID.setSetpoint(m_setpoint);
+    double output = m_turretPID.calculate(getTurretPosition())
+                    + Math.signum(m_turretPID.getError())
+                    * Math.abs(m_turretFeedforward.calculate(m_relativeAngularVelocity));
 
     // Apply deadband
     // double error = setpoint - getTurretPosition();
@@ -185,15 +188,13 @@ public class TurretSubsystem extends SubsystemBase {
 
     // Find best target angle
     double currentPosition = getTurretPosition();
-    //double targetAngle = findBestAngle(robotRelativeAngle, currentPosition);
     double targetAngle = findBestAngle( TurretConstants.kTurretFrontAngle + (360 - robotRelativeAngle), currentPosition);
     targetAngle = MathUtil.clamp(targetAngle, 0, TurretConstants.kTurretMaxRotation);
-    //m_turretPID.setSetpoint(360 - targetAngle);
-    m_turretPID.setSetpoint(targetAngle);
+    setTarget(targetAngle);
 
     // Calculate feedforward velocity
-    relativeAngularVelocity = (targetAngle - previousTargetAngle) / 0.02 - robotAngularVelocity;
-    previousTargetAngle = targetAngle;
+    m_relativeAngularVelocity = (targetAngle - m_previousTargetAngle) / 0.02 - robotAngularVelocity;
+    m_previousTargetAngle = targetAngle;
 
     // Advantagescope visualization
     double currentFieldHeading = robotPose.getRotation().getDegrees() + getTurretPosition();
@@ -258,6 +259,14 @@ public class TurretSubsystem extends SubsystemBase {
     return m_turretPID.getSetpoint();
   }
 
+  public void setTarget(double angle) {
+    m_targetAngle = angle;
+  }
+
+  public double getTarget() {
+    return m_targetAngle;
+  }
+
   // Reset turret encoder
   public void resetEncoder() {
     m_turretMotor.getEncoder().setPosition(0);
@@ -286,7 +295,7 @@ public class TurretSubsystem extends SubsystemBase {
   public void reset() {
     m_turretMotor.getEncoder().setPosition(calculateTurretPosition() > 500 ? calculateTurretPosition() - 727.92 : calculateTurretPosition());
     m_turretMotor.set(0);
-    m_turretPID.setSetpoint(getTurretPosition());
+    setTarget(getTurretPosition());
     m_turretPID.reset();
   }
 

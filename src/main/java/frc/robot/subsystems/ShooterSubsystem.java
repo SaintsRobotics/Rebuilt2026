@@ -57,21 +57,12 @@ public class ShooterSubsystem extends SubsystemBase {
     private final PIDController m_shooterPID = new PIDController(ShooterConstants.kShooterP, ShooterConstants.kShooterI, ShooterConstants.kShooterD, Constants.kFastPeriodicPeriod);
     private final SimpleMotorFeedforward m_shooterFeedforward = new SimpleMotorFeedforward(ShooterConstants.kShooterS, ShooterConstants.kShooterV);
 
-    // TODO: tune these lol
-    private final PIDController m_spindexerPID = new PIDController(0.01, 0, 0);
-    private final SimpleMotorFeedforward m_spindexerFF = new SimpleMotorFeedforward(0, 0.01);
-
-    private final PIDController m_transferPID = new PIDController(0.01, 0, 0);
-    private final SimpleMotorFeedforward m_transferFF = new SimpleMotorFeedforward(0, 0.01);
-
     private final PIDController m_hoodAnglePID = new PIDController(ShooterConstants.kHoodAngleP, ShooterConstants.kHoodAngleI, ShooterConstants.kHoodAngleD, Constants.kFastPeriodicPeriod);
 
     private final Supplier<Pose2d> m_poseSupplier;
 
-    private boolean spindexerOn = false;
-    private boolean transferOn = false;
-    private double spindexerSpeed = 0;
-    private double transferSpeed = 0;
+    private double m_spindexerSpeed = 0;
+    private double m_transferSpeed = 0;
 
     // Simulation classes
     private final DCMotor m_flywheelDCMotor = DCMotor.getNeoVortex(2);
@@ -128,8 +119,6 @@ public class ShooterSubsystem extends SubsystemBase {
     public void shooterStop() {
 
         m_shooterPID.setSetpoint(0);
-        m_spindexerPID.setSetpoint(0);
-        m_transferPID.setSetpoint(0);
 
     }
 
@@ -196,19 +185,19 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     public void setSpindexer(double setpoint) {
-        spindexerSpeed = setpoint;
+        m_spindexerSpeed = setpoint;
     }
 
     public void setSpindexer(boolean on) {
-        spindexerSpeed = on ? 1.0 : 0;
+        m_spindexerSpeed = on ? 1.0 : 0;
     }
 
     public void setTransfer(double setpoint) {
-        transferSpeed = setpoint;
+        m_transferSpeed = setpoint;
     }
 
     public void setTransfer(boolean on) {
-        transferSpeed = on ? 0.5 : 0;
+        m_transferSpeed = on ? 0.5 : 0;
     }
 
     //periodic
@@ -257,17 +246,8 @@ public class ShooterSubsystem extends SubsystemBase {
         // setHoodMotor(SmartDashboard.getNumber("Shooter/Set Hood Output", 0));
         SmartDashboard.putNumber("Shooter/Hood Output", hoodOutput);
 
-        // double spindexerOutput = m_spindexerPID.calculate(
-        //     m_spindexerMotor.getEncoder().getVelocity()) 
-        //     + m_spindexerFF.calculate(m_spindexerPID.getSetpoint());
-        // m_spindexerMotor.set(MathUtil.clamp(spindexerOutput, -ShooterConstants.kSpindexerMaxSpd, ShooterConstants.kSpindexerMaxSpd));
-        m_spindexerMotor.set(spindexerSpeed);
-
-        // double transferOutput = m_transferPID.calculate(
-        //     m_transferMotor.getEncoder().getVelocity()) 
-        //     + m_transferFF.calculate(m_transferPID.getSetpoint());
-        // m_transferMotor.set(MathUtil.clamp(transferOutput, -ShooterConstants.kTransferMaxSpd, ShooterConstants.kTransferMaxSpd));
-        m_transferMotor.set(transferSpeed);
+        m_spindexerMotor.set(m_spindexerSpeed);
+        m_transferMotor.set(m_transferSpeed);
     }
 
 }

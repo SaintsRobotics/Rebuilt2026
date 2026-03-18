@@ -260,15 +260,15 @@ public final class Constants {
     public static final double kTurretRightAngle = 323;
 
     // PID gains
-    public static final double kTurretP = 0.06;  
-    public static final double kTurretI = 0.002; //0.02;
-    public static final double kTurretD = 0.00021;
+    public static final double kTurretP = 0.04;  
+    public static final double kTurretI = 0.000; //0.02;
+    public static final double kTurretD = 0.000;
     public static final double kTurretIZone = 20;
     public static final double kPIDTolerance = 1;
 
     // Feedforward gains
-    public static final double kTurretS = 0.02;  
-    public static final double kTurretV = 0.10;  
+    public static final double kTurretS = 0.017;  
+    public static final double kTurretV = 0.0;  
 
     public static final double kTurretMaxSpeed = 1.0;  
     public static final double kTurretDeadband = 2.0;  
