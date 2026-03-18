@@ -247,6 +247,9 @@ public class RobotContainer {
     // operator reverse spindexer
     new JoystickButton(m_operatorController, Button.kRightBumper.value)
         .whileTrue(new ManualSpindexerCommand(m_shooter, -1.0, -0.5));
+
+    SmartDashboard.putData("Rotate Turret +90", new InstantCommand(() -> m_turret.setSetpoint(m_turret.getTurretPosition() + 90)));
+    SmartDashboard.putData("Rotate Turret -90", new InstantCommand(() -> m_turret.setSetpoint(m_turret.getTurretPosition() - 90)));
     
   }
 
@@ -257,7 +260,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("Ferry", new ShooterCommand(m_shooter, m_turret, m_robotDrive::getPose, () -> {return currentTarget;}));
     NamedCommands.registerCommand("Intake", new RunIntake(m_intake));
     NamedCommands.registerCommand("Deploy Intake", new InstantCommand(m_intake::togglePivot));
-    NamedCommands.registerCommand("Toggle Auto Aim", new InstantCommand(() -> autoAimTurret = false));
+    NamedCommands.registerCommand("Toggle Auto Aim", new InstantCommand(() -> autoAimTurret = true));
 
     new EventTrigger("Intake")
         .whileTrue(new RunIntake(m_intake));

@@ -254,13 +254,13 @@ public final class Constants {
     public static final double kEncoder2OffsetDegrees = 0.0;  
 
     public static final double kTurretMaxRotation = 334; 
-    public static final double kTurretBackAngle = 37;
-    public static final double kTurretLeftAngle = 121;
-    public static final double kTurretFrontAngle = 208;
-    public static final double kTurretRightAngle = 290;
+    public static final double kTurretBackAngle = 53;
+    public static final double kTurretLeftAngle = 143;
+    public static final double kTurretFrontAngle = 228;
+    public static final double kTurretRightAngle = 323;
 
     // PID gains
-    public static final double kTurretP = 0.07;  
+    public static final double kTurretP = 0.06;  
     public static final double kTurretI = 0.002; //0.02;
     public static final double kTurretD = 0.00021;
     public static final double kTurretIZone = 20;
