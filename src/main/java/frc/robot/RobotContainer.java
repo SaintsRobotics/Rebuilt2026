@@ -11,6 +11,7 @@ import com.pathplanner.lib.events.EventTrigger;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -207,17 +208,17 @@ public class RobotContainer {
         .onTrue(new InstantCommand(() -> autoAimTurret = true));
     new Trigger(() -> {return autoAimTurret;})
         .whileTrue(new AutoAimTurret(m_turret, m_robotDrive, () -> currentTarget, false))
-        .onFalse(new InstantCommand(() -> m_turret.setSetpoint(100), m_turret));
+        .onFalse(new InstantCommand(() -> m_turret.setTarget(100), m_turret));
     
     // operator turret cardinal directions
     new JoystickButton(m_driverController, Button.kY.value)
-        .onTrue(new InstantCommand(() -> m_turret.setSetpoint(TurretConstants.kTurretFrontAngle), m_turret));
+        .onTrue(new InstantCommand(() -> m_turret.setTarget(TurretConstants.kTurretFrontAngle), m_turret));
     new JoystickButton(m_driverController, Button.kB.value)
-        .onTrue(new InstantCommand(() -> m_turret.setSetpoint(TurretConstants.kTurretRightAngle), m_turret));
+        .onTrue(new InstantCommand(() -> m_turret.setTarget(TurretConstants.kTurretRightAngle), m_turret));
     new JoystickButton(m_driverController, Button.kA.value)
-        .onTrue(new InstantCommand(() -> m_turret.setSetpoint(TurretConstants.kTurretBackAngle), m_turret));
+        .onTrue(new InstantCommand(() -> m_turret.setTarget(TurretConstants.kTurretBackAngle), m_turret));
     new JoystickButton(m_driverController, Button.kX.value)
-        .onTrue(new InstantCommand(() -> m_turret.setSetpoint(TurretConstants.kTurretLeftAngle), m_turret));
+        .onTrue(new InstantCommand(() -> m_turret.setTarget(TurretConstants.kTurretLeftAngle), m_turret));
 
     // new JoystickButton(m_operatorController, Button.kB.value)
     //     .onTrue(new InstantCommand(() -> m_turret.setSetpoint(40)));
@@ -236,10 +237,14 @@ public class RobotContainer {
     
     // operator turret joystick (for testing purposes)
     new JoystickButton(m_operatorController, Button.kLeftStick.value)
-        .whileTrue(new RunCommand(() -> m_turret.setSetpoint(m_turret.getTurretPosition()+m_operatorController.getRightX()), m_turret));
+        .whileTrue(new RunCommand(() -> m_turret.setTarget(m_turret.getTurretPosition()+MathUtil.applyDeadband(m_operatorController.getRightX(), IOConstants.kControllerDeadband) * 1.5), m_turret));
 
-    SmartDashboard.putData("Rotate Turret +90", new InstantCommand(() -> m_turret.setSetpoint(m_turret.getTurretPosition() + 90)));
-    SmartDashboard.putData("Rotate Turret -90", new InstantCommand(() -> m_turret.setSetpoint(m_turret.getTurretPosition() - 90)));
+    // operator turret manual fine tuning
+    new JoystickButton(m_operatorController, Button.kBack.value)
+        .whileTrue(new RunCommand(() -> m_turret.setManualOffset(m_turret.getManualOffset() + MathUtil.applyDeadband(m_operatorController.getRightX(), IOConstants.kControllerDeadband) * 1.5)));
+
+    SmartDashboard.putData("Rotate Turret +90", new InstantCommand(() -> m_turret.setTarget(m_turret.getTurretPosition() + 90)));
+    SmartDashboard.putData("Rotate Turret -90", new InstantCommand(() -> m_turret.setTarget(m_turret.getTurretPosition() - 90)));
     
   }
 
@@ -295,10 +300,11 @@ public class RobotContainer {
     m_shooter.fastPeriodic();
 
     ChassisSpeeds speeds = ChassisSpeeds.fromRobotRelativeSpeeds(m_robotDrive.getRobotRelativeSpeeds(), m_robotDrive.getPose().getRotation());
-    currentTarget = FindTarget.getTarget(m_robotDrive.getPose()); /* LaunchCalc.findTargetOnTheMove(
+    currentTarget = LaunchCalc.findTargetOnTheMove(
         m_robotDrive.getPose(), 
         FindTarget.getTarget(m_robotDrive.getPose()), 
-        new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond)); */
+        new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond));
+        
     publisher.set(currentTarget);
     // publisher2.set(LaunchCalc.findTargetOnTheMove(m_robotDrive.getPose(), TurretConstants.kHubPose, new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond), 10));
   }

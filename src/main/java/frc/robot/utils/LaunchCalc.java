@@ -38,11 +38,10 @@ public class LaunchCalc{
         LaunchAngleLUT.put(Units.inchesToMeters(37.625 + 180), 0.43);
         LaunchAngleLUT.put(Units.inchesToMeters(180 + 56), 0.43);
 
-        TimeLUT.put(1.0, 0.97);
-        TimeLUT.put(2.0, 0.95);
-        TimeLUT.put(3.0, 1.09);
-        TimeLUT.put(4.0, 1.0);
-        TimeLUT.put(5.0, 1.17);
+        TimeLUT.put(1.43, 0.93);
+        TimeLUT.put(2.38, 1.01);
+        TimeLUT.put(3.27, 1.31);
+        TimeLUT.put(4.05, 1.38);
     }
 
     public static double findFlywheelSpeed(Pose2d currentPose, Pose2d targetPose) {
@@ -63,7 +62,8 @@ public class LaunchCalc{
         Pose2d newTarget = targetPose;
         for (int i = 0; i < iterations; i++) {
             distance = currentPose.getTranslation().getDistance(newTarget.getTranslation());
-            timeOfFlight = TimeLUT.get(distance);
+            // timeOfFlight = TimeLUT.get(distance);
+            timeOfFlight = 0.188614 * distance + 0.632681; // linear regression of the time lookup table as of 3/18
             newTarget = targetPose.plus(new Transform2d(velocity.times(-timeOfFlight*ShooterConstants.kShootOnTheMoveMultiplier), Rotation2d.kZero));
             // move newTarget slightly away from currentPose
             if (velocity.getDistance(new Translation2d()) > 0.05) {

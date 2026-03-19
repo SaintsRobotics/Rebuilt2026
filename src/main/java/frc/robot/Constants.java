@@ -256,7 +256,7 @@ public final class Constants {
     public static final double kTurretMaxRotation = 334; 
     public static final double kTurretBackAngle = 53;
     public static final double kTurretLeftAngle = 143;
-    public static final double kTurretFrontAngle = 228;
+    public static final double kTurretFrontAngle = 223;
     public static final double kTurretRightAngle = 323;
 
     // PID gains
@@ -370,8 +370,8 @@ public final class Constants {
     public static final double kHoodSpeedMax = 0.2;
 
     public static final int kShootOnTheMoveIterations = 5;
-    public static final double kShootOnTheMoveMultiplier = 1.2;
-    public static final double kSOTMOffsetMultiplier = 0.1;
+    public static final double kShootOnTheMoveMultiplier = 0.5;
+    public static final double kSOTMOffsetMultiplier = 0.0;
 
     public static final double kFlywheelMOI = 0.000190215774729; // why is converting an in^2 lbs MOI to kg m^2 MOI so difficult
     public static final double kFlywheelGearing = 1.0;

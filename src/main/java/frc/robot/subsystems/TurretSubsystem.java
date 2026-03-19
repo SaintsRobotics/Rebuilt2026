@@ -51,6 +51,7 @@ public class TurretSubsystem extends SubsystemBase {
   private double m_targetAngle;
   private double m_setpoint;
   private double m_previousTargetAngle;
+  private double m_manualOffset;
 
   // simulation classes
   private final DCMotor m_motorSim = DCMotor.getNeo550(1);
@@ -125,7 +126,7 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   public void fastPeriodic() {
-    m_setpoint = MathUtil.clamp(m_targetAngle, 0, TurretConstants.kTurretMaxRotation);
+    m_setpoint = MathUtil.clamp(m_targetAngle + m_manualOffset, 0, TurretConstants.kTurretMaxRotation);
     m_turretPID.setSetpoint(m_setpoint);
     double output = m_turretPID.calculate(getTurretPosition())
                     + Math.signum(m_turretPID.getError())
@@ -276,6 +277,14 @@ public class TurretSubsystem extends SubsystemBase {
     return Math.abs(getError()) < TurretConstants.kTurretTolerance;
   }
 
+  public void setManualOffset(double offset) {
+    m_manualOffset = offset;
+  }
+
+  public double getManualOffset() {
+    return m_manualOffset;
+  }
+
   // Calculates turret position with whatever this method is called
   private double calculateTurretPosition() {
     if (m_encoder1 == null || m_encoder2 == null) {
@@ -297,6 +306,7 @@ public class TurretSubsystem extends SubsystemBase {
     m_turretMotor.set(0);
     setTarget(getTurretPosition());
     m_turretPID.reset();
+    m_manualOffset = 0;
   }
 
 }
