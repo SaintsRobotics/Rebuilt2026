@@ -1,0 +1,49 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "TowerToLTrench"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LTrenchToCenter"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LCenterToBalls"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CenterToRTrench"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RTrenchToTower"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "autos i guess",
+  "choreoAuto": false
+}

@@ -8,28 +8,28 @@ import com.studica.frc.AHRS;
 import com.studica.frc.AHRS.NavXComType;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
-import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.Constants;
 import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.LimelightHelpers;
 import frc.robot.utils.SlewRateLimiter;
-import frc.robot.utils.Region;
 import frc.robot.Robot;
 
 public class DriveSubsystem extends SubsystemBase {
@@ -83,6 +83,8 @@ public class DriveSubsystem extends SubsystemBase {
   private final SlewRateLimiter m_ySpeedLimiter = new SlewRateLimiter(DriveConstants.kMaxAccelerationUnitsPerSecond);
   private final SlewRateLimiter m_rotationSpeedLimiter = new SlewRateLimiter(DriveConstants.kMaxAngularAccelerationUnitsPerSecond);
 
+   private final StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault().getStructTopic("Vision Pose", Pose2d.struct).publish();
+
   /** Creates a new DriveSubsystem. */
   @SuppressWarnings("unused")
   public DriveSubsystem() {
@@ -104,26 +106,40 @@ public class DriveSubsystem extends SubsystemBase {
             VisionConstants.kCamPosLeft.getX(),
             VisionConstants.kCamPosLeft.getY(),
             VisionConstants.kCamPosLeft.getZ(),
-            VisionConstants.kCamPosLeft.getRotation().getX(),
-            VisionConstants.kCamPosLeft.getRotation().getY(),
-            VisionConstants.kCamPosLeft.getRotation().getZ());
+            Units.radiansToDegrees(VisionConstants.kCamPosLeft.getRotation().getX()),
+            Units.radiansToDegrees(VisionConstants.kCamPosLeft.getRotation().getY()),
+            Units.radiansToDegrees(VisionConstants.kCamPosLeft.getRotation().getZ()));
         LimelightHelpers.SetIMUMode(VisionConstants.kLimelightNameLeft, VisionConstants.kIMUMode);
 
-        LimelightHelpers.setCropWindow(VisionConstants.kLimelightNameLeft, -1, 1, -1, 0.4);
+        LimelightHelpers.setCropWindow(VisionConstants.kLimelightNameLeft, -1, 1, -0.4, 1);
       }
 
-      if (VisionConstants.kUseRightLL) {
+      if (VisionConstants.kUseBackLL) {
         LimelightHelpers.setCameraPose_RobotSpace(
-          VisionConstants.kLimelightNameRight,
-          VisionConstants.kCamPosRight.getX(),
-          VisionConstants.kCamPosRight.getY(),
-          VisionConstants.kCamPosRight.getZ(),
-          VisionConstants.kCamPosRight.getRotation().getX(),
-          VisionConstants.kCamPosRight.getRotation().getY(),
-          VisionConstants.kCamPosRight.getRotation().getZ());
-        LimelightHelpers.SetIMUMode(VisionConstants.kLimelightNameRight, VisionConstants.kIMUMode);
+          VisionConstants.kLimelightNameBack,
+          VisionConstants.kCamPosBack.getX(),
+          VisionConstants.kCamPosBack.getY(),
+          VisionConstants.kCamPosBack.getZ(),
+          Units.radiansToDegrees(VisionConstants.kCamPosBack.getRotation().getX()),
+          Units.radiansToDegrees(VisionConstants.kCamPosBack.getRotation().getY()),
+          Units.radiansToDegrees(VisionConstants.kCamPosBack.getRotation().getZ()));
+        LimelightHelpers.SetIMUMode(VisionConstants.kLimelightNameBack, VisionConstants.kIMUMode);
 
-        LimelightHelpers.setCropWindow(VisionConstants.kLimelightNameRight, -1, 1, -1, 0.4);
+        LimelightHelpers.setCropWindow(VisionConstants.kLimelightNameBack, -1, 1, -0.4, 1);
+      }
+
+      if (VisionConstants.kUseFrontLL) {
+        LimelightHelpers.setCameraPose_RobotSpace(
+          VisionConstants.kLimelightNameFront,
+          VisionConstants.kCamPosFront.getX(),
+          VisionConstants.kCamPosFront.getY(),
+          VisionConstants.kCamPosFront.getZ(),
+          Units.radiansToDegrees(VisionConstants.kCamPosFront.getRotation().getX()),
+          Units.radiansToDegrees(VisionConstants.kCamPosFront.getRotation().getY()),
+          Units.radiansToDegrees(VisionConstants.kCamPosFront.getRotation().getZ()));
+        LimelightHelpers.SetIMUMode(VisionConstants.kLimelightNameFront, VisionConstants.kIMUMode);
+
+        LimelightHelpers.setCropWindow(VisionConstants.kLimelightNameFront, -1, 1, -0.4, 1);
       }
     }
 
@@ -145,8 +161,10 @@ public class DriveSubsystem extends SubsystemBase {
     m_poseEstimator.update(getGyroAngle(),
         m_swerveModulePositions);
 
+    
+    measureLimelight(VisionConstants.kLimelightNameBack, VisionConstants.kUseBackLL);
     measureLimelight(VisionConstants.kLimelightNameLeft, VisionConstants.kUseLeftLL);
-    measureLimelight(VisionConstants.kLimelightNameRight, VisionConstants.kUseRightLL);
+    measureLimelight(VisionConstants.kLimelightNameFront, VisionConstants.kUseFrontLL);
 
     m_field.setRobotPose(m_poseEstimator.getEstimatedPosition());
 
@@ -189,16 +207,30 @@ public class DriveSubsystem extends SubsystemBase {
     boolean LLreal = LimelightHelpers.getLatency_Pipeline(name) != 0.0;
     if (VisionConstants.kUseVision && Robot.isReal() && LLreal) {
       // Update LimeLight with current robot orientation
-      LimelightHelpers.SetRobotOrientation(name, m_poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0.0, 0.0, 0.0, 0.0, 0.0);
+      // LimelightHelpers.SetRobotOrientation(name, m_poseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0.0, 0.0, 0.0, 0.0, 0.0);
+      LimelightHelpers.SetRobotOrientation(name, getGyroAngle().getDegrees() + (AllianceFlipUtil.shouldFlip() ? 180 : 0), 0.0, 0.0, 0.0, 0.0, 0.0);
+      // LimelightHelpers.SetRobotOrientation(name, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 
       // Get the pose estimate
       LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(name);
 
+      // if the pose is wayyy off reject it
+      // boolean measurementValid = limelightMeasurement.pose.getTranslation().getDistance(getPose().getTranslation()) < VisionConstants.kTagDistThreshold;
+      boolean measurementValid = true;
+
       // Add it to your pose estimator if it is a valid measurement
-      if (limelightMeasurement != null && limelightMeasurement.tagCount != 0 && m_gyro.getRate() < 720) {
+      if (limelightMeasurement != null && limelightMeasurement.tagCount != 0 && m_gyro.getRate() < 720 && measurementValid) {
+        // scale vision standard deviation by tag count and distance
+        double stdDev = VisionConstants.kVisionPosStdDev
+        * (1 + VisionConstants.kTagDistScalar * limelightMeasurement.avgTagDist * limelightMeasurement.avgTagDist) // 1 + k * distance^2
+        * Math.pow(VisionConstants.kTagCountScalar, limelightMeasurement.tagCount-1); // k^(tagCount-1), 0 < k < 1
+        
         m_poseEstimator.addVisionMeasurement(
             limelightMeasurement.pose,
-            limelightMeasurement.timestampSeconds);
+            limelightMeasurement.timestampSeconds,
+            VecBuilder.fill(stdDev, stdDev, VisionConstants.kVisionAngleStdDev));
+        
+        publisher.set(limelightMeasurement.pose);
       }
     }
 

@@ -5,27 +5,28 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.IntakeConstants;
-import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.subsystems.IntakeSubsystem.ArmPosition;
+import frc.robot.subsystems.ShooterSubsystem;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class IntakeCommand extends Command {
-  IntakeSubsystem m_intake;
+public class ManualSpindexerCommand extends Command {
+  /** Creates a new ManualSpindexerCommand. */
 
-  /** Creates a new IntakeCommand. */
-  public IntakeCommand(IntakeSubsystem intake) {
+  private final ShooterSubsystem m_shooter;
+  private final double m_spindexerSpeed;
+  private final double m_transferSpeed;
+
+  public ManualSpindexerCommand(ShooterSubsystem shooter, double spindexerSpd, double transferSpd) {
+    m_shooter = shooter;
+    m_spindexerSpeed = spindexerSpd;
+    m_transferSpeed = transferSpd;
     // Use addRequirements() here to declare subsystem dependencies.
-    m_intake = intake;
-
-    addRequirements(m_intake);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_intake.setIntakeMotor(IntakeConstants.kIntakeSpeed);
-    m_intake.setArmPosition(ArmPosition.Extended);
+    m_shooter.setTransfer(m_transferSpeed);
+    m_shooter.setSpindexer(m_spindexerSpeed);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -35,8 +36,8 @@ public class IntakeCommand extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_intake.setIntakeMotor(0);
-    m_intake.setArmPosition(ArmPosition.Retracted);
+    m_shooter.setTransfer(0);
+    m_shooter.setSpindexer(0);
   }
 
   // Returns true when the command should end.

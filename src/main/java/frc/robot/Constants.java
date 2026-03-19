@@ -4,6 +4,16 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Amp;
+import static edu.wpi.first.units.Units.KilogramSquareMeters;
+import static edu.wpi.first.units.Units.Meter;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Pounds;
+
+import com.pathplanner.lib.config.ModuleConfig;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -15,7 +25,11 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Rectangle2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Mass;
+import edu.wpi.first.units.measure.MomentOfInertia;
 
 import frc.robot.utils.Region;
 
@@ -75,8 +89,8 @@ public final class Constants {
 
     // In degrees
     public static final double kIntakeLoweredAngle = 0.53;
-    public static final double kIntakeRaisedAngle = 0.1;
-    public static final double kIntakeFullyRaisedAngle = 0.05;
+    public static final double kIntakeRaisedAngle = 0.15;
+    public static final double kIntakeFullyRaisedAngle = 0.11;
 
     /** Encoder offset in rotations */
     public static final double kArmEncoderOffset = 0;
@@ -158,19 +172,25 @@ public final class Constants {
     // TODO: Update cam pose relative to center of bot
     public static final Pose3d kCamPosLeft = new Pose3d(
       // new Translation3d(0.3048,0.254,0),
-      new Translation3d(0.3429, -0.2413, 0.2413),
-      new Rotation3d(0,10,0)
+      new Translation3d(Units.inchesToMeters(-10.534), Units.inchesToMeters(-9.664), Units.inchesToMeters(7.646)),
+      new Rotation3d(Math.PI, Units.degreesToRadians(25), Math.PI/2) // these angles are in radians counterclockwise
     );
 
-    public static final Pose3d kCamPosRight = new Pose3d(
-      new Translation3d(0.3429, 0.2413, 0.2413),
-      new Rotation3d(0,0,0)
+    public static final Pose3d kCamPosBack = new Pose3d(
+      new Translation3d(Units.inchesToMeters(-9.664), Units.inchesToMeters(10.534), Units.inchesToMeters(7.646)),
+      new Rotation3d(Math.PI, Units.degreesToRadians(25), Math.PI)
+    );
+
+    public static final Pose3d kCamPosFront = new Pose3d(
+      new Translation3d(Units.inchesToMeters(9.663), Units.inchesToMeters(-10.319), Units.inchesToMeters(7.652)),
+      new Rotation3d(Math.PI, Units.degreesToRadians(25), 0)
     );
 
     
 
+    public static final String kLimelightNameBack = "limelight-sr";
     public static final String kLimelightNameLeft = "limelight";
-    public static final String kLimelightNameRight = "limelight-sr";
+    public static final String kLimelightNameFront = "limelight-topaz";
 
     // https://docs.limelightvision.io/docs/docs-limelight/pipeline-apriltag/apriltag-robot-localization-megatag2
     public static final int kIMUMode = 0;
@@ -179,23 +199,88 @@ public final class Constants {
     public static final Vector<N3> kOdometrySTDDevs = VecBuilder.fill(0.1, 0.1, 0.1);
     public static final Vector<N3> kVisionSTDDevs = VecBuilder.fill(0.7, 0.7, 999999);
 
-    public static final boolean kUseVision = false;
-    public static final boolean kUseLeftLL = true;
-    public static final boolean kUseRightLL = true;
+    public static final double kVisionPosStdDev = 0.7;
+    public static final double kVisionAngleStdDev = 999999; // really high because we always trust gyro angle more
+    public static final double kTagCountScalar = 0.7;
+    public static final double kTagDistScalar = 0.3;
+    public static final double kTagDistThreshold = 3.0; // Vision measurements further from the current pose than this value will be rejected
+
+    public static final boolean kUseVision = true;
+    public static final boolean kUseLeftLL = false;
+    public static final boolean kUseBackLL = true;
+    public static final boolean kUseFrontLL = false;
+  }
+
+  public static final class AutonConstants { // TODO: set constants when we get the real robot/when know what to set these to
+    private static final Mass kRobotMass = Pounds.of(138);
+    private static final MomentOfInertia kMomentOfInertia = KilogramSquareMeters.of(1);
+    private static final double kCoefficientOfStaticFriction = 0.5;
+    private static final DCMotor kDriveMotorType = DCMotor.getNeoVortex(1);
+    private static final Current kMaxDriveCurrent = Amp.of(60);
+
+    public static final PIDConstants kTranslationConstants = new PIDConstants(3, 0, 0); // TODO: tune
+    public static final PIDConstants kRotationConstants = new PIDConstants(8, 0, 0); // TODO: tune
+    public static final RobotConfig kBotConfig = new RobotConfig(kRobotMass, kMomentOfInertia,
+        new ModuleConfig(Meter.of(DriveConstants.kWheelDiameterMeters / 2),
+            MetersPerSecond.of(DriveConstants.kMaxSpeedMetersPerSecond), kCoefficientOfStaticFriction, kDriveMotorType,
+            DriveConstants.kDrivingGearRatio, kMaxDriveCurrent, 4),
+        DriveConstants.kModulePositions);
   }
 
   public static final class TurretConstants {
-    public static final int kTurretMotorPort = 0;
 
-    public static final double kTurretMaxRotation = 270;
+    // TODO: set constants
 
-    public static final double kTurretP = 1;
-    public static final double kTurretD = 0.5;
-    public static final double kTurretS = 0.01;
-    public static final double kTurretV = 5;
-    public static final double kTurretMaxSpeed = 1;
+    public static final int kTurretMotorPort = 40;
 
-    public static final Pose2d kTurretOffset = new Pose2d();
+    // CRT Encoders
+    public static final int kEncoder1CANId = 41;  
+    public static final int kEncoder2CANId = 42;  
+
+    public static final double kTurretTeeth = 90.0;
+    public static final double kEncoder1Teeth = 13.0;
+    public static final double kEncoder2Teeth = 14.0;
+
+    public static final double kEncoderMaxDelta = 40.0;
+
+    public static final double kTurretGearing = 180.0;
+
+    // Gear ratios 
+    public static final double kEncoder1Ratio = kTurretTeeth / kEncoder1Teeth; 
+    public static final double kEncoder2Ratio = kTurretTeeth / kEncoder2Teeth; 
+
+    // Encoder initial offsets
+    public static final double kEncoder1OffsetDegrees = 0.0;  
+    public static final double kEncoder2OffsetDegrees = 0.0;  
+
+    public static final double kTurretMaxRotation = 334; 
+    public static final double kTurretBackAngle = 53;
+    public static final double kTurretLeftAngle = 143;
+    public static final double kTurretFrontAngle = 223;
+    public static final double kTurretRightAngle = 323;
+
+    // PID gains
+    public static final double kTurretP = 0.04;  
+    public static final double kTurretI = 0.000; //0.02;
+    public static final double kTurretD = 0.000;
+    public static final double kTurretIZone = 20;
+    public static final double kPIDTolerance = 1;
+
+    // Feedforward gains
+    public static final double kTurretS = 0.017;  
+    public static final double kTurretV = 0.0;  
+
+    public static final double kTurretMaxSpeed = 1.0;  
+    public static final double kTurretDeadband = 2.0;  
+    public static final double kTurretTolerance = 1.5;
+    public static final Pose2d kTurretOffset = new Pose2d(
+        Units.inchesToMeters(-4.203), 
+        Units.inchesToMeters(7.701), 
+        new Rotation2d(Units.degreesToRadians(-180)));
+
+    public static final double kTurretSimGearRatio = 100.0; 
+    public static final double kTurretSimMOI = 0.5;
+    public static final double kTurretSimLength = 0.5;   
 
   }
 
@@ -209,7 +294,7 @@ public final class Constants {
     public static final double kAllianceZoneLength = Units.inchesToMeters(156.61);
 
     public static final double kTrenchWidth = Units.inchesToMeters(47.00);
-    public static final double kTrenchLength = Units.inchesToMeters(49.84);
+    public static final double kTrenchLength = Units.inchesToMeters(49.84 + 5); // add some buffer zone
 
     public static final Region kBlueAllianceRegion = new Region(
       new Rectangle2d(
@@ -248,9 +333,53 @@ public final class Constants {
     public static final Pose2d kHubPose = new Pose2d(
       new Translation2d(
         Units.inchesToMeters(182.11),
-        Units.inchesToMeters(158.84)),
+        Units.inchesToMeters(158.84 - 0)), //offset to test on our hub which may be offset
       new Rotation2d()
     );
 
   }
+
+  public static final class ShooterConstants {
+
+    public static final int kShooterMotorLeftPort = 30;
+    public static final int kShooterMotorRightPort = 31;
+    //public static final int kShooterEncoderChannel = 0;
+
+    public static final int kHoodMotorPort = 32;
+    public static final int kHoodEncoderChannel = 35;
+
+    public static final int kSpindexerPort = 33;
+    public static final int kTransferPort = 34;
+
+    public static final double kShooterP = 0.0002;
+    public static final double kShooterI = 0;
+    public static final double kShooterD = 0;
+
+    public static final double kShooterS = 0.0;
+    public static final double kShooterV = 0.000185;
+
+    public static final double kHoodAngleP = 1.0;
+    public static final double kHoodAngleI = 0;
+    public static final double kHoodAngleD = 0;
+    
+    public static final double kMaxSpeed = 1.0;
+    public static final double kMinSpeed = -kMaxSpeed;
+
+    public static final double kHoodAngleMin = 0.005;
+    public static final double kHoodAngleMax = 0.725;
+    public static final double kHoodSpeedMax = 0.2;
+
+    public static final int kShootOnTheMoveIterations = 5;
+    public static final double kShootOnTheMoveMultiplier = 0.5;
+    public static final double kSOTMOffsetMultiplier = 0.0;
+
+    public static final double kFlywheelMOI = 0.000190215774729; // why is converting an in^2 lbs MOI to kg m^2 MOI so difficult
+    public static final double kFlywheelGearing = 1.0;
+    public static final double kFlywheelRadius = Units.inchesToMeters(1.5);
+
+    public static final double kSpindexerMaxSpd = 0.5;
+    public static final double kTransferMaxSpd = 0.5;
+
+  }
+
 }
