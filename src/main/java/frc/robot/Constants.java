@@ -249,6 +249,8 @@ public final class Constants {
     public static final double kEncoder1Ratio = kTurretTeeth / kEncoder1Teeth; 
     public static final double kEncoder2Ratio = kTurretTeeth / kEncoder2Teeth; 
 
+    public static final int kFilterSamples = 5;
+
     // Encoder initial offsets
     public static final double kEncoder1OffsetDegrees = 0.0;  
     public static final double kEncoder2OffsetDegrees = 0.0;  
@@ -256,15 +258,15 @@ public final class Constants {
     public static final double kTurretMaxRotation = 334; 
     public static final double kTurretBackAngle = 53;
     public static final double kTurretLeftAngle = 143;
-    public static final double kTurretFrontAngle = 223;
+    public static final double kTurretFrontAngle = 249;
     public static final double kTurretRightAngle = 323;
 
     // PID gains
-    public static final double kTurretP = 0.04;  
+    public static final double kTurretP = 0.01;  
     public static final double kTurretI = 0.000; //0.02;
     public static final double kTurretD = 0.000;
     public static final double kTurretIZone = 20;
-    public static final double kPIDTolerance = 1;
+    public static final double kPIDTolerance = 2;
 
     // Feedforward gains
     public static final double kTurretS = 0.017;  
@@ -272,7 +274,7 @@ public final class Constants {
 
     public static final double kTurretMaxSpeed = 1.0;  
     public static final double kTurretDeadband = 2.0;  
-    public static final double kTurretTolerance = 1.5;
+    public static final double kTurretTolerance = 5;
     public static final Pose2d kTurretOffset = new Pose2d(
         Units.inchesToMeters(-4.203), 
         Units.inchesToMeters(7.701), 
@@ -361,12 +363,13 @@ public final class Constants {
     public static final double kHoodAngleP = 1.0;
     public static final double kHoodAngleI = 0;
     public static final double kHoodAngleD = 0;
+    public static final double kHoodIZone = 0.1;
     
     public static final double kMaxSpeed = 1.0;
     public static final double kMinSpeed = -kMaxSpeed;
 
-    public static final double kHoodAngleMin = 0.005;
-    public static final double kHoodAngleMax = 0.725;
+    public static final double kHoodAngleMin = 0.05;
+    public static final double kHoodAngleMax = 0.72;
     public static final double kHoodSpeedMax = 0.2;
 
     public static final int kShootOnTheMoveIterations = 5;

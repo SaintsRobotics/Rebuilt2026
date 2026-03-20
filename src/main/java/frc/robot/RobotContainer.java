@@ -43,6 +43,7 @@ import frc.robot.commands.ShooterCommand;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
+import frc.robot.subsystems.IntakeSubsystem.ArmPosition;
 import frc.robot.utils.AllianceFlipUtil;
 import frc.robot.utils.FindTarget;
 import frc.robot.utils.FuelSim;
@@ -250,18 +251,18 @@ public class RobotContainer {
 
   private void configureAuton() {
 
-    NamedCommands.registerCommand("Score", new ShooterCommand(m_shooter, m_turret, m_robotDrive::getPose, () -> {return currentTarget;}).withTimeout(20.0));
+    NamedCommands.registerCommand("Score", new ShooterCommand(m_shooter, m_turret, m_robotDrive::getPose, () -> {return currentTarget;}).asProxy().withTimeout(20.0));
     NamedCommands.registerCommand("Climb", Commands.none());
-    NamedCommands.registerCommand("Ferry", new ShooterCommand(m_shooter, m_turret, m_robotDrive::getPose, () -> {return currentTarget;}));
+    NamedCommands.registerCommand("Ferry", new ShooterCommand(m_shooter, m_turret, m_robotDrive::getPose, () -> {return currentTarget;}).asProxy());
     NamedCommands.registerCommand("Intake", new RunIntake(m_intake));
-    NamedCommands.registerCommand("Deploy Intake", new InstantCommand(m_intake::togglePivot));
+    NamedCommands.registerCommand("Deploy Intake", new InstantCommand(() -> m_intake.setArmPosition(ArmPosition.Extended)));
     NamedCommands.registerCommand("Toggle Auto Aim", new InstantCommand(() -> autoAimTurret = true));
 
     new EventTrigger("Intake")
         .whileTrue(new RunIntake(m_intake));
 
     new EventTrigger("Score")
-        .onTrue(new ShooterCommand(m_shooter, m_turret, m_robotDrive::getPose, () -> {return currentTarget;}).withTimeout(20.0));
+        .whileTrue(new ShooterCommand(m_shooter, m_turret, m_robotDrive::getPose, () -> {return currentTarget;}).asProxy().withTimeout(20.0));
   }
 
   private void configureFuelSim() {

@@ -19,6 +19,8 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.filter.LinearFilter;
+import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -46,6 +48,7 @@ public class TurretSubsystem extends SubsystemBase {
   private final CANcoder m_encoder1;
   private final CANcoder m_encoder2;
 
+  private final LinearFilter m_positionFilter = LinearFilter.movingAverage(TurretConstants.kFilterSamples);
 
   private double m_relativeAngularVelocity;
   private double m_targetAngle;
@@ -111,13 +114,13 @@ public class TurretSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
 
     // double pos = calculateTurretPosition();
-    SmartDashboard.putNumber("Turret/Turret Angle", getTurretPosition());
+    SmartDashboard.putNumber("Turret/Turret Angle", m_positionFilter.lastValue());
     SmartDashboard.putNumber("Turret/Absolute Angle", calculateTurretPosition());
-    SmartDashboard.putNumber("Turret/Drift value", calculateTurretPosition() - getTurretPosition() );
-    SmartDashboard.putNumber("Turret/Encoder 1 Angle", m_encoder1.getAbsolutePosition().getValueAsDouble()*360);
-    SmartDashboard.putNumber("Turret/Encoder 2 Angle", m_encoder2.getAbsolutePosition().getValueAsDouble()*360);
-    SmartDashboard.putNumber("Turret/Encoder 1 Relative Angle", m_encoder1.getPosition().getValueAsDouble()*360/TurretConstants.kEncoder1Ratio);
-    SmartDashboard.putNumber("Turret/Encoder 2 Relative Angle", m_encoder2.getPosition().getValueAsDouble()*360/TurretConstants.kEncoder2Ratio);
+    SmartDashboard.putNumber("Turret/Drift value", calculateTurretPosition() - m_positionFilter.lastValue());
+    // SmartDashboard.putNumber("Turret/Encoder 1 Angle", m_encoder1.getAbsolutePosition().getValueAsDouble()*360);
+    // SmartDashboard.putNumber("Turret/Encoder 2 Angle", m_encoder2.getAbsolutePosition().getValueAsDouble()*360);
+    // SmartDashboard.putNumber("Turret/Encoder 1 Relative Angle", m_encoder1.getPosition().getValueAsDouble()*360/TurretConstants.kEncoder1Ratio);
+    // SmartDashboard.putNumber("Turret/Encoder 2 Relative Angle", m_encoder2.getPosition().getValueAsDouble()*360/TurretConstants.kEncoder2Ratio);
 
     SmartDashboard.putNumber("Turret/Turret Setpoint", m_turretPID.getSetpoint());
     // SmartDashboard.putNumber("Turret/Total PID Error", m_turretPID.getAccumulatedError());
@@ -126,6 +129,9 @@ public class TurretSubsystem extends SubsystemBase {
   }
 
   public void fastPeriodic() {
+    // calculate turret position and add it to the MedianFilter
+    m_positionFilter.calculate(calculateTurretPosition());
+
     m_setpoint = MathUtil.clamp(m_targetAngle + m_manualOffset, 0, TurretConstants.kTurretMaxRotation);
     m_turretPID.setSetpoint(m_setpoint);
     double output = m_turretPID.calculate(getTurretPosition())
@@ -139,8 +145,8 @@ public class TurretSubsystem extends SubsystemBase {
     // }
 
     // SmartDashboard.putNumber("Turret/pid error", m_turretPID.getError());
-    SmartDashboard.putNumber("Turret/pid output", output);
     output = MathUtil.clamp(output, -TurretConstants.kTurretMaxSpeed, TurretConstants.kTurretMaxSpeed);
+    SmartDashboard.putNumber("Turret/pid output", output);
     m_turretMotor.set(m_turretPID.atSetpoint() ? 0 : output);
     // m_turretMotor.set(SmartDashboard.getNumber("Turret/set output", 0));
 
@@ -242,7 +248,9 @@ public class TurretSubsystem extends SubsystemBase {
 
   public double getTurretPosition() {
     // return ((-m_turretMotor.getEncoder().getPosition() % 360) + 360) % 360;
-    return m_turretMotor.getEncoder().getPosition();
+    // return m_turretMotor.getEncoder().getPosition();
+    // return m_positionFilter.lastValue();
+    return calculateTurretPosition();
   }
 
   // Returns the current error between setpoint and position
@@ -293,6 +301,10 @@ public class TurretSubsystem extends SubsystemBase {
     // Read encoder positions
     double enc1 = m_encoder1.getAbsolutePosition().getValueAsDouble(); //* 360.0 - TurretConstants.kEncoder1OffsetDegrees;
     double enc2 = m_encoder2.getAbsolutePosition().getValueAsDouble(); //* 360.0 - TurretConstants.kEncoder2OffsetDegrees;
+    // round values
+    enc1 = Math.round(enc1 * 100.0) / 100.0;
+    enc2 = Math.round(enc2 * 100.0) / 100.0;
+
     double diff = enc1 - enc2;
     // handle wraparound
     if (diff < 0) {

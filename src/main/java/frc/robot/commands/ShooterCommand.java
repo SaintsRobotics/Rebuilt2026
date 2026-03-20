@@ -44,6 +44,10 @@ public class ShooterCommand extends Command {
             // SmartDashboard.getNumber("Shooter/Hood Angle Input", 0)
         );
         
+        SmartDashboard.putBoolean("Shooter/Flywheel Ready", m_shooterSubsystem.isShooterReady());
+        SmartDashboard.putBoolean("Shooter/Hood Ready", m_shooterSubsystem.isHoodReady());
+        SmartDashboard.putBoolean("Shooter/Turret Ready", m_turretSubsystem.atSetpoint());
+
         if (m_shooterSubsystem.isShooterReady() && m_shooterSubsystem.isHoodReady() && m_turretSubsystem.atSetpoint()) {
             m_shooterSubsystem.setSpindexer(true);
             m_shooterSubsystem.setTransfer(true);

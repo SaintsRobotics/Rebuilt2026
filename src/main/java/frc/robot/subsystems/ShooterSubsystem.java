@@ -101,8 +101,9 @@ public class ShooterSubsystem extends SubsystemBase {
         m_transferMotor.configure(spindexerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         m_shooterPID.setTolerance(150);
+        m_hoodAnglePID.setIZone(ShooterConstants.kHoodIZone);
         
-        // SmartDashboard.putNumber("Shooter/Set Hood Output", 0);
+        SmartDashboard.putNumber("Shooter/Set Hood Output", 0);
         // SmartDashboard.putNumber("Shooter/Input Shooter Speed", 0);
         // SmartDashboard.putNumber("Shooter/Hood Angle Input", 0);
     }
@@ -112,6 +113,7 @@ public class ShooterSubsystem extends SubsystemBase {
         
         shooterStop();
         setHoodAngle(ShooterConstants.kHoodAngleMin);
+        m_hoodAnglePID.reset();
 
     }
 
@@ -163,6 +165,7 @@ public class ShooterSubsystem extends SubsystemBase {
     //sets hood angle by setting the setpoint of the hood angle PID controller
     public void setHoodAngle(double angle) {
 
+        angle = MathUtil.clamp(angle, ShooterConstants.kHoodAngleMin, ShooterConstants.kHoodAngleMax);
         m_hoodAnglePID.setSetpoint(angle);
 
     }
@@ -208,6 +211,7 @@ public class ShooterSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Shooter/Flywheel Setpoint", m_shooterPID.getSetpoint());
         SmartDashboard.putNumber("Shooter/Flywheel Speed", Robot.isReal() ? m_shooterMotorLeft.getEncoder().getVelocity() : m_flywheelSim.getAngularVelocityRPM());
         SmartDashboard.putNumber("Shooter/Hood Angle", getHoodAngle());
+        SmartDashboard.putNumber("Shooter/Hood Setpoint", m_hoodAnglePID.getSetpoint());
         SmartDashboard.putNumber("Shooter/Motor speed", m_shooterMotorLeft.get());
     }
 
