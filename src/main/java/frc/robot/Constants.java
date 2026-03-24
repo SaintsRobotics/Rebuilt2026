@@ -88,7 +88,7 @@ public final class Constants {
     public static final double kArmMaxSpeed = 0.3;
 
     // In degrees
-    public static final double kIntakeLoweredAngle = 0.53;
+    public static final double kIntakeLoweredAngle = 0.58;
     public static final double kIntakeRaisedAngle = 0.15;
     public static final double kIntakeFullyRaisedAngle = 0.11;
 
@@ -255,11 +255,11 @@ public final class Constants {
     public static final double kEncoder1OffsetDegrees = 0.0;  
     public static final double kEncoder2OffsetDegrees = 0.0;  
 
-    public static final double kTurretMaxRotation = 334; 
-    public static final double kTurretBackAngle = 53;
+    public static final double kTurretMaxRotation = 330; 
+    public static final double kTurretBackAngle = 33;
     public static final double kTurretLeftAngle = 143;
-    public static final double kTurretFrontAngle = 249;
-    public static final double kTurretRightAngle = 323;
+    public static final double kTurretFrontAngle = 239;
+    public static final double kTurretRightAngle = 329;
 
     // PID gains
     public static final double kTurretP = 0.01;  

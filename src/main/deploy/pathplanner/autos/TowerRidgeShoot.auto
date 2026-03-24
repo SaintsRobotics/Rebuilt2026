@@ -7,19 +7,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Mid Shoot Depot"
+            "pathName": "TowerToRidgeToLCenter"
           }
         },
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "Score"
+            "pathName": "LCenterToCenter"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CenterToLShoot"
           }
         }
       ]
     }
   },
-  "resetOdom": true,
+  "resetOdom": false,
   "folder": null,
   "choreoAuto": false
 }

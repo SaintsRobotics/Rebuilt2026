@@ -20,7 +20,7 @@
         "y": 5.928561403508772
       },
       "prevControl": {
-        "x": 1.8812192982456144,
+        "x": 1.8812192982456146,
         "y": 5.912649122807018
       },
       "nextControl": null,
@@ -54,7 +54,7 @@
     {
       "name": "Score",
       "waypointRelativePos": 0.0,
-      "endWaypointRelativePos": null,
+      "endWaypointRelativePos": 0.0,
       "command": null
     },
     {

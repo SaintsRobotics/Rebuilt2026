@@ -9,23 +9,11 @@
           "data": {
             "name": "Deploy Intake"
           }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Toggle Auto Aim"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Right Mid Shoot"
-          }
         }
       ]
     }
   },
-  "resetOdom": false,
+  "resetOdom": true,
   "folder": null,
   "choreoAuto": false
 }
