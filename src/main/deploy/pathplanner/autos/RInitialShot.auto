@@ -1,0 +1,49 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "UnDock"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "TowerToRidgeToRCenter"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RCenterToBalls"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LCenterToShotspot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Shoot"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "autos i guess",
+  "choreoAuto": false
+}
