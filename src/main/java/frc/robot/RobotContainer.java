@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.events.EventTrigger;
@@ -47,6 +46,7 @@ import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.IntakeSubsystem.ArmPosition;
 import frc.robot.utils.AllianceFlipUtil;
+import frc.robot.utils.AutoBuilder;
 import frc.robot.utils.FindTarget;
 import frc.robot.utils.FuelSim;
 import frc.robot.utils.LaunchCalc;
@@ -71,12 +71,11 @@ public class RobotContainer {
   private final XboxController m_operatorController = new XboxController(IOConstants.kOperatorControllerPort);
 
   private final SendableChooser<Command> m_autoChooser;
-  private boolean autoAimTurret = false; // swtich back to false later
+  private boolean m_autoAimTurret = false; // swtich back to false later
 
   public final FuelSim fuelSim;
   private final StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault().getStructTopic("SotM Target/5 iterations", Pose2d.struct).publish();
-  private final StructPublisher<Pose2d> publisher2 = NetworkTableInstance.getDefault().getStructTopic("SotM Target/10 iterations", Pose2d.struct).publish();
-  private Pose2d currentTarget = FieldConstants.kHubPose;
+  private Pose2d m_currentTarget = FieldConstants.kHubPose;
 
   // private final PowerDistribution m_powerDistribution = new PowerDistribution(0, ModuleType.kRev);
 
@@ -93,25 +92,24 @@ public class RobotContainer {
     configureFuelSim();
 
     // Pathplanner auton initialization
-    AutoBuilder.configure(
-        m_robotDrive::getPose, 
-        (pose) -> m_robotDrive.resetOdometry(pose), 
-        () -> m_robotDrive.getRobotRelativeSpeeds(), 
-        (speeds) -> m_robotDrive.autonDrive(speeds),
-        new PPHolonomicDriveController(AutonConstants.kTranslationConstants, AutonConstants.kRotationConstants),
-        AutonConstants.kBotConfig, 
-        () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
-        m_robotDrive);
+    // AutoBuilder.configure(
+    //     m_robotDrive::getPose, 
+    //     (pose) -> m_robotDrive.resetOdometry(pose), 
+    //     () -> m_robotDrive.getRobotRelativeSpeeds(), 
+    //     (speeds) -> m_robotDrive.autonDrive(speeds),
+    //     new PPHolonomicDriveController(AutonConstants.kTranslationConstants, AutonConstants.kRotationConstants),
+    //     AutonConstants.kBotConfig, 
+    //     () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
+    //     m_robotDrive);
     
-    configureAuton();
+    // configureAuton();
 
-    m_autoChooser = AutoBuilder.buildAutoChooser();
-    SmartDashboard.putData(m_autoChooser);
+    // m_autoChooser = AutoBuilder.buildAutoChooser();
 
     // BLine Auton
-    // AutoBuilder autoBuilder = new AutoBuilder(m_robotDrive);
-    // m_autoChooser = autoBuilder.buildAutoChooser();
-    // SmartDashboard.putData("Auto Chooser", m_autoChooser);
+    AutoBuilder autoBuilder = new AutoBuilder(m_robotDrive, m_shooter, m_turret, m_intake, () -> m_currentTarget);
+    m_autoChooser = autoBuilder.buildAutoChooser();
+    SmartDashboard.putData("Auto Chooser", m_autoChooser);
 
     m_robotDrive.setDefaultCommand(
         new RunCommand(
@@ -201,7 +199,7 @@ public class RobotContainer {
 
     // driver shoot
     new Trigger(() -> {return m_driverController.getRightTriggerAxis() > 0.5;})
-        .whileTrue(new ShooterCommand(m_shooter, m_turret, m_robotDrive::getPose, () -> {return currentTarget;}));
+        .whileTrue(new ShooterCommand(m_shooter, m_turret, m_robotDrive::getPose, () -> {return m_currentTarget;}));
 
     
     // intake toggle pivot and run intake
@@ -212,11 +210,11 @@ public class RobotContainer {
     
     // operator manual turret
     new JoystickButton(m_operatorController, Button.kB.value)
-        .onTrue(new InstantCommand(() -> autoAimTurret = false));
+        .onTrue(new InstantCommand(() -> m_autoAimTurret = false));
     new JoystickButton(m_operatorController, Button.kA.value)
-        .onTrue(new InstantCommand(() -> autoAimTurret = true));
-    new Trigger(() -> {return autoAimTurret;})
-        .whileTrue(new AutoAimTurret(m_turret, m_robotDrive, () -> currentTarget, false))
+        .onTrue(new InstantCommand(() -> m_autoAimTurret = true));
+    new Trigger(() -> {return m_autoAimTurret;})
+        .whileTrue(new AutoAimTurret(m_turret, m_robotDrive, () -> m_currentTarget, false))
         .onFalse(new InstantCommand(() -> m_turret.setTarget(100), m_turret));
     
     // operator turret cardinal directions
@@ -259,18 +257,18 @@ public class RobotContainer {
 
   private void configureAuton() {
 
-    NamedCommands.registerCommand("Score", new ShooterCommand(m_shooter, m_turret, m_robotDrive::getPose, () -> {return currentTarget;}).asProxy().withTimeout(20.0));
+    NamedCommands.registerCommand("Score", new ShooterCommand(m_shooter, m_turret, m_robotDrive::getPose, () -> {return m_currentTarget;}).asProxy().withTimeout(20.0));
     NamedCommands.registerCommand("Climb", Commands.none());
-    NamedCommands.registerCommand("Ferry", new ShooterCommand(m_shooter, m_turret, m_robotDrive::getPose, () -> {return currentTarget;}).asProxy());
+    NamedCommands.registerCommand("Ferry", new ShooterCommand(m_shooter, m_turret, m_robotDrive::getPose, () -> {return m_currentTarget;}).asProxy());
     NamedCommands.registerCommand("Intake", new RunIntake(m_intake));
     NamedCommands.registerCommand("Deploy Intake", new InstantCommand(() -> m_intake.setArmPosition(ArmPosition.Extended)));
-    NamedCommands.registerCommand("Toggle Auto Aim", new InstantCommand(() -> autoAimTurret = true));
+    NamedCommands.registerCommand("Toggle Auto Aim", new InstantCommand(() -> m_autoAimTurret = true));
 
     new EventTrigger("Intake")
         .whileTrue(new RunIntake(m_intake));
 
     new EventTrigger("Score")
-        .whileTrue(new ShooterCommand(m_shooter, m_turret, m_robotDrive::getPose, () -> {return currentTarget;}).asProxy().withTimeout(20.0));
+        .whileTrue(new ShooterCommand(m_shooter, m_turret, m_robotDrive::getPose, () -> {return m_currentTarget;}).asProxy().withTimeout(20.0));
   }
 
   private void configureFuelSim() {
@@ -295,10 +293,6 @@ public class RobotContainer {
     return m_autoChooser.getSelected();
   }
 
-  public Command getAutonomousCommand() {
-    return m_autoChooser.getSelected();
-  }
-
   /**
    * This periodic loop runs every 10ms (100Hz)
    * 
@@ -313,12 +307,12 @@ public class RobotContainer {
     m_shooter.fastPeriodic();
 
     ChassisSpeeds speeds = ChassisSpeeds.fromRobotRelativeSpeeds(m_robotDrive.getRobotRelativeSpeeds(), m_robotDrive.getPose().getRotation());
-    currentTarget = LaunchCalc.findTargetOnTheMove(
+    m_currentTarget = LaunchCalc.findTargetOnTheMove(
         m_robotDrive.getPose(), 
         FindTarget.getTarget(m_robotDrive.getPose()), 
         new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond));
         
-    publisher.set(currentTarget);
+    publisher.set(m_currentTarget);
     // publisher2.set(LaunchCalc.findTargetOnTheMove(m_robotDrive.getPose(), TurretConstants.kHubPose, new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond), 10));
   }
 
@@ -329,7 +323,7 @@ public class RobotContainer {
     SmartDashboard.putBoolean("In Trench", FieldConstants.kTrenchesRegion.isInRegion(m_robotDrive.getPose()));
 
     SmartDashboard.putBoolean("Should Score Hub", FindTarget.shouldScoreHub(m_robotDrive.getPose()));
-    SmartDashboard.putBoolean("Auto Aim Enabled", autoAimTurret);
+    SmartDashboard.putBoolean("Auto Aim Enabled", m_autoAimTurret);
   }
 
   public void reset() {

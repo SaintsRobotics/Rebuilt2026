@@ -225,6 +225,18 @@ public final class Constants {
             MetersPerSecond.of(DriveConstants.kMaxSpeedMetersPerSecond), kCoefficientOfStaticFriction, kDriveMotorType,
             DriveConstants.kDrivingGearRatio, kMaxDriveCurrent, 4),
         DriveConstants.kModulePositions);
+    
+    public static final double kTranslationP = 0.2;
+    public static final double kTranslationI = 0.0;
+    public static final double kTranslationD = 0.0;
+
+    public static final double kRotationP = 3.0;
+    public static final double kRotationI = 0.0;
+    public static final double kRotationD = 0.0;
+
+    public static final double kCrossTrackP = 0.0;
+    public static final double kCrossTrackI = 0.0;
+    public static final double kCrossTrackD = 0.0;
   }
 
   public static final class TurretConstants {
