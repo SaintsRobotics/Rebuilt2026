@@ -11,8 +11,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.lib.BLine.FollowPath;
 import frc.robot.lib.BLine.Path;
 import frc.robot.subsystems.DriveSubsystem;
@@ -66,6 +64,8 @@ public class AutoBuilder {
         // Add autons below
         autoChooser.addOption("Right Double Sweep", rightSideAuto());
         autoChooser.addOption("Left Double Sweep", leftSideAuto());
+        autoChooser.addOption("Middle Depot", middleAuto());
+        autoChooser.addOption("Right Outpost", rightOutpostAuto());
 
         return autoChooser;
     }
@@ -99,6 +99,32 @@ public class AutoBuilder {
                 new RunIntake(m_intake)
             ),
             shootFor(5)
+        );
+    }
+
+    public Command middleAuto() {
+        return Commands.parallel(
+            Commands.deadline(
+                m_pathBuilder.build(new Path("Middle_Depot")),
+                Commands.waitSeconds(0.5)
+                    .andThen(deployIntake())
+                    .andThen(new RunIntake(m_intake))
+            ),
+            shootFor(15)
+        );
+    }
+
+    public Command rightOutpostAuto() {
+        return Commands.sequence(
+            deployIntake(),
+            Commands.deadline(
+                m_pathBuilder.build(new Path("RTrench_CenterFuel")), 
+                new RunIntake(m_intake)
+            ),
+            Commands.parallel(
+                m_pathBuilder.build(new Path("Right_Outpost")),
+                shootFor(15)
+            )
         );
     }
 
