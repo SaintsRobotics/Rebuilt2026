@@ -64,14 +64,15 @@ public class AutoBuilder {
         SendableChooser<Command> autoChooser = new SendableChooser<>();
 
         // Add autons below
-        autoChooser.addOption("RightTrench_AllCenterFuel_Tower", rightSideAuto());
+        autoChooser.addOption("Right Double Sweep", rightSideAuto());
+        autoChooser.addOption("Left Double Sweep", leftSideAuto());
 
         return autoChooser;
     }
 
     public Command rightSideAuto() {
         return Commands.sequence(
-            Commands.runOnce(() -> m_intake.setArmPosition(ArmPosition.Extended), m_intake),
+            deployIntake(),
             Commands.deadline(
                 m_pathBuilder.build(new Path("RTrench_CenterFuel")),
                 new RunIntake(m_intake)
@@ -85,7 +86,27 @@ public class AutoBuilder {
         );
     }
 
+    public Command leftSideAuto() {
+        return Commands.sequence(
+            deployIntake(),
+            Commands.deadline(
+                m_pathBuilder.build(new Path("Left_CenterFuel")), 
+                new RunIntake(m_intake)
+            ),
+            shootFor(5),
+            Commands.deadline(
+                m_pathBuilder.build(new Path("Left_HubFuel")), 
+                new RunIntake(m_intake)
+            ),
+            shootFor(5)
+        );
+    }
+
     private Command shootFor(double seconds) {
         return new ShooterCommand(m_shooter, m_turret, m_drive::getPose, m_targetSupplier).withTimeout(seconds).asProxy();
+    }
+
+    private Command deployIntake() {
+        return Commands.runOnce(() -> m_intake.setArmPosition(ArmPosition.Extended), m_intake);
     }
 }
