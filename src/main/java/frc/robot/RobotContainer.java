@@ -210,7 +210,7 @@ public class RobotContainer {
         .onTrue(new InstantCommand(() -> autoAimTurret = true));
     new Trigger(() -> {return autoAimTurret;})
         .whileTrue(new AutoAimTurret(m_turret, m_robotDrive, () -> currentTarget, false))
-        .onFalse(new InstantCommand(() -> m_turret.setTarget(100), m_turret));
+        .onFalse(new InstantCommand(() -> m_turret.setTarget(30), m_turret));
     
     // operator turret cardinal directions
     new JoystickButton(m_driverController, Button.kY.value)
@@ -302,10 +302,10 @@ public class RobotContainer {
     m_shooter.fastPeriodic();
 
     ChassisSpeeds speeds = ChassisSpeeds.fromRobotRelativeSpeeds(m_robotDrive.getRobotRelativeSpeeds(), m_robotDrive.getPose().getRotation());
-    currentTarget = LaunchCalc.findTargetOnTheMove(
+    currentTarget = FindTarget.getTarget(m_robotDrive.getPose()); /* LaunchCalc.findTargetOnTheMove(
         m_robotDrive.getPose(), 
         FindTarget.getTarget(m_robotDrive.getPose()), 
-        new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond));
+        new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond)); */
         
     publisher.set(currentTarget);
     // publisher2.set(LaunchCalc.findTargetOnTheMove(m_robotDrive.getPose(), TurretConstants.kHubPose, new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond), 10));

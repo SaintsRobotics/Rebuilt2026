@@ -107,6 +107,7 @@ public class TurretSubsystem extends SubsystemBase {
     m_turretPID.setTolerance(TurretConstants.kPIDTolerance);
 
     SmartDashboard.putNumber("Turret/set output", 0);
+    SmartDashboard.putData("Turret/PID Controller", m_turretPID);
   }
 
   @Override
@@ -123,6 +124,7 @@ public class TurretSubsystem extends SubsystemBase {
     // SmartDashboard.putNumber("Turret/Encoder 2 Relative Angle", m_encoder2.getPosition().getValueAsDouble()*360/TurretConstants.kEncoder2Ratio);
 
     SmartDashboard.putNumber("Turret/Turret Setpoint", m_turretPID.getSetpoint());
+    SmartDashboard.putNumber("Turret/Target Angle", m_targetAngle);
     // SmartDashboard.putNumber("Turret/Total PID Error", m_turretPID.getAccumulatedError());
     // SmartDashboard.putNumber("Turret Error", getError());
     // SmartDashboard.putNumber("Turret/Turret Output", output);
@@ -183,7 +185,7 @@ public class TurretSubsystem extends SubsystemBase {
   // Calculates and sets the turret setpoint
   public void calculateSetpoint(Pose2d robotPose, Pose2d targetPose, double robotAngularVelocity) {
     // Calculate turret location on the field
-    Pose2d rotatedOffset = TurretConstants.kTurretOffset.rotateBy(robotPose.getRotation());
+    Pose2d rotatedOffset = TurretConstants.kTurretOffset.rotateBy(new Rotation3d(robotPose.getRotation())).toPose2d();
     Pose2d turretLocation = new Pose2d(
       robotPose.getTranslation().plus(rotatedOffset.getTranslation()),
       robotPose.getRotation());
@@ -302,8 +304,8 @@ public class TurretSubsystem extends SubsystemBase {
     double enc1 = m_encoder1.getAbsolutePosition().getValueAsDouble(); //* 360.0 - TurretConstants.kEncoder1OffsetDegrees;
     double enc2 = m_encoder2.getAbsolutePosition().getValueAsDouble(); //* 360.0 - TurretConstants.kEncoder2OffsetDegrees;
     // round values
-    enc1 = Math.round(enc1 * 100.0) / 100.0;
-    enc2 = Math.round(enc2 * 100.0) / 100.0;
+    enc1 = Math.round(enc1 * 1000.0) / 1000.0;
+    enc2 = Math.round(enc2 * 1000.0) / 1000.0;
 
     double diff = enc1 - enc2;
     // handle wraparound

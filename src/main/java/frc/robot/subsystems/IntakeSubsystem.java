@@ -96,7 +96,9 @@ public class IntakeSubsystem extends SubsystemBase {
 
     //m_rollerMech = m_armMech.append(new MechanismLigament2d("Intake Bar", 0.3, 30, 9, new Color8Bit(Color.kYellow))); //IDK???!
 
-    SmartDashboard.putData("Intake Mechanism", intakeMech);
+    SmartDashboard.putData("Intake/Mechanism", intakeMech);
+    SmartDashboard.putData("Intake/Encoder", m_armEncoder);
+    SmartDashboard.putData("Intake/Arm PID", m_armPID);
   }
 
   @Override
@@ -105,11 +107,11 @@ public class IntakeSubsystem extends SubsystemBase {
     // m_armPID.setSetpoint(m_armSetpoint);
     double armMotorSpeed = MathUtil.clamp(m_armPID.calculate(m_armEncoder.getAbsolutePosition().getValueAsDouble(), m_armSetpoint), -0.3, 0.3);
 
-    SmartDashboard.putNumber("Motor Speed", armMotorSpeed);
-    SmartDashboard.putNumber("Arm Angle", m_armEncoder.getAbsolutePosition().getValueAsDouble());
+    SmartDashboard.putNumber("Intake/Motor Speed", armMotorSpeed);
+    // SmartDashboard.putNumber("Intake/Arm Angle", m_armEncoder.getAbsolutePosition().getValueAsDouble());
 
     // SmartDashboard.putNumber("pid output", armMotorSpeed);
-    SmartDashboard.putNumber("arm setpoint", m_armPID.getSetpoint());
+    // SmartDashboard.putNumber("Intake/arm setpoint", m_armPID.getSetpoint());
 
     m_armMotor.set(armMotorSpeed);
     m_intakeMotor.set(m_intakeSpeed); 

@@ -172,8 +172,8 @@ public final class Constants {
     // TODO: Update cam pose relative to center of bot
     public static final Pose3d kCamPosLeft = new Pose3d(
       // new Translation3d(0.3048,0.254,0),
-      new Translation3d(Units.inchesToMeters(-10.534), Units.inchesToMeters(-9.664), Units.inchesToMeters(7.646)),
-      new Rotation3d(Math.PI, Units.degreesToRadians(25), Math.PI/2) // these angles are in radians counterclockwise
+      new Translation3d(Units.inchesToMeters(-7.850939), Units.inchesToMeters(-1.514461), Units.inchesToMeters(15.818)),
+      new Rotation3d(Math.PI, Units.degreesToRadians(15), 0) // these angles are in radians counterclockwise
     );
 
     public static final Pose3d kCamPosBack = new Pose3d(
@@ -206,7 +206,7 @@ public final class Constants {
     public static final double kTagDistThreshold = 3.0; // Vision measurements further from the current pose than this value will be rejected
 
     public static final boolean kUseVision = true;
-    public static final boolean kUseLeftLL = false;
+    public static final boolean kUseLeftLL = true;
     public static final boolean kUseBackLL = true;
     public static final boolean kUseFrontLL = false;
   }
@@ -255,30 +255,31 @@ public final class Constants {
     public static final double kEncoder1OffsetDegrees = 0.0;  
     public static final double kEncoder2OffsetDegrees = 0.0;  
 
-    public static final double kTurretMaxRotation = 330; 
-    public static final double kTurretBackAngle = 33;
-    public static final double kTurretLeftAngle = 143;
-    public static final double kTurretFrontAngle = 239;
-    public static final double kTurretRightAngle = 329;
+    public static final double kTurretMaxRotation = 360; 
+    public static final double kTurretBackAngle = 76.7;
+    public static final double kTurretLeftAngle = 166.7;
+    public static final double kTurretFrontAngle = 256.7;
+    public static final double kTurretRightAngle = 346.7;
 
     // PID gains
-    public static final double kTurretP = 0.01;  
+    public static final double kTurretP = 0.02;  
     public static final double kTurretI = 0.000; //0.02;
     public static final double kTurretD = 0.000;
     public static final double kTurretIZone = 20;
-    public static final double kPIDTolerance = 2;
+    public static final double kPIDTolerance = 1;
 
     // Feedforward gains
-    public static final double kTurretS = 0.017;  
+    public static final double kTurretS = 0.01;
     public static final double kTurretV = 0.0;  
 
     public static final double kTurretMaxSpeed = 1.0;  
     public static final double kTurretDeadband = 2.0;  
     public static final double kTurretTolerance = 5;
-    public static final Pose2d kTurretOffset = new Pose2d(
-        Units.inchesToMeters(-4.203), 
-        Units.inchesToMeters(7.701), 
-        new Rotation2d(Units.degreesToRadians(-180)));
+    public static final Pose3d kTurretOffset = new Pose3d(
+        Units.inchesToMeters(-4.103), 
+        Units.inchesToMeters(4.250),
+        Units.inchesToMeters(10.875),
+        new Rotation3d(0, 0, Units.degreesToRadians(-180)));
 
     public static final double kTurretSimGearRatio = 100.0; 
     public static final double kTurretSimMOI = 0.5;
