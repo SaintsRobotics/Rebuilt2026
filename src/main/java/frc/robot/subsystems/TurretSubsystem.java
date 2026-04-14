@@ -36,6 +36,7 @@ import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Robot;
 import frc.robot.Constants.TurretConstants;
 
 public class TurretSubsystem extends SubsystemBase {
@@ -63,16 +64,16 @@ public class TurretSubsystem extends SubsystemBase {
     TurretConstants.kTurretSimGearRatio, 
     TurretConstants.kTurretSimMOI,    
     TurretConstants.kTurretSimLength,   
-    -Units.degreesToRadians(TurretConstants.kTurretMaxRotation / 2),  
-    Units.degreesToRadians(TurretConstants.kTurretMaxRotation / 2),  
+    0,
+    Units.degreesToRadians(TurretConstants.kTurretMaxRotation * 2),  
     false,  
     Units.degreesToRadians(0));  
   private final SparkMaxSim m_turretMotorSim = new SparkMaxSim(m_turretMotor, m_motorSim);
 
   private final StructPublisher<Pose3d> m_turretCurrentPublisher =
-    NetworkTableInstance.getDefault().getStructTopic("Turret/Current", Pose3d.struct).publish();
+    NetworkTableInstance.getDefault().getStructTopic("SmartDashboard/Turret/Current", Pose3d.struct).publish();
   private final StructPublisher<Pose3d> m_turretTargetPublisher =
-    NetworkTableInstance.getDefault().getStructTopic("Turret/Target", Pose3d.struct).publish();
+    NetworkTableInstance.getDefault().getStructTopic("SmartDashboard/Turret/Target", Pose3d.struct).publish();
 
 
   /** Creates a new TurretSubsystem. */
@@ -166,7 +167,7 @@ public class TurretSubsystem extends SubsystemBase {
       Units.radiansPerSecondToRotationsPerMinute(m_turretSim.getVelocityRadPerSec()), 
       RobotController.getBatteryVoltage(), 
       0.02);
-    m_turretMotorSim.getRelativeEncoderSim().setPosition(Units.radiansToDegrees(2*Math.PI - m_turretSim.getAngleRads()));
+    m_turretMotorSim.getRelativeEncoderSim().setPosition(Units.radiansToDegrees(2*Math.PI - m_turretSim.getAngleRads()) - TurretConstants.kTurretFrontAngle);
 
     m_encoder1.getSimState().addPosition(
       Radians.of(
@@ -206,8 +207,8 @@ public class TurretSubsystem extends SubsystemBase {
     m_previousTargetAngle = targetAngle;
 
     // Advantagescope visualization
-    double currentFieldHeading = robotPose.getRotation().getDegrees() + getTurretPosition();
-    double targetFieldHeading = robotPose.getRotation().getDegrees() + targetAngle;
+    double currentFieldHeading = robotPose.getRotation().getDegrees() + 360 - (getTurretPosition() - TurretConstants.kTurretFrontAngle);
+    double targetFieldHeading = robotPose.getRotation().getDegrees() + 360 - (targetAngle - TurretConstants.kTurretFrontAngle);
     Pose3d turret3d = new Pose3d(
       turretLocation.getX(),
       turretLocation.getY(),
@@ -248,11 +249,12 @@ public class TurretSubsystem extends SubsystemBase {
     return currentPosition;
   }
 
+  /** Returns the angle of the turret in clockwise degrees. */
   public double getTurretPosition() {
     // return ((-m_turretMotor.getEncoder().getPosition() % 360) + 360) % 360;
     // return m_turretMotor.getEncoder().getPosition();
     // return m_positionFilter.lastValue();
-    return calculateTurretPosition();
+    return Robot.isReal() ? calculateTurretPosition() : m_turretMotor.getEncoder().getPosition();
   }
 
   // Returns the current error between setpoint and position

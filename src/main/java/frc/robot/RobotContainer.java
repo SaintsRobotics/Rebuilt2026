@@ -11,7 +11,11 @@ import com.pathplanner.lib.events.EventTrigger;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -72,8 +76,8 @@ public class RobotContainer {
   private boolean autoAimTurret = false; // swtich back to false later
 
   public final FuelSim fuelSim;
-  private final StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault().getStructTopic("SotM Target/5 iterations", Pose2d.struct).publish();
-  private final StructPublisher<Pose2d> publisher2 = NetworkTableInstance.getDefault().getStructTopic("SotM Target/10 iterations", Pose2d.struct).publish();
+  private final StructPublisher<Pose2d> m_targetPublisher = NetworkTableInstance.getDefault().getStructTopic("SmartDashboard/Targeting/Target Pose", Pose2d.struct).publish();
+  private final StructPublisher<Pose3d> m_turretCamPublisher = NetworkTableInstance.getDefault().getStructTopic("SmartDashboard/Vision/Turret Cam Pose", Pose3d.struct).publish();
   private Pose2d currentTarget = FieldConstants.kHubPose;
 
   // private final PowerDistribution m_powerDistribution = new PowerDistribution(0, ModuleType.kRev);
@@ -245,9 +249,9 @@ public class RobotContainer {
     new JoystickButton(m_operatorController, Button.kBack.value)
         .whileTrue(new RunCommand(() -> m_turret.setManualOffset(m_turret.getManualOffset() + MathUtil.applyDeadband(m_operatorController.getRightX(), IOConstants.kControllerDeadband) * 1.5)));
 
-    SmartDashboard.putData("Rotate Turret +90", new InstantCommand(() -> m_turret.setTarget(m_turret.getTurretPosition() + 90)));
-    SmartDashboard.putData("Rotate Turret -90", new InstantCommand(() -> m_turret.setTarget(m_turret.getTurretPosition() - 90)));
-    
+    SmartDashboard.putData("Commands/Rotate Turret +90", new InstantCommand(() -> m_turret.setTarget(m_turret.getTurretPosition() + 90)));
+    SmartDashboard.putData("Commands/Rotate Turret -90", new InstantCommand(() -> m_turret.setTarget(m_turret.getTurretPosition() - 90)));
+    SmartDashboard.putData("Commands/Toggle Auto Aim", new InstantCommand(() -> {autoAimTurret = !autoAimTurret;}));
   }
 
   private void configureAuton() {
@@ -273,7 +277,7 @@ public class RobotContainer {
         fuelSim.clearFuel();
         //fuelSim.spawnStartingFuel();
     })
-    .withName("Reset Fuel")
+    .withName("Commands/Reset Fuel")
     .ignoringDisable(true));
 
     fuelSim.registerRobot(
@@ -306,19 +310,24 @@ public class RobotContainer {
         m_robotDrive.getPose(), 
         FindTarget.getTarget(m_robotDrive.getPose()), 
         new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond)); */
-        
-    publisher.set(currentTarget);
-    // publisher2.set(LaunchCalc.findTargetOnTheMove(m_robotDrive.getPose(), TurretConstants.kHubPose, new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond), 10));
+    m_targetPublisher.set(currentTarget);
+
+    Pose3d turretLLPose = m_robotDrive.updateTurretLL(m_turret.getTurretPosition());
+    turretLLPose.plus(
+        new Transform3d(
+            new Translation3d(m_robotDrive.getPose().getTranslation()), 
+            new Rotation3d(m_robotDrive.getPose().getRotation())));
+    m_turretCamPublisher.set(turretLLPose);
   }
 
   public void periodic() {
     
-    SmartDashboard.putBoolean("In Blue", FieldConstants.kBlueAllianceRegion.isInRegion(m_robotDrive.getPose()));
-    SmartDashboard.putBoolean("In Red", FieldConstants.kRedAllianceRegion.isInRegion(m_robotDrive.getPose()));
-    SmartDashboard.putBoolean("In Trench", FieldConstants.kTrenchesRegion.isInRegion(m_robotDrive.getPose()));
+    SmartDashboard.putBoolean("States/In Blue", FieldConstants.kBlueAllianceRegion.isInRegion(m_robotDrive.getPose()));
+    SmartDashboard.putBoolean("States/In Red", FieldConstants.kRedAllianceRegion.isInRegion(m_robotDrive.getPose()));
+    SmartDashboard.putBoolean("States/In Trench", FieldConstants.kTrenchesRegion.isInRegion(m_robotDrive.getPose()));
 
-    SmartDashboard.putBoolean("Should Score Hub", FindTarget.shouldScoreHub(m_robotDrive.getPose()));
-    SmartDashboard.putBoolean("Auto Aim Enabled", autoAimTurret);
+    SmartDashboard.putBoolean("States/Should Score Hub", FindTarget.shouldScoreHub(m_robotDrive.getPose()));
+    SmartDashboard.putBoolean("States/Auto Aim Enabled", autoAimTurret);
   }
 
   public void reset() {

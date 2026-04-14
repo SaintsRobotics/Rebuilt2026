@@ -175,6 +175,8 @@ public final class Constants {
       new Translation3d(Units.inchesToMeters(-7.850939), Units.inchesToMeters(-1.514461), Units.inchesToMeters(15.818)),
       new Rotation3d(Math.PI, Units.degreesToRadians(15), 0) // these angles are in radians counterclockwise
     );
+    public static final double kTurretCamOffset = 8.465;
+    public static final double kTurretCamAngle = 123.52;
 
     public static final Pose3d kCamPosBack = new Pose3d(
       new Translation3d(Units.inchesToMeters(-9.664), Units.inchesToMeters(10.534), Units.inchesToMeters(7.646)),

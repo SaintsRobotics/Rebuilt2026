@@ -12,7 +12,10 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -25,6 +28,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.TurretConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.Constants;
 import frc.robot.utils.AllianceFlipUtil;
@@ -83,7 +87,7 @@ public class DriveSubsystem extends SubsystemBase {
   private final SlewRateLimiter m_ySpeedLimiter = new SlewRateLimiter(DriveConstants.kMaxAccelerationUnitsPerSecond);
   private final SlewRateLimiter m_rotationSpeedLimiter = new SlewRateLimiter(DriveConstants.kMaxAngularAccelerationUnitsPerSecond);
 
-   private final StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault().getStructTopic("Vision Pose", Pose2d.struct).publish();
+   private final StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault().getStructTopic("SmartDashboard/Vision/Robot Vision Pose", Pose2d.struct).publish();
 
   /** Creates a new DriveSubsystem. */
   @SuppressWarnings("unused")
@@ -168,9 +172,9 @@ public class DriveSubsystem extends SubsystemBase {
 
     m_field.setRobotPose(m_poseEstimator.getEstimatedPosition());
 
-    SmartDashboard.putNumber("gyro angle", m_gyro.getAngle());
-    SmartDashboard.putNumber("odometryX", m_poseEstimator.getEstimatedPosition().getX());
-    SmartDashboard.putNumber("odometryY", m_poseEstimator.getEstimatedPosition().getY());
+    SmartDashboard.putNumber("Drive/gyro angle", m_gyro.getAngle());
+    SmartDashboard.putNumber("Drive/odometryX", m_poseEstimator.getEstimatedPosition().getX());
+    SmartDashboard.putNumber("Drive/odometryY", m_poseEstimator.getEstimatedPosition().getY());
 
     // AdvantageScope Logging
     // max speed = 1 (for ease of use in AdvantageScope)
@@ -188,14 +192,14 @@ public class DriveSubsystem extends SubsystemBase {
       m_desiredStates[3].angle.getDegrees(), m_desiredStates[3].speedMetersPerSecond / DriveConstants.kMaxSpeedMetersPerSecond,
     };
 
-    SmartDashboard.putNumberArray("AdvantageScope Swerve Desired States", logDataDesired);
-    SmartDashboard.putNumberArray("AdvantageScope Swerve States", logData);
+    SmartDashboard.putNumberArray("Drive/AdvantageScope Swerve Desired States", logDataDesired);
+    SmartDashboard.putNumberArray("Drive/AdvantageScope Swerve States", logData);
 
     Pose2d flippedPose = AllianceFlipUtil.apply(getPose());
     m_flippedField.setRobotPose(flippedPose);
-    SmartDashboard.putNumber("flip X", flippedPose.getX());
-    SmartDashboard.putNumber("flip Y", flippedPose.getY());
-    SmartDashboard.putNumber("flip Rot", flippedPose.getRotation().getDegrees());
+    SmartDashboard.putNumber("Drive/flip X", flippedPose.getX());
+    SmartDashboard.putNumber("Drive/flip Y", flippedPose.getY());
+    SmartDashboard.putNumber("Drive/flip Rot", flippedPose.getRotation().getDegrees());
   }
 
   public void measureLimelight(String name, boolean useLimelight) {
@@ -234,7 +238,7 @@ public class DriveSubsystem extends SubsystemBase {
       }
     }
 
-    SmartDashboard.putBoolean(name + " valid", LLreal);
+    SmartDashboard.putBoolean("Vision/" + name + " valid", LLreal);
   }
 
   /**
@@ -409,6 +413,32 @@ public class DriveSubsystem extends SubsystemBase {
   /** Returns the rate of rotation of the robot's yaw (Z-axis rotation) in degrees per second. */
   public double getRotationSpeed() {
     return Robot.isReal()? m_gyro.getRate() : Units.radiansToDegrees(DriveConstants.kDriveKinematics.toChassisSpeeds(m_desiredStates).omegaRadiansPerSecond);
+  }
+
+  public Pose3d updateTurretLL(double angle) {
+    // angle is in clockwise degrees, limelight wants counterclockwise degrees
+    // turret's zero is kTurretFrontAngle degrees away from the front of the robot
+    double frontRelativeAngle = 360 - (angle - TurretConstants.kTurretFrontAngle);
+    // construct the Translation3d from the angle, kTurretCamAngle, kTurretFrontAngle, and kTurretCamOffset
+    double LLAngle = 360 - (angle - TurretConstants.kTurretFrontAngle + VisionConstants.kTurretCamAngle);
+    Translation3d LLPose = new Translation3d(
+      Math.sin(LLAngle),
+      Math.cos(LLAngle),
+      VisionConstants.kCamPosLeft.getZ());
+    LimelightHelpers.setCameraPose_RobotSpace(
+          VisionConstants.kLimelightNameLeft,
+          LLPose.getX(),
+          LLPose.getY(),
+          LLPose.getZ(),
+          Units.radiansToDegrees(VisionConstants.kCamPosLeft.getRotation().getX()),
+          Units.radiansToDegrees(VisionConstants.kCamPosLeft.getRotation().getY()),
+          frontRelativeAngle);
+    return new Pose3d(
+      LLPose, new Rotation3d(
+        VisionConstants.kCamPosLeft.getRotation().getX(), 
+        VisionConstants.kCamPosLeft.getRotation().getY(), 
+        Units.degreesToRadians(frontRelativeAngle))
+      );
   }
 
   private Rotation2d getGyroAngle() {
