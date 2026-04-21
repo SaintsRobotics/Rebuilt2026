@@ -116,7 +116,7 @@ public class TurretSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
 
     // double pos = calculateTurretPosition();
-    SmartDashboard.putNumber("Turret/Turret Angle", m_positionFilter.lastValue());
+    SmartDashboard.putNumber("Turret/Turret Angle", getTurretPosition());
     SmartDashboard.putNumber("Turret/Absolute Angle", calculateTurretPosition());
     SmartDashboard.putNumber("Turret/Drift value", calculateTurretPosition() - m_positionFilter.lastValue());
     // SmartDashboard.putNumber("Turret/Encoder 1 Angle", m_encoder1.getAbsolutePosition().getValueAsDouble()*360);

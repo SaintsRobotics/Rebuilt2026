@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -433,12 +434,20 @@ public class DriveSubsystem extends SubsystemBase {
           Units.radiansToDegrees(VisionConstants.kCamPosLeft.getRotation().getX()),
           Units.radiansToDegrees(VisionConstants.kCamPosLeft.getRotation().getY()),
           frontRelativeAngle);
-    return new Pose3d(
-      LLPose, new Rotation3d(
+    Pose2d robotPose = getPose();
+    Pose3d LLPose3d = new Pose3d(
+      new Translation3d(
+        LLPose.getX() + robotPose.getX(),
+        LLPose.getY() + robotPose.getY(),
+        LLPose.getZ()
+      ),
+      new Rotation3d(
         VisionConstants.kCamPosLeft.getRotation().getX(), 
-        VisionConstants.kCamPosLeft.getRotation().getY(), 
+        -VisionConstants.kCamPosLeft.getRotation().getY(), 
         Units.degreesToRadians(frontRelativeAngle))
-      );
+    );
+    LLPose3d = LLPose3d.rotateAround(new Pose3d(robotPose).getTranslation(), new Rotation3d(getGyroAngle()));
+    return LLPose3d;
   }
 
   private Rotation2d getGyroAngle() {
