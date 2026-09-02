@@ -83,13 +83,12 @@ public class RobotContainer {
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-    // PowerDistribution pd = new PowerDistribution(1, ModuleType.kRev);
     // Configure the trigger bindings
     configureBindings();
 
     fuelSim = new FuelSim();
     configureFuelSim();
-
+ 
     // Pathplanner auton initialization
     AutoBuilder.configure(
         m_robotDrive::getPose, 
