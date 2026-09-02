@@ -104,7 +104,7 @@ public final class Constants {
     public static final int kFrontRightDriveMotorPort = 7;
     public static final int kRearRightDriveMotorPort = 9;
 
-    public static final int kFrontLeftTurningMotorPort = 6;
+    public static final int kFrontLeftTurningMotorPort = 37;
     public static final int kRearLeftTurningMotorPort = 12;
     public static final int kFrontRightTurningMotorPort = 8;
     public static final int kRearRightTurningMotorPort = 10;
